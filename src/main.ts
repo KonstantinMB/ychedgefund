@@ -97,10 +97,12 @@ async function initPanels(): Promise<void> {
   initPanelManager();
 
   const panels: Array<{ name: string; loader: () => Promise<Record<string, () => void>>; fn: string }> = [
-    { name: 'strategic-risk',      loader: () => import('./panels/strategic-risk'),      fn: 'initStrategicRiskPanel' },
-    { name: 'portfolio',           loader: () => import('./panels/portfolio'),            fn: 'initPortfolioPanel' },
+    // ── Left sidebar: Paper Trading (Signals first — natural workflow) ──────
     { name: 'signals',             loader: () => import('./panels/signals'),              fn: 'initSignalsPanel' },
+    { name: 'portfolio',           loader: () => import('./panels/portfolio'),            fn: 'initPortfolioPanel' },
     { name: 'performance',         loader: () => import('./panels/performance'),          fn: 'initPerformancePanel' },
+    // ── Right sidebar: Intelligence panels ──────────────────────────────────
+    { name: 'strategic-risk',      loader: () => import('./panels/strategic-risk'),      fn: 'initStrategicRiskPanel' },
     { name: 'news-feed',           loader: () => import('./panels/news-feed'),            fn: 'initNewsFeedPanel' },
     { name: 'ai-insights',         loader: () => import('./panels/ai-insights'),          fn: 'initAIInsightsPanel' },
     { name: 'markets',             loader: () => import('./panels/markets'),              fn: 'initMarketsPanel' },

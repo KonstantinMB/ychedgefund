@@ -443,8 +443,24 @@ function renderPositionsTable(snap: PortfolioSnapshot): void {
     posTableBodyEl.innerHTML = `
       <div class="port-empty">
         <div class="port-empty-icon">📊</div>
-        <div>No open positions</div>
-        <div class="port-empty-sub">Approved signals will auto-execute</div>
+        <div class="port-empty-title">No open positions yet</div>
+        <div class="port-empty-steps">
+          <div class="port-empty-step">
+            <span class="port-empty-step-num">1</span>
+            <span>Scroll up to <strong>SIGNALS</strong></span>
+          </div>
+          <div class="port-empty-step">
+            <span class="port-empty-step-num">2</span>
+            <span>Click <strong>Paper Trade</strong> on any signal</span>
+          </div>
+          <div class="port-empty-step">
+            <span class="port-empty-step-num">3</span>
+            <span>Position appears here instantly</span>
+          </div>
+        </div>
+        <div class="port-empty-auto">
+          Or enable <strong>Auto-trade</strong> in the Signals panel to execute automatically
+        </div>
       </div>
     `;
     return;
@@ -873,7 +889,7 @@ function buildPortfolioBody(container: HTMLElement): void {
 export function initPortfolioPanel(): void {
   registerPanel({
     id: 'portfolio',
-    title: 'Portfolio',
+    title: 'Portfolio & Positions',
     badge: 'PAPER',
     badgeClass: 'mock',
     defaultCollapsed: false,
