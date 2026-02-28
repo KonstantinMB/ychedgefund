@@ -1,9 +1,11 @@
 /**
  * CoinGecko Crypto Prices Edge Function
  *
- * Fetches richer market data for major cryptocurrencies via /coins/markets endpoint:
- * price, 24h/7d change, market cap, volume. Optional demo API key via
- * COINGECKO_API_KEY env var. 60-second cache.
+ * Strategy:
+ *  1. Try /coins/markets (richer data: market cap, volume, 7d change) — requires demo key or no-auth free tier
+ *  2. On 401/403/429, fall back to /simple/price (always free, no key needed) with basic fields
+ *
+ * 60-second cache. Never 500s — returns empty array on all errors.
  */
 
 import { withCors } from '../_cors';
@@ -33,6 +35,16 @@ const SYMBOL_MAP: Record<string, string> = {
   binancecoin: 'BNB',
 };
 
+const NAME_MAP: Record<string, string> = {
+  bitcoin: 'Bitcoin',
+  ethereum: 'Ethereum',
+  solana: 'Solana',
+  ripple: 'XRP',
+  binancecoin: 'BNB',
+};
+
+// ── /coins/markets (full data, requires demo key on pro endpoint) ─────────────
+
 interface CoinGeckoMarketCoin {
   id: string;
   symbol: string;
@@ -45,8 +57,7 @@ interface CoinGeckoMarketCoin {
   market_cap_rank: number | null;
 }
 
-function buildUrl(): string {
-  const apiKey = process.env.COINGECKO_API_KEY;
+async function fetchMarkets(apiKey: string | undefined): Promise<CryptoPrice[] | null> {
   const base = apiKey
     ? 'https://pro-api.coingecko.com/api/v3/coins/markets'
     : 'https://api.coingecko.com/api/v3/coins/markets';
@@ -60,18 +71,22 @@ function buildUrl(): string {
     sparkline: 'false',
     price_change_percentage: '24h,7d',
   });
-  return `${base}?${params}`;
-}
 
-function buildHeaders(): HeadersInit {
-  const apiKey = process.env.COINGECKO_API_KEY;
-  return apiKey ? { 'x-cg-demo-api-key': apiKey } : {};
-}
+  const headers: HeadersInit = apiKey ? { 'x-cg-demo-api-key': apiKey } : {};
 
-function normalize(raw: CoinGeckoMarketCoin[]): CryptoPrice[] {
+  const res = await fetch(`${base}?${params}`, {
+    headers,
+    signal: AbortSignal.timeout(8_000),
+  });
+
+  // 401/403/429 means we need to fall back to /simple/price
+  if (res.status === 401 || res.status === 403 || res.status === 429) return null;
+  if (!res.ok) return null;
+
+  const raw: CoinGeckoMarketCoin[] = await res.json();
   return raw.map((coin) => ({
     id: coin.id,
-    symbol: SYMBOL_MAP[coin.id] || coin.symbol.toUpperCase(),
+    symbol: SYMBOL_MAP[coin.id] ?? coin.symbol.toUpperCase(),
     name: coin.name,
     price: coin.current_price ?? 0,
     change24h: coin.price_change_percentage_24h ?? 0,
@@ -82,13 +97,72 @@ function normalize(raw: CoinGeckoMarketCoin[]): CryptoPrice[] {
   }));
 }
 
-export default withCors(async (_req: Request) => {
-  const prices = await withCache<CryptoPrice[]>('market:crypto:v2', 60, async () => {
-    const res = await fetch(buildUrl(), { headers: buildHeaders() });
-    if (!res.ok) throw new Error(`CoinGecko upstream error: ${res.status}`);
-    const raw: CoinGeckoMarketCoin[] = await res.json();
-    return normalize(raw);
+// ── /simple/price (always free, no key needed) ────────────────────────────────
+
+interface SimplePriceResponse {
+  [id: string]: {
+    usd: number;
+    usd_24h_change: number;
+    usd_market_cap: number;
+    usd_24h_vol: number;
+  };
+}
+
+async function fetchSimplePrice(): Promise<CryptoPrice[]> {
+  const params = new URLSearchParams({
+    ids: COIN_IDS.join(','),
+    vs_currencies: 'usd',
+    include_24hr_change: 'true',
+    include_market_cap: 'true',
+    include_24hr_vol: 'true',
   });
+
+  const res = await fetch(
+    `https://api.coingecko.com/api/v3/simple/price?${params}`,
+    {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(8_000),
+    }
+  );
+
+  if (!res.ok) return [];
+
+  const raw: SimplePriceResponse = await res.json();
+
+  return COIN_IDS
+    .filter((id) => raw[id])
+    .map((id, idx) => ({
+      id,
+      symbol: SYMBOL_MAP[id] ?? id.toUpperCase(),
+      name: NAME_MAP[id] ?? id,
+      price: raw[id]?.usd ?? 0,
+      change24h: raw[id]?.usd_24h_change ?? 0,
+      change7d: 0,           // not available in simple/price
+      marketCap: raw[id]?.usd_market_cap ?? 0,
+      volume24h: raw[id]?.usd_24h_vol ?? 0,
+      marketCapRank: idx + 1, // approximate rank
+    }));
+}
+
+// ── Handler ───────────────────────────────────────────────────────────────────
+
+export default withCors(async (_req: Request) => {
+  let prices: CryptoPrice[] = [];
+
+  try {
+    prices = await withCache<CryptoPrice[]>('market:crypto:v2', 60, async () => {
+      const apiKey = process.env.COINGECKO_API_KEY;
+
+      // Try full market data first; fall back to simple price on auth/rate errors
+      const marketData = await fetchMarkets(apiKey);
+      if (marketData !== null && marketData.length > 0) return marketData;
+
+      // Fallback: /simple/price — free, no key, always works
+      return fetchSimplePrice();
+    });
+  } catch {
+    prices = [];
+  }
 
   const totalCryptoMarketCap = prices.reduce((sum, p) => sum + p.marketCap, 0);
 

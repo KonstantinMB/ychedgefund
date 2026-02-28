@@ -66,6 +66,7 @@ async function fetchBearerToken(): Promise<string | null> {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
+      signal: AbortSignal.timeout(8_000),
     });
 
     if (!res.ok) return null;
@@ -116,11 +117,15 @@ export default withCors(async (_req: Request) => {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const res = await fetch(OPENSKY_URL, { headers });
+      // Hard 12s timeout — well under Vercel's 25s function limit
+      const res = await fetch(OPENSKY_URL, {
+        headers,
+        signal: AbortSignal.timeout(12_000),
+      });
 
-      // Rate-limited or blocked — return empty rather than error
-      if (res.status === 429 || res.status === 403 || res.status === 503) return [];
-      if (!res.ok) throw new Error(`OpenSky upstream error: ${res.status}`);
+      // Blocked, rate-limited, or any client error → return empty gracefully
+      if (res.status === 401 || res.status === 403 || res.status === 429 || res.status === 503) return [];
+      if (!res.ok) return []; // never throw — always return empty on error
 
       const data: OpenSkyResponse = await res.json();
       const states = data.states ?? [];
