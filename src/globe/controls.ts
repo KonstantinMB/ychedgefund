@@ -33,13 +33,17 @@ const CATEGORY_LABELS: Record<string, string> = {
  * Initialize layer controls — called once at startup
  */
 export function initLayerControls(): void {
-  const leftPanel = document.getElementById('left-panel');
-  if (!leftPanel) {
+  // Prefer the dedicated sub-container; fall back to the full left panel
+  const target =
+    document.getElementById('left-layers-panel') ??
+    document.getElementById('left-panel');
+
+  if (!target) {
     console.error('[Controls] Left panel not found');
     return;
   }
 
-  renderLayerControls(leftPanel);
+  renderLayerControls(target);
   console.log('[Controls] Layer controls initialized');
 }
 

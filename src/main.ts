@@ -344,6 +344,92 @@ function initGlobeWiring(): void {
   });
 }
 
+// ── Right panel drag-to-resize ────────────────────────────────────────────────
+
+const RIGHT_PANEL_WIDTH_KEY = 'atlas-right-panel-width';
+const MIN_RIGHT_WIDTH = 320;
+const MAX_RIGHT_WIDTH = Math.round(window.innerWidth * 0.65);
+
+function initRightPanelResize(): void {
+  const panel  = document.getElementById('right-panel') as HTMLElement | null;
+  const handle = document.getElementById('right-resize-handle') as HTMLElement | null;
+  if (!panel || !handle) return;
+
+  // Restore persisted width
+  const saved = localStorage.getItem(RIGHT_PANEL_WIDTH_KEY);
+  if (saved) {
+    const w = parseInt(saved, 10);
+    if (w >= MIN_RIGHT_WIDTH && w <= MAX_RIGHT_WIDTH) {
+      panel.style.width = `${w}px`;
+      document.documentElement.style.setProperty('--right-panel-width', `${w}px`);
+    }
+  }
+
+  let startX = 0;
+  let startWidth = 0;
+  let dragging = false;
+
+  const onMouseMove = (e: MouseEvent) => {
+    if (!dragging) return;
+    // Dragging left = panel grows; right = shrinks
+    const delta   = startX - e.clientX;
+    const newWidth = Math.min(MAX_RIGHT_WIDTH, Math.max(MIN_RIGHT_WIDTH, startWidth + delta));
+    panel.style.width = `${newWidth}px`;
+    document.documentElement.style.setProperty('--right-panel-width', `${newWidth}px`);
+  };
+
+  const onMouseUp = () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    const finalWidth = parseInt(panel.style.width, 10);
+    localStorage.setItem(RIGHT_PANEL_WIDTH_KEY, String(finalWidth));
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', onMouseUp);
+  };
+
+  handle.addEventListener('mousedown', (e: MouseEvent) => {
+    e.preventDefault();
+    dragging   = true;
+    startX     = e.clientX;
+    startWidth = panel.offsetWidth;
+    handle.classList.add('dragging');
+    document.body.style.cursor     = 'ew-resize';
+    document.body.style.userSelect = 'none';
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  });
+
+  // Touch support
+  handle.addEventListener('touchstart', (e: TouchEvent) => {
+    const touch = e.touches[0];
+    startX     = touch.clientX;
+    startWidth = panel.offsetWidth;
+    dragging   = true;
+    handle.classList.add('dragging');
+  }, { passive: true });
+
+  handle.addEventListener('touchmove', (e: TouchEvent) => {
+    if (!dragging) return;
+    const touch   = e.touches[0];
+    const delta   = startX - touch.clientX;
+    const newWidth = Math.min(MAX_RIGHT_WIDTH, Math.max(MIN_RIGHT_WIDTH, startWidth + delta));
+    panel.style.width = `${newWidth}px`;
+    document.documentElement.style.setProperty('--right-panel-width', `${newWidth}px`);
+  }, { passive: true });
+
+  handle.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    localStorage.setItem(RIGHT_PANEL_WIDTH_KEY, panel.style.width.replace('px', ''));
+  });
+
+  console.log('[Atlas] Right panel resize initialised');
+}
+
 // ── Keyboard shortcuts ────────────────────────────────────────────────────────
 
 function showToast(message: string, duration = 2200): void {
@@ -502,6 +588,7 @@ async function init(): Promise<void> {
   await initPaperTradingToggle();
   initStatusBar();
   initGlobeWiring();
+  initRightPanelResize();
   await initKeyboardShortcuts();
 
   // Command palette

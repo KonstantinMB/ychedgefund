@@ -4,6 +4,11 @@
  * Reference: WorldMonitor aesthetic (dark mode)
  */
 
+/* Slightly larger base font so dashboard text is more readable */
+html {
+  font-size: 15px;
+}
+
 /* ============================================
    DARK THEME (Default)
    ============================================ */
@@ -188,12 +193,18 @@ body {
   transition: background var(--transition-base), border-color var(--transition-base);
 }
 
+/* ── Left sidebar ─────────────────────────────────────────────────────────── */
+:root {
+  --left-panel-width: 280px;
+  --right-panel-width: 400px;
+}
+
 .left-panel {
   position: fixed;
   top: 0;
   left: 0;
-  width: 200px;
-  height: 100vh;
+  width: var(--left-panel-width);
+  height: calc(100vh - 32px); /* leave room for bottom status bar */
   background: var(--bg-panel);
   border-right: 1px solid var(--border-primary);
   backdrop-filter: blur(12px);
@@ -203,22 +214,112 @@ body {
   display: flex;
   flex-direction: column;
   transition: background var(--transition-base), border-color var(--transition-base);
+  font-size: 13px;
 }
 
+/* Divider between layers and trading sections */
+.left-trading-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.8rem 0.4rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border-secondary);
+}
+
+.left-trading-divider span {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.left-trading-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-secondary);
+}
+
+/* Trading panels container inside left sidebar */
+.left-trading-panel {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Trading panels in left bar are slightly more compact */
+.left-trading-panel .panel-header {
+  padding: 0.55rem 0.8rem;
+}
+
+.left-trading-panel .panel-title {
+  font-size: 0.68rem;
+}
+
+.left-trading-panel .panel-body {
+  font-size: 0.75rem;
+}
+
+/* ── Right panel — resizable ─────────────────────────────────────────────── */
 .right-panel {
-  position: absolute;
+  position: fixed;
   top: var(--spacing-md);
-  right: var(--spacing-md);
-  width: 380px;
-  max-height: calc(100vh - var(--spacing-xl));
+  right: 0;
+  width: var(--right-panel-width);
+  height: calc(100vh - var(--spacing-xl) - 32px); /* minus status bar */
   background: var(--bg-panel);
   border: 1px solid var(--border-primary);
-  border-radius: var(--radius-md);
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
   backdrop-filter: blur(12px);
   z-index: var(--z-panels);
   overflow-y: auto;
   overflow-x: hidden;
   transition: background var(--transition-base), border-color var(--transition-base);
+  font-size: 13px;
+  /* width transitions are disabled so drag feels instant */
+}
+
+/* Drag handle on the left edge of right panel */
+.right-resize-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 10;
+  background: transparent;
+  transition: background 0.15s;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.right-resize-handle:hover,
+.right-resize-handle.dragging {
+  background: rgba(74, 222, 128, 0.25);
+}
+
+/* Visual grip dots on the drag handle */
+.right-resize-handle::before {
+  content: '⋮';
+  position: absolute;
+  top: 50%;
+  left: -1px;
+  transform: translateY(-50%);
+  color: var(--border-primary);
+  font-size: 14px;
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.right-resize-handle:hover::before,
+.right-resize-handle.dragging::before {
+  opacity: 1;
 }
 
 /* ============================================
@@ -575,7 +676,7 @@ pre {
 }
 
 .panel-title {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -3331,7 +3432,7 @@ kbd {
 .layers-header {
   padding: 1rem 1rem 0.75rem;
   border-bottom: 1px solid var(--border-secondary);
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -3340,11 +3441,11 @@ kbd {
 }
 
 .layer-category {
-  padding: 0.75rem 1rem 0.25rem;
+  padding: 0.65rem 1rem 0.2rem;
 }
 
 .layer-category-label {
-  font-size: 0.55rem;
+  font-size: 0.6rem;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -3358,7 +3459,7 @@ kbd {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.45rem 1rem;
+  padding: 0.5rem 1rem;
   cursor: pointer;
   transition: background 0.15s, border-left-color 0.15s;
   border-left: 2px solid transparent;
@@ -3414,13 +3515,13 @@ kbd {
 }
 
 .layer-icon {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   flex-shrink: 0;
   opacity: 0.7;
 }
 
 .layer-name {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   flex: 1;
   transition: color 0.15s;
 }
@@ -3437,13 +3538,22 @@ kbd {
 #left-panel::-webkit-scrollbar {
   width: 4px;
 }
-#left-panel::-webkit-scrollbar-track {
+#left-panel::-webkit-scrollbar-track,
+.left-trading-panel::-webkit-scrollbar-track {
   background: transparent;
 }
-#left-panel::-webkit-scrollbar-thumb {
+#left-panel::-webkit-scrollbar-thumb,
+.left-trading-panel::-webkit-scrollbar-thumb {
   background: var(--border-primary);
   border-radius: 2px;
 }
+
+/* Right panel scrollbar (always visible while resizing) */
+#right-panel::-webkit-scrollbar {
+  width: 4px;
+}
+#right-panel::-webkit-scrollbar-track { background: transparent; }
+#right-panel::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 2px; }
 
 /* ============================================
    ENTITY POPUP

@@ -12,7 +12,7 @@
  * Charts are pure SVG — no external chart library.
  */
 
-import { registerPanel } from './panel-manager';
+import { registerLeftPanel as registerPanel } from './panel-manager';
 import { portfolioManager } from '../trading/engine/portfolio-manager';
 import { calculatePerformance } from '../trading/engine/performance';
 import type { PerformanceMetrics, StrategyStats } from '../trading/engine/performance';

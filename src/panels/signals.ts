@@ -15,7 +15,7 @@
  *  - Live pulsing dot + active-signal count badge
  */
 
-import { registerPanel } from './panel-manager';
+import { registerLeftPanel as registerPanel } from './panel-manager';
 import type { Signal } from '../trading/engine';
 import { tradingEngine } from '../trading/engine';
 

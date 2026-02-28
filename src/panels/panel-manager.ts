@@ -150,6 +150,7 @@ export function createPanel(config: PanelConfig): HTMLElement {
 }
 
 let rightPanelEl: HTMLElement | null = null;
+let leftTradingPanelEl: HTMLElement | null = null;
 
 /**
  * Initialize the panel manager. Must be called once before createPanel.
@@ -159,6 +160,7 @@ export function initPanelManager(): void {
   if (!rightPanelEl) {
     console.error('[PanelManager] #right-panel element not found');
   }
+  leftTradingPanelEl = document.getElementById('left-trading-panel');
 }
 
 /**
@@ -171,4 +173,18 @@ export function registerPanel(config: PanelConfig): void {
   }
   const panel = createPanel(config);
   rightPanelEl.appendChild(panel);
+}
+
+/**
+ * Register a panel into the left sidebar trading section (#left-trading-panel).
+ * Falls back to #right-panel if the left trading panel is not found.
+ */
+export function registerLeftPanel(config: PanelConfig): void {
+  const target = leftTradingPanelEl ?? rightPanelEl;
+  if (!target) {
+    console.error('[PanelManager] No panel container found');
+    return;
+  }
+  const panel = createPanel(config);
+  target.appendChild(panel);
 }

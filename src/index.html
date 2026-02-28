@@ -61,14 +61,22 @@
       </div>
     </div>
 
-    <!-- Left Panel: Layer Toggles -->
+    <!-- Left Panel: Layer Toggles + Portfolio Management -->
     <div id="left-panel" class="left-panel">
-      <!-- Layer toggles will be rendered here -->
+      <!-- Layer toggles rendered by controls.ts -->
+      <div id="left-layers-panel"></div>
+
+      <!-- Trading panels (Portfolio, Signals, Performance) -->
+      <div class="left-trading-divider">
+        <span>PAPER TRADING</span>
+      </div>
+      <div id="left-trading-panel" class="left-trading-panel"></div>
     </div>
 
-    <!-- Right Panel: Intelligence Panels -->
+    <!-- Right Panel: Intelligence Panels + resize handle -->
     <div id="right-panel" class="right-panel">
-      <!-- Intelligence panels will be rendered here -->
+      <div id="right-resize-handle" class="right-resize-handle" title="Drag to resize panel"></div>
+      <!-- Intelligence panels rendered here -->
     </div>
 
     <!-- Command Palette injected by command-palette.ts -->

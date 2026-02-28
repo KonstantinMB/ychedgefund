@@ -16,7 +16,7 @@
  *   6. Flatten All emergency button
  */
 
-import { registerPanel } from './panel-manager';
+import { registerLeftPanel as registerPanel } from './panel-manager';
 import { showToast } from '../lib/toast';
 import { tradingEngine } from '../trading/engine';
 import { portfolioManager } from '../trading/engine/portfolio-manager';
