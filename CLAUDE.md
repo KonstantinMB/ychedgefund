@@ -226,7 +226,7 @@ const PAPER_CONFIG = {
 - [x] Phase 2: Connect panels to live data (news-feed ← GDELT, markets ← Yahoo/fear-greed, risk ← USGS/GDACS) ✅
 - [x] Phase 2: Client-side API client + DataService (event-driven, staggered polling) ✅
 - [x] Phase 2: FRED + Finnhub market data edge functions ✅
-- [ ] Phase 2: Railway WebSocket relay + AIS vessel stream (deferred to Phase 5)
+- [x] Phase 2: Railway WebSocket relay + AIS vessel stream ✅
 - [x] Phase 3: Intelligence engine - CII, convergence (5°grid), Welford anomaly detection ✅
 - [x] Phase 3: Live earthquake (USGS), fire (FIRMS), aircraft (OpenSky) globe layers ✅
 - [x] Phase 3: AI briefs panel (Groq summaries, auto-regenerate 30min, topic tags) ✅
@@ -237,12 +237,17 @@ const PAPER_CONFIG = {
 - [x] Phase 4a: Market data pipeline (data-agent — WebSocket streaming, normalization, staleness detection, IndexedDB cache, technical indicators) ✅
 - [x] Phase 4b: Signal generation engine (trading-agent — 5 strategies, signal bus, Bayesian consensus, deduplication) ✅
 - [x] Phase 4c: Risk management system (risk-agent — RiskManager with 10 pre-trade checks, CircuitBreaker with GREEN/YELLOW/RED/BLACK states, immutable audit logging, portfolio risk metrics: VaR, CVaR, beta, Sharpe, correlations, Herfindahl) ✅
-- [ ] Phase 4d: Paper trading execution + portfolio tracking (full integration, localStorage + Redis persistence)
-- [ ] Phase 4e: Trading UI panels (signals, portfolio, performance metrics with Sharpe/Sortino/Calmar)
+- [x] Phase 4d: Paper trading execution + portfolio tracking (full integration, localStorage + Redis persistence) ✅
+- [x] Phase 4e Part 1: Signals panel — virtual scroll, strategy badges (GEO/SENT/MOM/MACRO/CROSS), confidence fill bar, consensus detection, detail popup, paper trade + auto-execute toggle, globe fly-to, filter pills ✅
+- [x] Phase 4e Part 2: Portfolio panel — NAV header with flash, circuit breaker badge, positions table with fill bars + flatten, exposure bars, heat/drawdown gauges, sector SVG donut, closed trades, Flatten All emergency button ✅
+- [x] Phase 4e Part 3: Performance panel — SVG equity curve + gradient fill, SPY benchmark overlay, drawdown chart, period selector (1M/3M/6M/1Y/ALL), hover tooltip, metrics table (30d/90d/ALL), monthly returns heatmap, strategy breakdown, CSV export, deterministic mock data ✅
+- [x] Phase 4e Part 4: Globe risk heatmap layer — portfolio exposure choropleth, 80 country centroids, pulse animation (80ms), confidence-weighted exposure formula, click popup with positions/hedges/CII, globe.ts parent-prefix toggle, default ON ✅
 - [x] Phase 5: Cmd+K command palette (fuzzy search, 20+ commands, keyboard nav) ✅
 - [x] Phase 5: PWA manifest + icons ✅
 - [x] Phase 5: Railway WebSocket relay (AIS+OpenSky multiplexer, exponential-backoff reconnect) ✅
-- [ ] Phase 5: Production deploy to Vercel + Railway + set env variables in dashboards
+- [x] Phase 5: Final integration — paper trading toggle, bottom status bar, keyboard shortcuts (T/S/P/Space/Esc), globe signal flash, bootstrap first-visit equity seed ✅
+- [x] Phase 5: Production deploy to Vercel — https://atlas-rouge-one.vercel.app ✅
+- [x] MVP COMPLETE — all phases shipped 🚀
 
 ## Coding Conventions
 - Vanilla TypeScript — NO React, NO Vue, NO Angular, NO Svelte

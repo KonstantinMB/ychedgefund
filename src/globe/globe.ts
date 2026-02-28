@@ -183,11 +183,22 @@ class GlobeManager {
       return;
     }
 
-    // Otherwise, filter from registry based on active layer IDs
+    // Otherwise, filter from registry based on active layer IDs.
+    // A sub-layer with id "parent-suffix" is shown when either "parent-suffix"
+    // or its parent "parent" is in activeLayerIds (supports risk-heatmap-base etc.)
     const activeLayers: Layer[] = [];
     this.layerRegistry.forEach((layer, id) => {
       if (this.activeLayerIds.has(id)) {
         activeLayers.push(layer);
+        return;
+      }
+      // Parent-prefix check: "risk-heatmap-base" → parent "risk-heatmap"
+      const dashIdx = id.lastIndexOf('-');
+      if (dashIdx > 0) {
+        const parentId = id.slice(0, dashIdx);
+        if (this.activeLayerIds.has(parentId)) {
+          activeLayers.push(layer);
+        }
       }
     });
 
@@ -263,6 +274,12 @@ class GlobeManager {
 
     const layerId = info.layer?.id ?? '';
     const obj = info.object as Record<string, unknown>;
+
+    // Risk heatmap click — delegate to its own handler
+    if (layerId === 'risk-heatmap-base') {
+      void import('./layers/risk-heatmap').then(m => m.handleRiskHeatmapClick(info));
+      return;
+    }
 
     // Show entity popup next to the clicked dot
     const entity = buildEntityInfo(layerId, obj);

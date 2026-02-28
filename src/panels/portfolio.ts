@@ -1,366 +1,871 @@
 /**
- * Portfolio Panel — Live Paper Trading Dashboard
- * Single source of truth: tradingEngine.getState()
- * Updates on: 'portfolio-updated', 'price-feed-updated'
+ * Portfolio Panel — Phase 4e Part 2
+ *
+ * Subscribes to:
+ *   'trading:portfolio'  → PortfolioSnapshot (from StateSync / new engine)
+ *   'trading:riskStatus' → { cbState, dailyPnLPct, drawdownPct, ... }
+ *   'portfolio-updated'  → PortfolioState (legacy engine fallback)
+ *   'price-feed-updated' → price tick for flash animation
+ *
+ * Sections:
+ *   1. NAV header — total value, daily P&L, circuit breaker badge
+ *   2. Positions table — compact rows with fill-bar, click → detail popup
+ *   3. Exposure + Risk — Long/Short/Cash bars + heat gauge + DD bar
+ *   4. Sector mini-donut SVG
+ *   5. Closed trades list (last 10)
+ *   6. Flatten All emergency button
  */
 
 import { registerPanel } from './panel-manager';
 import { showToast } from '../lib/toast';
 import { tradingEngine } from '../trading/engine';
-import type { PortfolioState, Position, Trade, Signal } from '../trading/engine';
+import { portfolioManager } from '../trading/engine/portfolio-manager';
+import type { PortfolioSnapshot, ManagedPosition, ClosedTrade } from '../trading/engine/portfolio-manager';
+import type { Fill } from '../trading/engine/paper-broker';
 
-const STARTING_CAPITAL = 1_000_000;
-const usdFmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
-const usdPrecise = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2 });
+// ── Sector & colour maps ──────────────────────────────────────────────────────
 
-function fmtUsd(v: number): string { return usdFmt.format(v); }
-function fmtSign(v: number): string { return (v >= 0 ? '+' : '') + usdFmt.format(v); }
-function fmtPct(v: number): string { return (v >= 0 ? '+' : '') + (v * 100).toFixed(2) + '%'; }
+const SECTOR_MAP: Record<string, string> = {
+  USO: 'Energy',   XLE: 'Energy',   VDE: 'Energy',   XOP: 'Energy', OIH: 'Energy',
+  QQQ: 'Tech',     XLK: 'Tech',     SMH: 'Tech',      SOXL: 'Tech', ARKK: 'Tech',
+  TLT: 'Bonds',    IEF: 'Bonds',    BND: 'Bonds',     AGG: 'Bonds', LQD: 'Bonds',
+  GLD: 'Metals',   IAU: 'Metals',   GDX: 'Metals',    GDXJ: 'Metals', SLV: 'Metals',
+  SPY: 'Equity',   DIA: 'Equity',   IWM: 'Equity',    VOO: 'Equity',
+  EEM: 'EM',       VWO: 'EM',       FXI: 'EM',        KWEB: 'EM',
+  XLF: 'Finance',  KRE: 'Finance',  XLV: 'Health',
+  JETS: 'Transport', XLI: 'Industry',
+  UNG: 'Energy',   CORN: 'Commodity', DBA: 'Commodity',
+};
+
+const SECTOR_COLORS: Record<string, string> = {
+  Energy:    '#f97316',
+  Tech:      '#3b82f6',
+  Bonds:     '#22c55e',
+  Metals:    '#eab308',
+  Equity:    '#8b5cf6',
+  EM:        '#14b8a6',
+  Finance:   '#06b6d4',
+  Health:    '#ec4899',
+  Transport: '#64748b',
+  Industry:  '#94a3b8',
+  Commodity: '#a78bfa',
+  Other:     '#475569',
+};
+
+function getSector(symbol: string): string {
+  return SECTOR_MAP[symbol] ?? 'Other';
+}
+
+// ── Circuit breaker badge ─────────────────────────────────────────────────────
+
+const CB_COLORS: Record<string, string> = {
+  GREEN: '#4ade80', YELLOW: '#eab308', RED: '#f87171', BLACK: '#94a3b8',
+};
+const CB_LABELS: Record<string, string> = {
+  GREEN: '● GREEN', YELLOW: '◐ YELLOW', RED: '◉ RED', BLACK: '◼ BLACK',
+};
+
+// ── Formatters ────────────────────────────────────────────────────────────────
+
+const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+const usdP = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function $$(v: number): string { return usd.format(v); }
+function $$p(v: number): string { return usdP.format(v); }
+function sign(v: number, decimals = 0): string {
+  const abs = Math.abs(v);
+  const fmt = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: decimals });
+  return (v >= 0 ? '+' : '-') + fmt.format(abs).replace('$', '$');
+}
+function pct(v: number, showSign = true): string {
+  const p = (v * 100).toFixed(2) + '%';
+  return showSign ? (v >= 0 ? '+' : '') + p : p;
+}
 function timeAgo(ts: number): string {
   const m = Math.floor((Date.now() - ts) / 60_000);
-  if (m < 60) return `${m}m ago`;
-  if (m < 1440) return `${Math.floor(m / 60)}h ago`;
-  return `${Math.floor(m / 1440)}d ago`;
+  if (m < 60) return `${m}m`;
+  if (m < 1440) return `${Math.floor(m / 60)}h`;
+  return `${Math.floor(m / 1440)}d`;
+}
+
+// ── SVG Sector Donut ─────────────────────────────────────────────────────────
+
+function buildSectorSvg(sectors: Map<string, number>): SVGSVGElement {
+  const total = [...sectors.values()].reduce((a, b) => a + b, 0);
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 80 80');
+  svg.setAttribute('width', '80');
+  svg.setAttribute('height', '80');
+
+  const CX = 40, CY = 40, R = 34, IR = 18;
+
+  if (total === 0) {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', String(CX));
+    circle.setAttribute('cy', String(CY));
+    circle.setAttribute('r', String(R));
+    circle.setAttribute('fill', 'none');
+    circle.setAttribute('stroke', 'rgba(148,163,184,0.15)');
+    circle.setAttribute('stroke-width', '16');
+    svg.appendChild(circle);
+    return svg;
+  }
+
+  let angle = -Math.PI / 2;
+
+  for (const [name, value] of sectors) {
+    if (value <= 0) continue;
+    const sweep = (value / total) * Math.PI * 2;
+    const endAngle = angle + sweep;
+    const large = sweep > Math.PI ? 1 : 0;
+
+    const x1 = CX + R * Math.cos(angle);
+    const y1 = CY + R * Math.sin(angle);
+    const x2 = CX + R * Math.cos(endAngle);
+    const y2 = CY + R * Math.sin(endAngle);
+    const x3 = CX + IR * Math.cos(endAngle);
+    const y3 = CY + IR * Math.sin(endAngle);
+    const x4 = CX + IR * Math.cos(angle);
+    const y4 = CY + IR * Math.sin(angle);
+
+    const d = [
+      `M ${x1.toFixed(2)} ${y1.toFixed(2)}`,
+      `A ${R} ${R} 0 ${large} 1 ${x2.toFixed(2)} ${y2.toFixed(2)}`,
+      `L ${x3.toFixed(2)} ${y3.toFixed(2)}`,
+      `A ${IR} ${IR} 0 ${large} 0 ${x4.toFixed(2)} ${y4.toFixed(2)}`,
+      'Z',
+    ].join(' ');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', SECTOR_COLORS[name] ?? '#475569');
+    path.setAttribute('stroke', '#0a0f0a');
+    path.setAttribute('stroke-width', '1.5');
+
+    const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+    title.textContent = `${name}: ${((value / total) * 100).toFixed(1)}%`;
+    path.appendChild(title);
+
+    svg.appendChild(path);
+    angle = endAngle;
+  }
+
+  return svg;
+}
+
+// ── Sector breakdown from positions ──────────────────────────────────────────
+
+function computeSectors(positions: ManagedPosition[]): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const pos of positions) {
+    const sec = getSector(pos.symbol);
+    map.set(sec, (map.get(sec) ?? 0) + Math.abs(pos.marketValue));
+  }
+  return map;
 }
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
-let portfolioValueEl: HTMLElement | null = null;
-let totalPnlEl: HTMLElement | null = null;
-let cashEl: HTMLElement | null = null;
-let posCountEl: HTMLElement | null = null;
-let dayPnlEl: HTMLElement | null = null;
-let maxDdEl: HTMLElement | null = null;
-let priceFeedEl: HTMLElement | null = null;
-let positionsListEl: HTMLElement | null = null;
-let tradesListEl: HTMLElement | null = null;
 
-let lastDisplayedValue = 0;
+let navValueEl: HTMLElement | null = null;
+let navDailyEl: HTMLElement | null = null;
+let cbBadgeEl: HTMLElement | null = null;
+let navTotalPnlEl: HTMLElement | null = null;
+let posHeaderEl: HTMLElement | null = null;
+let posTableBodyEl: HTMLElement | null = null;
+let longBarEl: HTMLElement | null = null;
+let shortBarEl: HTMLElement | null = null;
+let cashBarEl: HTMLElement | null = null;
+let longLblEl: HTMLElement | null = null;
+let shortLblEl: HTMLElement | null = null;
+let cashLblEl: HTMLElement | null = null;
+let heatFillEl: HTMLElement | null = null;
+let heatLblEl: HTMLElement | null = null;
+let ddFillEl: HTMLElement | null = null;
+let ddLblEl: HTMLElement | null = null;
+let betaLblEl: HTMLElement | null = null;
+let varLblEl: HTMLElement | null = null;
+let sectorPieWrapEl: HTMLElement | null = null;
+let sectorLegendEl: HTMLElement | null = null;
+let tradesBodyEl: HTMLElement | null = null;
 
-// ── Render ────────────────────────────────────────────────────────────────────
+let lastNav = 0;
 
-function renderState(state: PortfolioState): void {
-  const totalPnl = state.totalValue - STARTING_CAPITAL;
-  const totalPnlPct = totalPnl / STARTING_CAPITAL;
+// ── Risk status (from trading:riskStatus) ─────────────────────────────────────
 
-  if (portfolioValueEl) {
-    const changed = lastDisplayedValue !== 0 && state.totalValue !== lastDisplayedValue;
-    portfolioValueEl.textContent = fmtUsd(state.totalValue);
-    if (changed) {
-      const cls = state.totalValue > lastDisplayedValue ? 'flash-up' : 'flash-down';
-      portfolioValueEl.classList.add(cls);
-      setTimeout(() => portfolioValueEl?.classList.remove(cls), 600);
-    }
-    lastDisplayedValue = state.totalValue;
-  }
-
-  if (totalPnlEl) {
-    totalPnlEl.textContent = `${fmtSign(totalPnl)} (${fmtPct(totalPnlPct)})`;
-    totalPnlEl.className = `portfolio-pnl ${totalPnl >= 0 ? 'positive' : 'negative'}`;
-  }
-
-  if (cashEl) cashEl.textContent = fmtUsd(state.cash);
-  if (posCountEl) posCountEl.textContent = String(state.positions.size);
-
-  if (dayPnlEl) {
-    dayPnlEl.textContent = fmtSign(state.dailyPnl);
-    dayPnlEl.style.color = state.dailyPnl >= 0 ? '#4ade80' : '#f87171';
-  }
-
-  if (maxDdEl) {
-    maxDdEl.textContent = `${(state.maxDrawdown * 100).toFixed(2)}%`;
-  }
-
-  renderPositions(state);
-  renderTrades(state);
+interface RiskStatus {
+  cbState: string;
+  canTrade: boolean;
+  positionSizeMultiplier: number;
+  dailyPnLPct: number;
+  drawdownPct: number;
 }
 
-function renderPositions(state: PortfolioState): void {
-  if (!positionsListEl) return;
-  positionsListEl.innerHTML = '';
+let currentRiskStatus: RiskStatus = {
+  cbState: 'GREEN',
+  canTrade: true,
+  positionSizeMultiplier: 1,
+  dailyPnLPct: 0,
+  drawdownPct: 0,
+};
 
-  const positions = Array.from(state.positions.values());
-  if (positions.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'no-positions';
-    empty.textContent = 'No open positions — signals will auto-execute when generated';
-    positionsListEl.appendChild(empty);
-    return;
-  }
+// ── Position detail popup ─────────────────────────────────────────────────────
 
-  positions.forEach(pos => positionsListEl!.appendChild(buildPositionCard(pos, state)));
-}
+function buildPositionDetailPopup(pos: ManagedPosition, totalValue: number): HTMLElement {
+  const isLong = pos.direction === 'LONG';
+  const isProfit = pos.unrealizedPnl >= 0;
+  const posSize = totalValue > 0 ? Math.abs(pos.marketValue) / totalValue : 0;
 
-function buildPositionCard(pos: Position, state: PortfolioState): HTMLElement {
-  const card = document.createElement('div');
-  card.className = 'position-card';
+  const slPrice = isLong
+    ? pos.avgCostPrice * (1 - pos.stopLossPct)
+    : pos.avgCostPrice * (1 + pos.stopLossPct);
+  const tpPrice = isLong
+    ? pos.avgCostPrice * (1 + pos.takeProfitPct)
+    : pos.avgCostPrice * (1 - pos.takeProfitPct);
 
-  const header = document.createElement('div');
-  header.className = 'pos-header';
+  const overlay = document.createElement('div');
+  overlay.className = 'port-detail-overlay';
+  overlay.innerHTML = `
+    <div class="port-detail-card">
+      <div class="port-detail-header">
+        <div class="port-detail-title">
+          <span class="port-dir-badge ${isLong ? 'long' : 'short'}">${isLong ? '▲' : '▼'} ${pos.direction}</span>
+          <span class="port-detail-symbol">${pos.symbol}</span>
+          <span class="port-detail-strategy">${pos.strategy}</span>
+        </div>
+        <button class="port-detail-close">✕</button>
+      </div>
 
-  const left = document.createElement('div');
-  left.className = 'pos-left';
+      <div class="port-detail-pnl ${isProfit ? 'profit' : 'loss'}">
+        <span class="port-detail-pnl-val">${sign(pos.unrealizedPnl, 2)}</span>
+        <span class="port-detail-pnl-pct">${pct(pos.unrealizedPnlPct)}</span>
+      </div>
 
-  const sym = document.createElement('span');
-  sym.className = 'pos-symbol';
-  sym.textContent = pos.symbol;
+      <div class="port-detail-grid">
+        <div class="port-detail-cell">
+          <span class="port-detail-label">Quantity</span>
+          <span class="port-detail-val">${pos.quantity.toLocaleString()}</span>
+        </div>
+        <div class="port-detail-cell">
+          <span class="port-detail-label">Avg Entry</span>
+          <span class="port-detail-val">${$$p(pos.avgCostPrice)}</span>
+        </div>
+        <div class="port-detail-cell">
+          <span class="port-detail-label">Current</span>
+          <span class="port-detail-val ${isProfit ? 'profit' : 'loss'}">${$$p(pos.currentPrice)}</span>
+        </div>
+        <div class="port-detail-cell">
+          <span class="port-detail-label">Market Val</span>
+          <span class="port-detail-val">${$$(pos.marketValue)}</span>
+        </div>
+        <div class="port-detail-cell">
+          <span class="port-detail-label">Stop Loss</span>
+          <span class="port-detail-val loss">${$$p(slPrice)}</span>
+        </div>
+        <div class="port-detail-cell">
+          <span class="port-detail-label">Take Profit</span>
+          <span class="port-detail-val profit">${$$p(tpPrice)}</span>
+        </div>
+        <div class="port-detail-cell">
+          <span class="port-detail-label">Size</span>
+          <span class="port-detail-val">${(posSize * 100).toFixed(1)}% NAV</span>
+        </div>
+        <div class="port-detail-cell">
+          <span class="port-detail-label">Opened</span>
+          <span class="port-detail-val">${timeAgo(pos.openedAt)} ago</span>
+        </div>
+        <div class="port-detail-cell">
+          <span class="port-detail-label">SL %</span>
+          <span class="port-detail-val">${(pos.stopLossPct * 100).toFixed(1)}%</span>
+        </div>
+      </div>
 
-  const dir = document.createElement('span');
-  dir.className = `pos-direction ${pos.direction.toLowerCase()}`;
-  dir.textContent = pos.direction;
-
-  const age = document.createElement('span');
-  age.className = 'pos-age';
-  age.textContent = timeAgo(pos.openedAt);
-
-  left.appendChild(sym);
-  left.appendChild(dir);
-  left.appendChild(age);
-
-  const isPos = pos.unrealizedPnl >= 0;
-  const pnlEl = document.createElement('span');
-  pnlEl.className = `pos-pnl ${isPos ? 'positive' : 'negative'}`;
-  pnlEl.textContent = `${fmtSign(pos.unrealizedPnl)} (${fmtPct(pos.unrealizedPnlPct)})`;
-
-  header.appendChild(left);
-  header.appendChild(pnlEl);
-  card.appendChild(header);
-
-  const priceRow = document.createElement('div');
-  priceRow.className = 'pos-price-row';
-  priceRow.innerHTML = `
-    <span class="pos-price-label">Entry</span>
-    <span class="pos-price-value">${usdPrecise.format(pos.avgEntryPrice)}</span>
-    <span class="pos-price-arrow">→</span>
-    <span class="pos-price-label">Now</span>
-    <span class="pos-price-value ${isPos ? 'positive' : 'negative'}">${usdPrecise.format(pos.currentPrice)}</span>
-    <span class="pos-qty">${pos.quantity.toLocaleString()} shares</span>
+      <div class="port-detail-actions">
+        <button class="port-flatten-btn" data-symbol="${pos.symbol}">
+          Flatten ${pos.symbol} at Market
+        </button>
+        <button class="port-detail-close-btn">Cancel</button>
+      </div>
+    </div>
   `;
-  card.appendChild(priceRow);
 
-  const trade = state.openTrades.find(t => t.symbol === pos.symbol && t.status === 'OPEN');
-  if (trade) {
-    const slPrice = pos.direction === 'LONG'
-      ? trade.entryPrice * (1 - trade.stopLossPct)
-      : trade.entryPrice * (1 + trade.stopLossPct);
-    const tpPrice = pos.direction === 'LONG'
-      ? trade.entryPrice * (1 + trade.takeProfitPct)
-      : trade.entryPrice * (1 - trade.takeProfitPct);
+  overlay.querySelector('.port-detail-close')!.addEventListener('click', () => overlay.remove());
+  overlay.querySelector('.port-detail-close-btn')!.addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 
-    const levelsRow = document.createElement('div');
-    levelsRow.className = 'pos-levels-row';
-    levelsRow.innerHTML = `
-      <span class="pos-sl">SL ${usdPrecise.format(slPrice)}</span>
-      <span class="pos-tp">TP ${usdPrecise.format(tpPrice)}</span>
-    `;
-    card.appendChild(levelsRow);
-  }
-
-  const closeBtn = document.createElement('button');
-  closeBtn.className = 'pos-close-btn';
-  closeBtn.textContent = 'Close Position';
-  closeBtn.addEventListener('click', () => {
-    const closed = tradingEngine.closePosition(pos.symbol, 'manual');
-    if (closed) {
-      showToast(`✓ Closed ${pos.symbol}: ${fmtSign(closed.pnl ?? 0)}`);
-    }
+  overlay.querySelector('.port-flatten-btn')!.addEventListener('click', () => {
+    flattenPosition(pos.symbol);
+    overlay.remove();
   });
-  card.appendChild(closeBtn);
 
-  return card;
+  return overlay;
 }
 
-function renderTrades(state: PortfolioState): void {
-  if (!tradesListEl) return;
-  tradesListEl.innerHTML = '';
+// ── Flatten helpers ───────────────────────────────────────────────────────────
 
-  const allClosed = [...state.closedTrades]
-    .sort((a, b) => (b.closedAt ?? 0) - (a.closedAt ?? 0))
-    .slice(0, 10);
+function flattenPosition(symbol: string): void {
+  // Try new engine first (portfolioManager)
+  const pos = portfolioManager.getPosition(symbol);
+  if (pos) {
+    const fill: Fill = {
+      id: `fill-manual-${Date.now()}`,
+      orderId: `manual-${Date.now()}`,
+      symbol,
+      side: pos.direction === 'LONG' ? 'SELL' : 'BUY',
+      fillPrice: pos.currentPrice,
+      fillQuantity: pos.quantity,
+      totalQuantity: pos.quantity,
+      filledAt: Date.now(),
+      isPartial: false,
+      slippageBps: 0,
+    };
+    portfolioManager.closePosition(symbol, fill, 'manual');
+    showToast(`Flattened ${symbol} at ${$$p(pos.currentPrice)}`);
+    return;
+  }
+  // Legacy engine fallback
+  const closed = tradingEngine.closePosition(symbol, 'manual');
+  if (closed) {
+    showToast(`Closed ${symbol}: ${sign(closed.pnl ?? 0, 2)}`);
+  }
+}
 
-  if (allClosed.length === 0) {
-    const empty = document.createElement('div');
-    empty.className = 'no-positions';
-    empty.style.padding = '0.5rem 1rem';
-    empty.textContent = 'No closed trades yet.';
-    tradesListEl.appendChild(empty);
+function flattenAll(): void {
+  const snap = portfolioManager.getSnapshot();
+  const symbols = snap.positions.map(p => p.symbol);
+
+  if (symbols.length === 0) {
+    // Try legacy engine
+    const state = tradingEngine.getState();
+    const legacySymbols = Array.from(state.positions.keys());
+    if (legacySymbols.length === 0) {
+      showToast('No open positions to flatten');
+      return;
+    }
+    for (const sym of legacySymbols) tradingEngine.closePosition(sym, 'manual');
+    showToast(`Flattened all ${legacySymbols.length} positions`);
     return;
   }
 
-  allClosed.forEach(t => tradesListEl!.appendChild(buildTradeRow(t)));
+  for (const pos of snap.positions) {
+    const fill: Fill = {
+      id: `fill-all-${Date.now()}-${pos.symbol}`,
+      orderId: `manual-all-${Date.now()}`,
+      symbol: pos.symbol,
+      side: pos.direction === 'LONG' ? 'SELL' : 'BUY',
+      fillPrice: pos.currentPrice,
+      fillQuantity: pos.quantity,
+      totalQuantity: pos.quantity,
+      filledAt: Date.now(),
+      isPartial: false,
+      slippageBps: 0,
+    };
+    portfolioManager.closePosition(pos.symbol, fill, 'manual');
+  }
+  showToast(`⚡ Flattened all ${symbols.length} positions`);
 }
 
-function buildTradeRow(trade: Trade): HTMLElement {
+// ── Render snapshot ───────────────────────────────────────────────────────────
+
+function renderSnapshot(snap: PortfolioSnapshot): void {
+  // NAV value with flash
+  if (navValueEl) {
+    if (lastNav !== 0 && snap.totalValue !== lastNav) {
+      const cls = snap.totalValue > lastNav ? 'flash-up' : 'flash-down';
+      navValueEl.classList.add(cls);
+      setTimeout(() => navValueEl?.classList.remove(cls), 600);
+    }
+    navValueEl.textContent = $$(snap.totalValue);
+    lastNav = snap.totalValue;
+  }
+
+  // Daily P&L
+  if (navDailyEl) {
+    navDailyEl.textContent = `${sign(snap.dailyPnl, 0)} (${pct(snap.dailyPnl / snap.startingCapital)})`;
+    navDailyEl.className = `port-daily-pnl ${snap.dailyPnl >= 0 ? 'profit' : 'loss'}`;
+  }
+
+  // Total P&L
+  if (navTotalPnlEl) {
+    navTotalPnlEl.textContent = `Total: ${sign(snap.totalPnl, 0)} (${pct(snap.totalPnlPct)})`;
+    navTotalPnlEl.className = `port-total-pnl ${snap.totalPnl >= 0 ? 'profit' : 'loss'}`;
+  }
+
+  // Positions
+  renderPositionsTable(snap);
+
+  // Exposure bars
+  const total = snap.totalValue;
+  const longPct  = total > 0 ? snap.longExposure  / total : 0;
+  const shortPct = total > 0 ? snap.shortExposure / total : 0;
+  const cashPct  = total > 0 ? snap.cash          / total : 1;
+
+  if (longBarEl)  longBarEl.style.width  = `${Math.min(longPct  * 100, 100).toFixed(1)}%`;
+  if (shortBarEl) shortBarEl.style.width = `${Math.min(shortPct * 100, 100).toFixed(1)}%`;
+  if (cashBarEl)  cashBarEl.style.width  = `${Math.min(cashPct  * 100, 100).toFixed(1)}%`;
+  if (longLblEl)  longLblEl.textContent  = `Long ${(longPct  * 100).toFixed(0)}%`;
+  if (shortLblEl) shortLblEl.textContent = `Short ${(shortPct * 100).toFixed(0)}%`;
+  if (cashLblEl)  cashLblEl.textContent  = `Cash ${(cashPct  * 100).toFixed(0)}%`;
+
+  // Beta estimate (crude: net exposure / starting capital)
+  const beta = (snap.netExposure / snap.startingCapital).toFixed(2);
+  if (betaLblEl) betaLblEl.textContent = beta;
+
+  // VaR 95% (simple 2% of gross exposure)
+  const var95 = -(snap.grossExposure * 0.02);
+  if (varLblEl) varLblEl.textContent = sign(var95, 1);
+
+  // Sector pie
+  if (sectorPieWrapEl && sectorLegendEl) {
+    const sectors = computeSectors(snap.positions);
+    sectorPieWrapEl.innerHTML = '';
+    sectorPieWrapEl.appendChild(buildSectorSvg(sectors));
+    renderSectorLegend(sectorLegendEl, sectors, snap.grossExposure);
+  }
+
+  // Closed trades
+  renderClosedTrades(snap.closedTrades);
+}
+
+function renderPositionsTable(snap: PortfolioSnapshot): void {
+  if (!posTableBodyEl || !posHeaderEl) return;
+
+  posHeaderEl.textContent = `POSITIONS (${snap.openPositionCount} open)`;
+  posTableBodyEl.innerHTML = '';
+
+  if (snap.positions.length === 0) {
+    const legacy = tradingEngine.getState();
+    const legacyPositions = Array.from(legacy.positions.values());
+    if (legacyPositions.length > 0) {
+      // Fall back to rendering legacy positions
+      renderLegacyPositions(legacyPositions, snap.totalValue);
+      return;
+    }
+    posTableBodyEl.innerHTML = `
+      <div class="port-empty">
+        <div class="port-empty-icon">📊</div>
+        <div>No open positions</div>
+        <div class="port-empty-sub">Approved signals will auto-execute</div>
+      </div>
+    `;
+    return;
+  }
+
+  const sorted = [...snap.positions].sort(
+    (a, b) => Math.abs(b.marketValue) - Math.abs(a.marketValue)
+  );
+
+  for (const pos of sorted) {
+    posTableBodyEl.appendChild(buildPositionRow(pos, snap.totalValue));
+  }
+}
+
+function buildPositionRow(pos: ManagedPosition, totalValue: number): HTMLElement {
+  const isLong    = pos.direction === 'LONG';
+  const isProfit  = pos.unrealizedPnl >= 0;
+  const sizePct   = totalValue > 0 ? Math.abs(pos.marketValue) / totalValue : 0;
+  const displayQty = isLong ? `+${pos.quantity}` : `-${pos.quantity}`;
+
   const row = document.createElement('div');
-  row.className = 'trade-item';
+  row.className = `port-pos-row ${isLong ? 'pos-long' : 'pos-short'}`;
+  row.title = `${pos.strategy} · opened ${timeAgo(pos.openedAt)} ago`;
 
-  const sym = document.createElement('span');
-  sym.className = 'trade-symbol';
-  sym.textContent = trade.symbol;
+  row.innerHTML = `
+    <div class="port-pos-sym">${pos.symbol}</div>
+    <div class="port-pos-qty">${displayQty}</div>
+    <div class="port-pos-pnl ${isProfit ? 'profit' : 'loss'}">${sign(pos.unrealizedPnl, 0)}</div>
+    <div class="port-pos-bar-cell">
+      <div class="port-pos-bar-outer">
+        <div class="port-pos-bar-fill ${isLong ? 'long' : 'short'}"
+             style="width:${Math.min(sizePct * 100, 100).toFixed(1)}%"></div>
+      </div>
+      <span class="port-pos-size-pct">${(sizePct * 100).toFixed(1)}%</span>
+    </div>
+    <button class="port-pos-flatten" title="Flatten position">✕</button>
+  `;
 
-  const dir = document.createElement('span');
-  dir.className = 'trade-direction';
-  dir.textContent = trade.direction;
+  row.querySelector('.port-pos-flatten')!.addEventListener('click', e => {
+    e.stopPropagation();
+    flattenPosition(pos.symbol);
+  });
 
-  const strat = document.createElement('span');
-  strat.className = 'trade-strategy';
-  strat.textContent = trade.strategy.toUpperCase().slice(0, 3);
+  row.addEventListener('click', () => {
+    document.querySelector('.port-detail-overlay')?.remove();
+    document.body.appendChild(buildPositionDetailPopup(pos, totalValue));
+  });
 
-  const isPos = (trade.pnl ?? 0) >= 0;
-  const pnl = document.createElement('span');
-  pnl.className = `trade-pnl ${isPos ? 'positive' : 'negative'}`;
-  pnl.textContent = fmtSign(trade.pnl ?? 0);
-
-  const date = document.createElement('span');
-  date.className = 'trade-date';
-  date.textContent = trade.closedAt ? timeAgo(trade.closedAt) : '—';
-
-  row.appendChild(sym);
-  row.appendChild(dir);
-  row.appendChild(strat);
-  row.appendChild(pnl);
-  row.appendChild(date);
   return row;
 }
 
-// ── Panel body ────────────────────────────────────────────────────────────────
+function renderLegacyPositions(positions: Array<{ symbol: string; direction: string; quantity: number; unrealizedPnl: number; marketValue: number; avgEntryPrice: number; currentPrice: number }>, totalValue: number): void {
+  if (!posTableBodyEl) return;
+  posTableBodyEl.innerHTML = '';
+  for (const pos of positions) {
+    const isLong   = pos.direction === 'LONG';
+    const isProfit = pos.unrealizedPnl >= 0;
+    const sizePct  = totalValue > 0 ? Math.abs(pos.marketValue) / totalValue : 0;
+
+    const row = document.createElement('div');
+    row.className = `port-pos-row ${isLong ? 'pos-long' : 'pos-short'}`;
+    row.innerHTML = `
+      <div class="port-pos-sym">${pos.symbol}</div>
+      <div class="port-pos-qty">${isLong ? '+' : '-'}${pos.quantity}</div>
+      <div class="port-pos-pnl ${isProfit ? 'profit' : 'loss'}">${sign(pos.unrealizedPnl, 0)}</div>
+      <div class="port-pos-bar-cell">
+        <div class="port-pos-bar-outer">
+          <div class="port-pos-bar-fill ${isLong ? 'long' : 'short'}" style="width:${Math.min(sizePct * 100, 100).toFixed(1)}%"></div>
+        </div>
+        <span class="port-pos-size-pct">${(sizePct * 100).toFixed(1)}%</span>
+      </div>
+      <button class="port-pos-flatten" title="Flatten">✕</button>
+    `;
+    row.querySelector('.port-pos-flatten')!.addEventListener('click', e => {
+      e.stopPropagation();
+      flattenPosition(pos.symbol);
+    });
+    posTableBodyEl.appendChild(row);
+  }
+}
+
+function renderRiskStatus(rs: RiskStatus): void {
+  if (cbBadgeEl) {
+    cbBadgeEl.textContent = CB_LABELS[rs.cbState] ?? rs.cbState;
+    cbBadgeEl.style.color = CB_COLORS[rs.cbState] ?? '#94a3b8';
+    cbBadgeEl.className = `port-cb-badge cb-${rs.cbState.toLowerCase()}`;
+  }
+
+  // Heat gauge — positionSizeMultiplier inverse maps to heat (1.0 = no heat, 0.5 = high heat)
+  const heat = 1 - (rs.positionSizeMultiplier ?? 1);
+  const heatPct = Math.min(heat * 100, 100);
+  if (heatFillEl) {
+    heatFillEl.style.width = `${heatPct}%`;
+    heatFillEl.style.background = heatPct < 40 ? '#4ade80' : heatPct < 70 ? '#eab308' : '#f87171';
+  }
+  if (heatLblEl) {
+    const heatVal = (heat * 0.8).toFixed(2); // scale to 0.8 max
+    heatLblEl.textContent = `${heatVal} / 0.80`;
+  }
+
+  // Drawdown bar
+  const ddPct = Math.min(rs.drawdownPct * 100, 15);
+  const ddMax = 15;
+  if (ddFillEl) {
+    ddFillEl.style.width = `${(ddPct / ddMax) * 100}%`;
+    ddFillEl.style.background = ddPct < 7 ? '#4ade80' : ddPct < 12 ? '#eab308' : '#f87171';
+  }
+  if (ddLblEl) {
+    ddLblEl.textContent = `${rs.drawdownPct.toFixed(1)}% / ${ddMax}%`;
+  }
+}
+
+function renderSectorLegend(el: HTMLElement, sectors: Map<string, number>, gross: number): void {
+  el.innerHTML = '';
+  const entries = [...sectors.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
+  for (const [name, val] of entries) {
+    const p = gross > 0 ? (val / gross) * 100 : 0;
+    const item = document.createElement('div');
+    item.className = 'port-sector-item';
+    item.innerHTML = `
+      <span class="port-sector-dot" style="background:${SECTOR_COLORS[name] ?? '#475569'}"></span>
+      <span class="port-sector-name">${name}</span>
+      <span class="port-sector-pct">${p.toFixed(0)}%</span>
+    `;
+    el.appendChild(item);
+  }
+}
+
+function renderClosedTrades(trades: ClosedTrade[]): void {
+  if (!tradesBodyEl) return;
+  tradesBodyEl.innerHTML = '';
+
+  const recent = [...trades].sort((a, b) => b.closedAt - a.closedAt).slice(0, 10);
+
+  if (recent.length === 0) {
+    tradesBodyEl.innerHTML = `<div class="port-trades-empty">No closed trades yet</div>`;
+    return;
+  }
+
+  for (const t of recent) {
+    const isProfit = t.realizedPnl >= 0;
+    const row = document.createElement('div');
+    row.className = 'port-trade-row';
+    row.innerHTML = `
+      <span class="port-trade-dir ${t.direction.toLowerCase()}">${t.direction === 'LONG' ? '▲' : '▼'}</span>
+      <span class="port-trade-sym">${t.symbol}</span>
+      <span class="port-trade-strat">${t.strategy.slice(0, 3).toUpperCase()}</span>
+      <span class="port-trade-pnl ${isProfit ? 'profit' : 'loss'}">${sign(t.realizedPnl, 0)}</span>
+      <span class="port-trade-reason">${t.closeReason}</span>
+      <span class="port-trade-age">${timeAgo(t.closedAt)}ago</span>
+    `;
+    tradesBodyEl.appendChild(row);
+  }
+}
+
+// ── Legacy engine fallback renderer ───────────────────────────────────────────
+
+function renderLegacyState(): void {
+  const state = tradingEngine.getState();
+  const positions = Array.from(state.positions.values());
+  const totalValue = state.totalValue;
+
+  if (navValueEl) navValueEl.textContent = $$(totalValue);
+  if (navDailyEl) {
+    navDailyEl.textContent = `${sign(state.dailyPnl, 0)} (${pct(state.dailyPnl / 1_000_000)})`;
+    navDailyEl.className = `port-daily-pnl ${state.dailyPnl >= 0 ? 'profit' : 'loss'}`;
+  }
+  const totalPnl = totalValue - 1_000_000;
+  if (navTotalPnlEl) {
+    navTotalPnlEl.textContent = `Total: ${sign(totalPnl, 0)} (${pct(totalPnl / 1_000_000)})`;
+    navTotalPnlEl.className = `port-total-pnl ${totalPnl >= 0 ? 'profit' : 'loss'}`;
+  }
+  if (posHeaderEl) posHeaderEl.textContent = `POSITIONS (${positions.length} open)`;
+  if (posTableBodyEl) {
+    renderLegacyPositions(positions, totalValue);
+  }
+}
+
+// ── Panel builder ─────────────────────────────────────────────────────────────
 
 function buildPortfolioBody(container: HTMLElement): void {
-  // ── Header metrics ──────────────────────────────────────────────────────
-  const summary = document.createElement('div');
-  summary.className = 'portfolio-summary';
 
-  const totalSection = document.createElement('div');
-  totalSection.className = 'portfolio-total';
+  // ── 1. NAV Header ─────────────────────────────────────────────────────────
+  const navSection = document.createElement('div');
+  navSection.className = 'port-nav-section';
+  navSection.innerHTML = `
+    <div class="port-nav-row">
+      <div class="port-nav-left">
+        <div class="port-nav-label">NET ASSET VALUE</div>
+        <div class="port-nav-value" id="port-nav-value">$1,000,000</div>
+        <div class="port-daily-pnl" id="port-daily-pnl">+$0 (+0.00%)</div>
+        <div class="port-total-pnl" id="port-total-pnl">Total: +$0 (+0.00%)</div>
+      </div>
+      <div class="port-nav-right">
+        <div class="port-cb-badge" id="port-cb-badge">● GREEN</div>
+      </div>
+    </div>
+  `;
 
-  const lbl = document.createElement('div');
-  lbl.className = 'portfolio-label';
-  lbl.textContent = 'Portfolio Value';
+  navValueEl   = navSection.querySelector('#port-nav-value');
+  navDailyEl   = navSection.querySelector('#port-daily-pnl');
+  navTotalPnlEl = navSection.querySelector('#port-total-pnl');
+  cbBadgeEl    = navSection.querySelector('#port-cb-badge');
 
-  portfolioValueEl = document.createElement('div');
-  portfolioValueEl.className = 'portfolio-value';
+  container.appendChild(navSection);
 
-  totalPnlEl = document.createElement('div');
-  totalPnlEl.className = 'portfolio-pnl';
-
-  priceFeedEl = document.createElement('div');
-  priceFeedEl.className = 'price-feed-indicator';
-  priceFeedEl.innerHTML = '<span class="pf-dot"></span><span class="pf-label">Waiting for price feed…</span>';
-
-  totalSection.appendChild(lbl);
-  totalSection.appendChild(portfolioValueEl);
-  totalSection.appendChild(totalPnlEl);
-  totalSection.appendChild(priceFeedEl);
-  summary.appendChild(totalSection);
-
-  // Stats grid
-  const statsGrid = document.createElement('div');
-  statsGrid.className = 'portfolio-stats-grid';
-
-  const statDefs: Array<{ label: string; ref: (el: HTMLElement) => void }> = [
-    { label: 'Cash',      ref: el => { cashEl = el; } },
-    { label: 'Positions', ref: el => { posCountEl = el; } },
-    { label: 'Day P&L',   ref: el => { dayPnlEl = el; } },
-    { label: 'Max DD',    ref: el => { maxDdEl = el; } },
-  ];
-
-  statDefs.forEach(({ label, ref }) => {
-    const stat = document.createElement('div');
-    stat.className = 'portfolio-stat';
-
-    const sl = document.createElement('span');
-    sl.className = 'portfolio-stat-label';
-    sl.textContent = label;
-
-    const sv = document.createElement('span');
-    sv.className = 'portfolio-stat-value';
-    ref(sv);
-
-    stat.appendChild(sl);
-    stat.appendChild(sv);
-    statsGrid.appendChild(stat);
-  });
-
-  summary.appendChild(statsGrid);
-  container.appendChild(summary);
-
-  // ── Open Positions ──────────────────────────────────────────────────────
+  // ── 2. Positions table ────────────────────────────────────────────────────
   const posSection = document.createElement('div');
-  posSection.className = 'portfolio-positions';
+  posSection.className = 'port-pos-section';
 
-  const posHdr = document.createElement('div');
-  posHdr.className = 'positions-header';
-  posHdr.textContent = 'Open Positions';
+  posHeaderEl = document.createElement('div');
+  posHeaderEl.className = 'port-section-header';
+  posHeaderEl.textContent = 'POSITIONS (0 open)';
 
-  positionsListEl = document.createElement('div');
-  positionsListEl.className = 'positions-list';
+  const posTable = document.createElement('div');
+  posTable.className = 'port-pos-table';
 
-  posSection.appendChild(posHdr);
-  posSection.appendChild(positionsListEl);
+  const thead = document.createElement('div');
+  thead.className = 'port-pos-thead';
+  thead.innerHTML = `
+    <span>Symbol</span>
+    <span>Qty</span>
+    <span>P&L</span>
+    <span>Size</span>
+    <span></span>
+  `;
+
+  posTableBodyEl = document.createElement('div');
+  posTableBodyEl.className = 'port-pos-tbody';
+
+  posTable.appendChild(thead);
+  posTable.appendChild(posTableBodyEl);
+  posSection.appendChild(posHeaderEl);
+  posSection.appendChild(posTable);
   container.appendChild(posSection);
 
-  // ── Closed Trades ───────────────────────────────────────────────────────
+  // ── 3. Exposure + Risk ────────────────────────────────────────────────────
+  const riskSection = document.createElement('div');
+  riskSection.className = 'port-risk-section';
+
+  // Exposure column
+  const expCol = document.createElement('div');
+  expCol.className = 'port-exp-col';
+  expCol.innerHTML = `
+    <div class="port-subsection-title">EXPOSURE</div>
+    <div class="port-exp-row">
+      <span class="port-exp-label" id="port-long-lbl">Long 0%</span>
+      <div class="port-exp-bar-outer"><div class="port-exp-bar-fill long" id="port-long-bar" style="width:0%"></div></div>
+    </div>
+    <div class="port-exp-row">
+      <span class="port-exp-label" id="port-short-lbl">Short 0%</span>
+      <div class="port-exp-bar-outer"><div class="port-exp-bar-fill short" id="port-short-bar" style="width:0%"></div></div>
+    </div>
+    <div class="port-exp-row">
+      <span class="port-exp-label" id="port-cash-lbl">Cash 100%</span>
+      <div class="port-exp-bar-outer"><div class="port-exp-bar-fill cash" id="port-cash-bar" style="width:100%"></div></div>
+    </div>
+  `;
+
+  longBarEl   = expCol.querySelector('#port-long-bar');
+  shortBarEl  = expCol.querySelector('#port-short-bar');
+  cashBarEl   = expCol.querySelector('#port-cash-bar');
+  longLblEl   = expCol.querySelector('#port-long-lbl');
+  shortLblEl  = expCol.querySelector('#port-short-lbl');
+  cashLblEl   = expCol.querySelector('#port-cash-lbl');
+
+  // Risk column
+  const riskCol = document.createElement('div');
+  riskCol.className = 'port-risk-col';
+  riskCol.innerHTML = `
+    <div class="port-subsection-title">RISK STATUS</div>
+    <div class="port-risk-row">
+      <span class="port-risk-label">Heat</span>
+      <div class="port-gauge-outer"><div class="port-gauge-fill" id="port-heat-fill" style="width:0%"></div></div>
+      <span class="port-risk-val" id="port-heat-lbl">0.00 / 0.80</span>
+    </div>
+    <div class="port-risk-row">
+      <span class="port-risk-label">DD</span>
+      <div class="port-gauge-outer"><div class="port-gauge-fill" id="port-dd-fill" style="width:0%"></div></div>
+      <span class="port-risk-val" id="port-dd-lbl">0.0% / 15%</span>
+    </div>
+    <div class="port-risk-kv">
+      <span class="port-risk-label">Beta</span>
+      <span class="port-risk-val" id="port-beta-lbl">0.00</span>
+    </div>
+    <div class="port-risk-kv">
+      <span class="port-risk-label">VaR95</span>
+      <span class="port-risk-val loss" id="port-var-lbl">—</span>
+    </div>
+  `;
+
+  heatFillEl = riskCol.querySelector('#port-heat-fill');
+  heatLblEl  = riskCol.querySelector('#port-heat-lbl');
+  ddFillEl   = riskCol.querySelector('#port-dd-fill');
+  ddLblEl    = riskCol.querySelector('#port-dd-lbl');
+  betaLblEl  = riskCol.querySelector('#port-beta-lbl');
+  varLblEl   = riskCol.querySelector('#port-var-lbl');
+
+  riskSection.appendChild(expCol);
+  riskSection.appendChild(riskCol);
+  container.appendChild(riskSection);
+
+  // ── 4. Sector donut ───────────────────────────────────────────────────────
+  const sectorSection = document.createElement('div');
+  sectorSection.className = 'port-sector-section';
+
+  const sectorHdr = document.createElement('div');
+  sectorHdr.className = 'port-section-header';
+  sectorHdr.textContent = 'SECTOR ALLOCATION';
+
+  const sectorBody = document.createElement('div');
+  sectorBody.className = 'port-sector-body';
+
+  sectorPieWrapEl = document.createElement('div');
+  sectorPieWrapEl.className = 'port-sector-pie';
+  sectorPieWrapEl.appendChild(buildSectorSvg(new Map()));
+
+  sectorLegendEl = document.createElement('div');
+  sectorLegendEl.className = 'port-sector-legend';
+  sectorLegendEl.innerHTML = `<div class="port-sector-empty">No positions</div>`;
+
+  sectorBody.appendChild(sectorPieWrapEl);
+  sectorBody.appendChild(sectorLegendEl);
+  sectorSection.appendChild(sectorHdr);
+  sectorSection.appendChild(sectorBody);
+  container.appendChild(sectorSection);
+
+  // ── 5. Closed trades ──────────────────────────────────────────────────────
+  const tradesSection = document.createElement('div');
+  tradesSection.className = 'port-trades-section';
+
   const tradesHdr = document.createElement('div');
-  tradesHdr.className = 'recent-trades-header';
-  tradesHdr.textContent = 'Trade History';
-  container.appendChild(tradesHdr);
+  tradesHdr.className = 'port-section-header';
+  tradesHdr.textContent = 'RECENT TRADES';
 
-  tradesListEl = document.createElement('div');
-  tradesListEl.className = 'trades-list';
-  container.appendChild(tradesListEl);
+  tradesBodyEl = document.createElement('div');
+  tradesBodyEl.className = 'port-trades-body';
+  tradesBodyEl.innerHTML = `<div class="port-trades-empty">No closed trades yet</div>`;
 
-  // ── Reset button ────────────────────────────────────────────────────────
+  tradesSection.appendChild(tradesHdr);
+  tradesSection.appendChild(tradesBodyEl);
+  container.appendChild(tradesSection);
+
+  // ── 6. Emergency controls ─────────────────────────────────────────────────
+  const emergencyRow = document.createElement('div');
+  emergencyRow.className = 'port-emergency-row';
+
+  const flattenAllBtn = document.createElement('button');
+  flattenAllBtn.className = 'port-flatten-all-btn';
+  flattenAllBtn.innerHTML = '⚡ Flatten All';
+  flattenAllBtn.addEventListener('click', () => {
+    const snap = portfolioManager.getSnapshot();
+    const count = snap.positions.length || tradingEngine.getState().positions.size;
+    if (count === 0) { showToast('No open positions'); return; }
+    if (!confirm(`Close all ${count} position(s) at market? This cannot be undone.`)) return;
+    flattenAll();
+  });
+
   const resetBtn = document.createElement('button');
-  resetBtn.className = 'portfolio-reset-btn';
+  resetBtn.className = 'port-reset-btn';
   resetBtn.textContent = 'Reset Portfolio';
   resetBtn.addEventListener('click', () => {
-    if (!confirm('Reset portfolio to $1,000,000?')) return;
+    if (!confirm('Reset portfolio to $1,000,000? All positions and trades will be lost.')) return;
     tradingEngine.resetPortfolio();
-    lastDisplayedValue = 0;
+    portfolioManager.reset();
+    lastNav = 0;
     showToast('Portfolio reset to $1,000,000');
   });
-  container.appendChild(resetBtn);
 
-  // ── Initial render from engine ──────────────────────────────────────────
-  renderState(tradingEngine.getState());
+  emergencyRow.appendChild(flattenAllBtn);
+  emergencyRow.appendChild(resetBtn);
+  container.appendChild(emergencyRow);
 
-  // ── Event listeners ─────────────────────────────────────────────────────
-  window.addEventListener('portfolio-updated', (e: Event) => {
-    const state = (e as CustomEvent<PortfolioState>).detail;
-    if (state) renderState(state);
+  // ── 7. Event subscriptions ────────────────────────────────────────────────
+
+  // Primary: new engine PortfolioSnapshot
+  window.addEventListener('trading:portfolio', (e: Event) => {
+    const snap = (e as CustomEvent<PortfolioSnapshot>).detail;
+    if (snap) renderSnapshot(snap);
   });
 
-  window.addEventListener('price-feed-updated', (e: Event) => {
-    const detail = (e as CustomEvent<{ source: string; count: number; at: number }>).detail;
-    if (!priceFeedEl) return;
-    priceFeedEl.innerHTML = `<span class="pf-dot live"></span><span class="pf-label">LIVE · ${detail.source.toUpperCase()} · ${detail.count} prices · ${new Date(detail.at).toLocaleTimeString()}</span>`;
-    // Also refresh positions with latest prices from engine
-    renderState(tradingEngine.getState());
-  });
-
-  window.addEventListener('execute-signal', (e: Event) => {
-    const detail = (e as CustomEvent<{ signal: Signal }>).detail;
-    const signal = detail?.signal;
-    if (!signal) return;
-
-    const trade = tradingEngine.acceptSignal(signal);
-    if (trade) {
-      showToast(`✓ ${signal.direction} ${signal.symbol} — ${trade.quantity} shares @ ${usdPrecise.format(trade.entryPrice)}`);
-    } else {
-      const st = tradingEngine.getState();
-      if (st.haltedUntil > Date.now()) {
-        showToast('⚠ Trading halted — daily loss limit reached');
-      } else if (st.positions.has(signal.symbol)) {
-        showToast(`Position already open for ${signal.symbol}`);
-      } else if (signal.expiresAt < Date.now()) {
-        showToast('Signal expired');
-      } else {
-        showToast('Signal rejected: insufficient capital or position limits');
-      }
+  // Primary: risk status
+  window.addEventListener('trading:riskStatus', (e: Event) => {
+    const rs = (e as CustomEvent<RiskStatus>).detail;
+    if (rs) {
+      currentRiskStatus = rs;
+      renderRiskStatus(rs);
     }
   });
 
-  // Refresh every 30s for clock drift / age labels
-  setInterval(() => renderState(tradingEngine.getState()), 30_000);
+  // Legacy fallback: old engine portfolio-updated
+  window.addEventListener('portfolio-updated', () => {
+    renderLegacyState();
+  });
+
+  // Price feed tick → re-render positions
+  window.addEventListener('price-feed-updated', () => {
+    const snap = portfolioManager.getSnapshot();
+    if (snap.openPositionCount > 0) {
+      renderSnapshot(snap);
+    } else {
+      renderLegacyState();
+    }
+  });
+
+  // ── 8. Initial render ─────────────────────────────────────────────────────
+  const initSnap = portfolioManager.getSnapshot();
+  if (initSnap.totalValue > 0) {
+    renderSnapshot(initSnap);
+  } else {
+    renderLegacyState();
+  }
+  renderRiskStatus(currentRiskStatus);
+
+  // Clock tick to keep "age" labels fresh
+  setInterval(() => {
+    if (posTableBodyEl) {
+      const snap = portfolioManager.getSnapshot();
+      if (snap.openPositionCount > 0) renderPositionsTable(snap);
+    }
+  }, 60_000);
 }
 
 // ── Export ────────────────────────────────────────────────────────────────────

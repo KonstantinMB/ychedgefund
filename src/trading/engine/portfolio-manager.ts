@@ -370,6 +370,12 @@ export class PortfolioManager {
     return [...this.equityCurve];
   }
 
+  /** Seed synthetic equity curve on first run (no-op if real data already exists) */
+  seedEquityCurve(points: EquityPoint[]): void {
+    if (this.equityCurve.length > 0) return;
+    this.equityCurve = [...points];
+  }
+
   getTotalValue(): number {
     const posValue = Array.from(this.positions.values()).reduce((s, p) => s + p.marketValue, 0);
     return this.cash + posValue;

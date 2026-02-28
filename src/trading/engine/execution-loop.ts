@@ -48,6 +48,21 @@ export interface LoopStats {
   isRunning: boolean;
 }
 
+// ── Auto-execute gate ─────────────────────────────────────────────────────────
+
+/** When false, signals are shown in the UI but not auto-executed */
+let autoExecuteEnabled = true;
+
+export function setAutoExecute(enabled: boolean): void {
+  autoExecuteEnabled = enabled;
+  console.log(`[ExecutionLoop] Auto-execute: ${enabled ? 'ON' : 'OFF'}`);
+  window.dispatchEvent(new CustomEvent('trading:auto-execute-changed', { detail: { enabled } }));
+}
+
+export function getAutoExecute(): boolean {
+  return autoExecuteEnabled;
+}
+
 // ── ExecutionLoop ─────────────────────────────────────────────────────────────
 
 export class ExecutionLoop {
@@ -82,9 +97,9 @@ export class ExecutionLoop {
     // Subscribe to real-time price updates
     window.addEventListener('price-feed-updated', this.handlePriceFeedUpdate);
 
-    // Subscribe to signal bus — process signals immediately
+    // Subscribe to signal bus — process signals only when auto-execute is ON
     this.unsubscribeSignalBus = signalBus.subscribe(signal => {
-      void this.processSignal(signal);
+      if (autoExecuteEnabled) void this.processSignal(signal);
     });
 
     // Main heartbeat: MTM + pending signals retry + persist
