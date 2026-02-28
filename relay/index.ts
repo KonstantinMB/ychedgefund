@@ -99,9 +99,10 @@ if (process.env.AISSTREAM_API_KEY) {
 // --- OpenSky poller -------------------------------------------------------
 
 const openskPoller = new OpenSkyPoller();
-openskPoller.start(30_000);
 openskPoller.subscribe((aircraft) => broadcast('aircraft', aircraft));
-console.log('[Relay] OpenSky poller started (30 s interval)');
+
+// start() is async — it probes connectivity first and skips polling if blocked
+void openskPoller.start(30_000);
 
 // --- Start server ---------------------------------------------------------
 

@@ -72,6 +72,25 @@ async function getAccessToken(): Promise<string | null> {
   }
 }
 
+// ── Connectivity probe ───────────────────────────────────────────────────────
+
+/**
+ * Quick HEAD request to check if OpenSky is reachable from this host.
+ * Returns false on any network error (Railway IPs are often blocked).
+ */
+async function probeOpenSky(): Promise<boolean> {
+  try {
+    const res = await fetch('https://opensky-network.org/', {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(8_000),
+      headers: { 'User-Agent': 'Atlas Intelligence Platform (connectivity-probe)' },
+    });
+    return res.status < 500;
+  } catch {
+    return false;
+  }
+}
+
 // ── Poller ──────────────────────────────────────────────────────────────────
 
 export class OpenSkyPoller {
@@ -81,7 +100,20 @@ export class OpenSkyPoller {
   private disabled = false;
   private readonly MAX_CONSECUTIVE_ERRORS = 5;
 
-  start(intervalMs = 30_000): void {
+  async start(intervalMs = 30_000): Promise<void> {
+    // Fast connectivity probe — skip entirely if OpenSky blocks this host
+    const reachable = await probeOpenSky();
+    if (!reachable) {
+      console.warn(
+        '[OpenSky] Host unreachable from this environment (Railway IP likely blocked). ' +
+        'Aircraft tracking disabled. Set OPENSKY_CLIENT_ID + OPENSKY_CLIENT_SECRET or ' +
+        'use a proxy to enable it.'
+      );
+      this.disabled = true;
+      return;
+    }
+
+    console.log('[OpenSky] Host reachable — starting poller');
     void this.poll(); // immediate first poll
     this.interval = setInterval(() => { void this.poll(); }, intervalMs);
   }
