@@ -1,0 +1,285 @@
+/**
+ * Atlas - Base Styles
+ * Dark intelligence dashboard theme
+ * Reference: WorldMonitor aesthetic
+ */
+
+/* CSS Variables - Dark Theme */
+:root {
+  /* Background colors */
+  --bg-primary: #0a0f0a;
+  --bg-secondary: #0f140f;
+  --bg-panel: rgba(10, 15, 10, 0.95);
+  --bg-panel-hover: rgba(15, 20, 15, 0.98);
+
+  /* Text colors */
+  --text-primary: #e8f0e8;
+  --text-secondary: #a0b0a0;
+  --text-tertiary: #6a7a6a;
+  --text-accent: #4ade80;
+
+  /* Border colors */
+  --border-primary: rgba(74, 222, 128, 0.2);
+  --border-secondary: rgba(74, 222, 128, 0.1);
+
+  /* Status colors */
+  --status-critical: #ef4444;
+  --status-high: #f97316;
+  --status-medium: #eab308;
+  --status-low: #22c55e;
+  --status-info: #3b82f6;
+
+  /* Sentiment colors */
+  --sentiment-positive: #22c55e;
+  --sentiment-negative: #ef4444;
+  --sentiment-neutral: #94a3b8;
+
+  /* Typography */
+  --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+
+  /* Z-index layers */
+  --z-globe: 0;
+  --z-panels: 10;
+  --z-modal: 100;
+  --z-command-palette: 1000;
+}
+
+/* Reset & Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Layout Structure */
+#app {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+}
+
+.globe-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: var(--z-globe);
+}
+
+.left-panel {
+  position: absolute;
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+  width: 280px;
+  max-height: calc(100vh - var(--spacing-xl));
+  background: var(--bg-panel);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(12px);
+  z-index: var(--z-panels);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.right-panel {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  width: 380px;
+  max-height: calc(100vh - var(--spacing-xl));
+  background: var(--bg-panel);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(12px);
+  z-index: var(--z-panels);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+h1 { font-size: 24px; }
+h2 { font-size: 20px; }
+h3 { font-size: 16px; }
+h4 { font-size: 14px; }
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+/* Values and metrics should use monospace */
+.value,
+.metric,
+.number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Scrollbar styling */
+.left-panel::-webkit-scrollbar,
+.right-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.left-panel::-webkit-scrollbar-track,
+.right-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.left-panel::-webkit-scrollbar-thumb,
+.right-panel::-webkit-scrollbar-thumb {
+  background: var(--border-primary);
+  border-radius: 3px;
+}
+
+.left-panel::-webkit-scrollbar-thumb:hover,
+.right-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--text-accent);
+}
+
+/* Command Palette */
+.command-palette {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  max-width: 90vw;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  z-index: var(--z-command-palette);
+  padding: var(--spacing-md);
+}
+
+.command-palette.hidden {
+  display: none;
+}
+
+/* Utility Classes */
+.hidden {
+  display: none !important;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.gap-sm {
+  gap: var(--spacing-sm);
+}
+
+.gap-md {
+  gap: var(--spacing-md);
+}
+
+/* Status badges */
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-critical {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--status-critical);
+  border: 1px solid var(--status-critical);
+}
+
+.badge-high {
+  background: rgba(249, 115, 22, 0.2);
+  color: var(--status-high);
+  border: 1px solid var(--status-high);
+}
+
+.badge-medium {
+  background: rgba(234, 179, 8, 0.2);
+  color: var(--status-medium);
+  border: 1px solid var(--status-medium);
+}
+
+.badge-low {
+  background: rgba(34, 197, 94, 0.2);
+  color: var(--status-low);
+  border: 1px solid var(--status-low);
+}
+
+/* Sentiment indicators */
+.sentiment-positive {
+  color: var(--sentiment-positive);
+}
+
+.sentiment-negative {
+  color: var(--sentiment-negative);
+}
+
+.sentiment-neutral {
+  color: var(--sentiment-neutral);
+}
+
+/* Loading states */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.loading {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glow effect for interactive elements */
+.glow {
+  box-shadow: 0 0 10px var(--text-accent);
+}
