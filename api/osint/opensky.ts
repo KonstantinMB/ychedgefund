@@ -1,9 +1,9 @@
 /**
  * OpenSky Aircraft Positions Edge Function
  *
- * Fetches live aircraft state vectors from OpenSky Network.
- * No API key required (anonymous rate limit applies). 1-minute cache.
- * Filters to airborne aircraft with valid coordinates, max 1000 results.
+ * Uses OAuth2 client_credentials (OPENSKY_CLIENT_ID / OPENSKY_CLIENT_SECRET) when set.
+ * Falls back to anonymous access (heavily rate-limited from shared datacenter IPs).
+ * Returns empty array gracefully on any failure — never 500s.
  */
 
 import { withCors } from '../_cors';
@@ -21,6 +21,11 @@ const IDX_GEO_ALTITUDE = 7;
 const IDX_ON_GROUND = 8;
 const IDX_VELOCITY = 9;
 const IDX_HEADING = 10;
+
+const OPENSKY_URL =
+  'https://opensky-network.org/api/states/all?lamin=-90&lomin=-180&lamax=90&lomax=180';
+const OPENSKY_TOKEN_URL =
+  'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
 
 type StateVector = (string | number | boolean | null)[];
 
@@ -40,12 +45,39 @@ interface Aircraft {
   heading: number;
 }
 
-const OPENSKY_URL =
-  'https://opensky-network.org/api/states/all?lamin=-90&lomin=-180&lamax=90&lomax=180';
+// ── OAuth2 token (edge functions are stateless, token fetched per cold start) ──
+
+async function fetchBearerToken(): Promise<string | null> {
+  const clientId = (typeof process !== 'undefined' ? process.env.OPENSKY_CLIENT_ID : undefined)
+    ?? (globalThis as Record<string, unknown>)['OPENSKY_CLIENT_ID'] as string | undefined;
+  const clientSecret = (typeof process !== 'undefined' ? process.env.OPENSKY_CLIENT_SECRET : undefined)
+    ?? (globalThis as Record<string, unknown>)['OPENSKY_CLIENT_SECRET'] as string | undefined;
+
+  if (!clientId || !clientSecret) return null;
+
+  try {
+    const body = new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: clientId,
+      client_secret: clientSecret,
+    });
+
+    const res = await fetch(OPENSKY_TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+    });
+
+    if (!res.ok) return null;
+    const json = await res.json() as { access_token: string };
+    return json.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
 
 function normalizeState(s: StateVector): Aircraft | null {
-  const onGround = s[IDX_ON_GROUND];
-  if (onGround === true) return null;
+  if (s[IDX_ON_GROUND] === true) return null;
 
   const lat = s[IDX_LAT] as number | null;
   const lon = s[IDX_LON] as number | null;
@@ -64,15 +96,30 @@ function normalizeState(s: StateVector): Aircraft | null {
 }
 
 export default withCors(async (_req: Request) => {
-  // 5-minute cache — OpenSky anonymous tier allows ~1 req/5min from shared IPs
+  // Authenticated requests get 10-second cache; anonymous stay at 5 min
+  const isAuthenticated = !!(
+    (typeof process !== 'undefined' ? process.env.OPENSKY_CLIENT_ID : undefined)
+    ?? (globalThis as Record<string, unknown>)['OPENSKY_CLIENT_ID']
+  );
+  const cacheTtl = isAuthenticated ? 10 : 300;
+
   let aircraft: Aircraft[] = [];
   try {
-    aircraft = await withCache<Aircraft[]>('osint:aircraft', 300, async () => {
-      const res = await fetch(OPENSKY_URL, {
-        headers: { 'User-Agent': 'Atlas/1.0 (intelligence dashboard)' },
-      });
-      // OpenSky returns 429 when rate-limited — return empty rather than error
-      if (res.status === 429 || res.status === 503) return [];
+    aircraft = await withCache<Aircraft[]>('osint:aircraft', cacheTtl, async () => {
+      // Get OAuth2 token if credentials are available
+      const token = await fetchBearerToken();
+
+      const headers: Record<string, string> = {
+        'User-Agent': 'Atlas/1.0 (intelligence dashboard)',
+      };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(OPENSKY_URL, { headers });
+
+      // Rate-limited or blocked — return empty rather than error
+      if (res.status === 429 || res.status === 403 || res.status === 503) return [];
       if (!res.ok) throw new Error(`OpenSky upstream error: ${res.status}`);
 
       const data: OpenSkyResponse = await res.json();
@@ -88,17 +135,23 @@ export default withCors(async (_req: Request) => {
       return results;
     });
   } catch {
-    // Any error (including Upstash overload propagation) → return empty gracefully
+    // Any error (Upstash overload, network failure) → return empty, never 500
     aircraft = [];
   }
 
   return new Response(
-    JSON.stringify({ aircraft, count: aircraft.length, source: 'opensky', timestamp: Date.now() }),
+    JSON.stringify({
+      aircraft,
+      count: aircraft.length,
+      source: 'opensky',
+      authenticated: isAuthenticated,
+      timestamp: Date.now(),
+    }),
     {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+        'Cache-Control': `public, s-maxage=${cacheTtl}, stale-while-revalidate=${cacheTtl * 2}`,
       },
     }
   );
