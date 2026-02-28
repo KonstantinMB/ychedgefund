@@ -193,6 +193,24 @@ const PAPER_CONFIG = {
 2. **News Sentiment Momentum**: GDELT 4-hour rolling tone by sector, threshold triggers at ±3.0
 3. **Macro Indicator Divergence**: FRED yield curve, unemployment claims, CPI → sector rotation
 
+## Agent Orchestration Rules
+
+### Trading Signal Flow (MUST follow this order):
+1. **data-agent** → Streams fresh market prices to the trading engine
+2. **intelligence-agent** → Produces CII scores, convergence alerts, anomalies
+3. **trading-agent** → Consumes intelligence + prices → generates signals
+4. **risk-agent** → Validates every signal before execution (GATEKEEPER)
+5. **trading-agent** → Executes approved paper trades, updates portfolio
+6. **frontend-agent** → Renders signals, portfolio, P&L in real-time panels
+
+### Rules:
+- **NEVER skip the risk-agent check**. Every trade goes through it.
+- **data-agent** must confirm price freshness before any trade executes
+- **intelligence-agent** outputs feed into **trading-agent** as inputs
+- All agents read from the same reactive state store in `/src/lib/state.ts`
+- Signals are published to the state store; panels subscribe to updates
+- Paper portfolio persists in localStorage AND Upstash Redis
+
 ## Current Build Status
 <!-- UPDATE THIS AFTER EACH SESSION -->
 - [x] Phase 0: Foundation (repo, tooling, CORS, 3-tier cache, state management, WebSocket) ✅
@@ -216,13 +234,15 @@ const PAPER_CONFIG = {
 - [x] Phase 4: Paper trading engine (engine, portfolio, signals, risk management) ✅
 - [x] Phase 4: 3 strategies: geopolitical (CII-triggered), sentiment (GDELT rolling tone), macro (FRED yield curve) ✅
 - [x] Phase 4: Portfolio panel + signals panel with execute buttons ✅
+- [x] Phase 4a: Market data pipeline (data-agent — WebSocket streaming, normalization, staleness detection, IndexedDB cache, technical indicators) ✅
+- [x] Phase 4b: Signal generation engine (trading-agent — 5 strategies, signal bus, Bayesian consensus, deduplication) ✅
+- [x] Phase 4c: Risk management system (risk-agent — RiskManager with 10 pre-trade checks, CircuitBreaker with GREEN/YELLOW/RED/BLACK states, immutable audit logging, portfolio risk metrics: VaR, CVaR, beta, Sharpe, correlations, Herfindahl) ✅
+- [ ] Phase 4d: Paper trading execution + portfolio tracking (full integration, localStorage + Redis persistence)
+- [ ] Phase 4e: Trading UI panels (signals, portfolio, performance metrics with Sharpe/Sortino/Calmar)
 - [x] Phase 5: Cmd+K command palette (fuzzy search, 20+ commands, keyboard nav) ✅
 - [x] Phase 5: PWA manifest + icons ✅
 - [x] Phase 5: Railway WebSocket relay (AIS+OpenSky multiplexer, exponential-backoff reconnect) ✅
 - [ ] Phase 5: Production deploy to Vercel + Railway + set env variables in dashboards
-- [ ] Phase 3: Intelligence engine (CII, convergence, anomaly, AI briefs)
-- [ ] Phase 4: Paper trading + signals (engine, 3 strategies, portfolio UI)
-- [ ] Phase 5: Polish + deploy (WebSocket, Cmd+K, PWA, production deploy)
 
 ## Coding Conventions
 - Vanilla TypeScript — NO React, NO Vue, NO Angular, NO Svelte

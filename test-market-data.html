@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Market Data Pipeline Test</title>
+    <style>
+      body {
+        font-family: 'Monaco', 'Courier New', monospace;
+        background: #0a0f0a;
+        color: #00ff00;
+        padding: 20px;
+        margin: 0;
+      }
+
+      h1 {
+        color: #00ff00;
+        border-bottom: 2px solid #00ff00;
+        padding-bottom: 10px;
+      }
+
+      .status {
+        background: #1a1f1a;
+        border: 1px solid #00ff00;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .status h2 {
+        margin-top: 0;
+        color: #ffff00;
+      }
+
+      .metric {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid #2a3f2a;
+      }
+
+      .metric:last-child {
+        border-bottom: none;
+      }
+
+      .metric-label {
+        font-weight: bold;
+      }
+
+      .metric-value {
+        color: #ffff00;
+      }
+
+      .fresh {
+        color: #00ff00;
+      }
+
+      .stale {
+        color: #ff6600;
+      }
+
+      .error {
+        color: #ff0000;
+      }
+
+      .ticks {
+        background: #1a1f1a;
+        border: 1px solid #00ff00;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        max-height: 500px;
+        overflow-y: auto;
+      }
+
+      .tick {
+        padding: 10px;
+        margin: 5px 0;
+        background: #0f140f;
+        border-left: 3px solid #00ff00;
+        font-size: 12px;
+      }
+
+      .tick.stale {
+        border-left-color: #ff6600;
+      }
+
+      .tick-header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .tick-details {
+        color: #888;
+        font-size: 11px;
+      }
+
+      button {
+        background: #00ff00;
+        color: #0a0f0a;
+        border: none;
+        padding: 10px 20px;
+        font-family: inherit;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin: 5px;
+      }
+
+      button:hover {
+        background: #ffff00;
+      }
+
+      button:active {
+        background: #cccc00;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Market Data Pipeline Test</h1>
+
+    <div class="status">
+      <h2>Stream Status</h2>
+      <div class="metric">
+        <span class="metric-label">Initialization:</span>
+        <span class="metric-value" id="init-status">Pending...</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Total Symbols:</span>
+        <span class="metric-value" id="total-symbols">0</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Fresh Ticks:</span>
+        <span class="metric-value fresh" id="fresh-count">0</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Stale Ticks:</span>
+        <span class="metric-value stale" id="stale-count">0</span>
+      </div>
+      <div class="metric">
+        <span class="metric-label">Last Update:</span>
+        <span class="metric-value" id="last-update">Never</span>
+      </div>
+    </div>
+
+    <div>
+      <button onclick="testBackfill()">Test Historical Backfill</button>
+      <button onclick="testIndicators()">Test Technical Indicators</button>
+      <button onclick="clearData()">Clear All Data</button>
+    </div>
+
+    <div class="ticks">
+      <h2>Live Market Ticks</h2>
+      <div id="tick-list"></div>
+    </div>
+
+    <script type="module">
+      import { initMarketStream, getMarketStream } from '/src/trading/data/market-stream.ts';
+      import { getAllSymbols } from '/src/trading/data/universe.ts';
+      import { backfillSymbols, getHistoricalData, clearHistoricalData } from '/src/trading/data/historical.ts';
+
+      let stream = null;
+
+      async function init() {
+        try {
+          console.log('[Test] Initializing market data stream...');
+
+          const initStatus = document.getElementById('init-status');
+          initStatus.textContent = 'Initializing...';
+          initStatus.className = 'metric-value';
+
+          // Get Finnhub API key from localStorage (optional)
+          const finnhubKey = localStorage.getItem('FINNHUB_API_KEY');
+
+          // Initialize stream
+          stream = await initMarketStream(finnhubKey);
+
+          // Subscribe to tick updates
+          stream.subscribe(tick => {
+            updateTickDisplay(tick);
+            updateStats();
+          });
+
+          initStatus.textContent = 'Connected ✓';
+          initStatus.className = 'metric-value fresh';
+
+          const symbols = getAllSymbols();
+          document.getElementById('total-symbols').textContent = symbols.length;
+
+          console.log('[Test] Market data stream initialized successfully');
+        } catch (error) {
+          console.error('[Test] Initialization failed:', error);
+
+          const initStatus = document.getElementById('init-status');
+          initStatus.textContent = 'Failed ✗';
+          initStatus.className = 'metric-value error';
+        }
+      }
+
+      function updateTickDisplay(tick) {
+        const tickList = document.getElementById('tick-list');
+        const tickId = `tick-${tick.symbol}`;
+
+        let tickEl = document.getElementById(tickId);
+
+        if (!tickEl) {
+          tickEl = document.createElement('div');
+          tickEl.id = tickId;
+          tickEl.className = 'tick';
+          tickList.appendChild(tickEl);
+        }
+
+        const age = Math.floor((Date.now() - tick.timestamp) / 1000);
+        const time = new Date(tick.timestamp).toLocaleTimeString();
+
+        tickEl.className = tick.isStale ? 'tick stale' : 'tick';
+
+        tickEl.innerHTML = `
+          <div class="tick-header">
+            <span>${tick.symbol}</span>
+            <span>$${tick.price.toFixed(2)}</span>
+          </div>
+          <div class="tick-details">
+            Source: ${tick.source} | Age: ${age}s | ${time} | ${tick.isStale ? '⚠️ STALE' : '✓ Fresh'}
+          </div>
+        `;
+
+        document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+      }
+
+      function updateStats() {
+        if (!stream) return;
+
+        const report = stream.getStalenessReport();
+
+        document.getElementById('fresh-count').textContent = report.fresh;
+        document.getElementById('stale-count').textContent = report.stale;
+      }
+
+      window.testBackfill = async function() {
+        try {
+          console.log('[Test] Starting historical backfill...');
+          const symbols = getAllSymbols().slice(0, 5); // Test with first 5 symbols
+          await backfillSymbols(symbols);
+          console.log('[Test] Backfill complete!');
+          alert('Backfill complete! Check console for details.');
+        } catch (error) {
+          console.error('[Test] Backfill failed:', error);
+          alert('Backfill failed: ' + error.message);
+        }
+      };
+
+      window.testIndicators = async function() {
+        try {
+          console.log('[Test] Testing technical indicators...');
+          const indicators = await getHistoricalData('SPY');
+          console.log('[Test] SPY Indicators:', indicators);
+          alert(`SPY Indicators:\nSMA20: $${indicators.sma20.toFixed(2)}\nSMA50: $${indicators.sma50.toFixed(2)}\nRSI14: ${indicators.rsi14.toFixed(1)}\nATR14: $${indicators.atr14.toFixed(2)}`);
+        } catch (error) {
+          console.error('[Test] Indicator test failed:', error);
+          alert('Indicator test failed: ' + error.message);
+        }
+      };
+
+      window.clearData = async function() {
+        if (confirm('Clear all historical data from IndexedDB?')) {
+          try {
+            await clearHistoricalData();
+            alert('All data cleared!');
+          } catch (error) {
+            console.error('[Test] Clear failed:', error);
+            alert('Clear failed: ' + error.message);
+          }
+        }
+      };
+
+      // Initialize on load
+      init();
+    </script>
+  </body>
+</html>

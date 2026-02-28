@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signal Generation Test</title>
+    <style>
+      body {
+        font-family: 'Monaco', 'Courier New', monospace;
+        background: #0a0f0a;
+        color: #00ff00;
+        padding: 20px;
+        margin: 0;
+      }
+
+      h1 {
+        color: #00ff00;
+        border-bottom: 2px solid #00ff00;
+        padding-bottom: 10px;
+      }
+
+      .status {
+        background: #1a1f1a;
+        border: 1px solid #00ff00;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .signal {
+        background: #0f140f;
+        border-left: 3px solid #00ff00;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 4px;
+      }
+
+      .signal.consensus {
+        border-left-color: #ffff00;
+        background: #1a1a0f;
+      }
+
+      .signal-header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .signal-meta {
+        color: #888;
+        font-size: 11px;
+        margin-top: 5px;
+      }
+
+      .strategy-tag {
+        display: inline-block;
+        background: #2a4f2a;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 10px;
+        margin-right: 5px;
+      }
+
+      .confidence {
+        color: #ffff00;
+      }
+
+      .direction-long {
+        color: #00ff00;
+      }
+
+      .direction-short {
+        color: #ff6600;
+      }
+
+      button {
+        background: #00ff00;
+        color: #0a0f0a;
+        border: none;
+        padding: 10px 20px;
+        font-family: inherit;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin: 5px;
+      }
+
+      button:hover {
+        background: #ffff00;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .stat-card {
+        background: #1a1f1a;
+        border: 1px solid #00ff00;
+        padding: 15px;
+        border-radius: 8px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        color: #ffff00;
+        font-weight: bold;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: #888;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Signal Generation Engine Test</h1>
+
+    <div class="status">
+      <h2>Engine Status</h2>
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="signal-count">0</div>
+          <div class="stat-label">Total Signals</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="consensus-count">0</div>
+          <div class="stat-label">Consensus Signals</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="strategy-count">0</div>
+          <div class="stat-label">Active Strategies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="avg-confidence">0%</div>
+          <div class="stat-label">Avg Confidence</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <button onclick="refreshSignals()">Refresh Signals</button>
+      <button onclick="showConsensus()">Show Consensus Only</button>
+      <button onclick="showAll()">Show All</button>
+      <button onclick="clearSignals()">Clear All Signals</button>
+    </div>
+
+    <div class="status">
+      <h2>Live Signals</h2>
+      <div id="signal-list"></div>
+    </div>
+
+    <script type="module">
+      import { initMarketStream } from '/src/trading/data/market-stream.ts';
+      import { backfillSymbols } from '/src/trading/data/historical.ts';
+      import { getAllSymbols } from '/src/trading/data/universe.ts';
+      import { initAllStrategies, signalBus, getTopSignals, findConsensusSignals, getStrategyStats } from '/src/trading/signals/index.ts';
+
+      let showConsensusOnly = false;
+
+      async function init() {
+        console.log('[Test] Initializing signal generation test...');
+
+        // 1. Initialize market data stream
+        console.log('[Test] Starting market data stream...');
+        await initMarketStream();
+
+        // 2. Backfill historical data for indicators (first 10 symbols for speed)
+        console.log('[Test] Backfilling historical data...');
+        const symbols = getAllSymbols().slice(0, 10);
+        await backfillSymbols(symbols);
+
+        // 3. Initialize all trading strategies
+        console.log('[Test] Initializing strategies...');
+        await initAllStrategies();
+
+        // 4. Subscribe to signal bus
+        signalBus.subscribe(signal => {
+          console.log('[Test] New signal:', signal);
+          updateDisplay();
+        });
+
+        // 5. Start display update loop
+        setInterval(updateDisplay, 5000); // Update every 5 seconds
+
+        console.log('[Test] Initialization complete!');
+      }
+
+      function updateDisplay() {
+        const allSignals = signalBus.getHistory();
+        const consensus = findConsensusSignals();
+        const stats = getStrategyStats();
+
+        // Update stats
+        document.getElementById('signal-count').textContent = allSignals.length;
+        document.getElementById('consensus-count').textContent = consensus.length;
+        document.getElementById('strategy-count').textContent = stats.size;
+
+        if (allSignals.length > 0) {
+          const avgConf = allSignals.reduce((sum, s) => sum + s.confidence, 0) / allSignals.length;
+          document.getElementById('avg-confidence').textContent = (avgConf * 100).toFixed(0) + '%';
+        }
+
+        // Display signals
+        const signalList = document.getElementById('signal-list');
+        signalList.innerHTML = '';
+
+        const signalsToShow = showConsensusOnly ? consensus : getTopSignals(20);
+
+        if (signalsToShow.length === 0) {
+          signalList.innerHTML = '<p>No signals yet. Waiting for strategies to generate signals...</p>';
+          return;
+        }
+
+        signalsToShow.forEach(signal => {
+          const signalEl = document.createElement('div');
+          signalEl.className = signal.strategy === 'consensus' ? 'signal consensus' : 'signal';
+
+          const directionClass = signal.direction === 'LONG' ? 'direction-long' : 'direction-short';
+
+          signalEl.innerHTML = `
+            <div class="signal-header">
+              <span class="${directionClass}">${signal.symbol} ${signal.direction}</span>
+              <span class="confidence">${(signal.confidence * 100).toFixed(0)}% confidence</span>
+            </div>
+            <div>
+              <span class="strategy-tag">${signal.strategy}</span>
+              Target: ${(signal.targetReturn * 100).toFixed(1)}% | Stop: ${(signal.stopLoss * 100).toFixed(1)}%
+            </div>
+            <div style="margin-top: 8px; color: #ccc; font-size: 12px;">
+              ${signal.reasoning}
+            </div>
+            <div class="signal-meta">
+              ${new Date(signal.timestamp).toLocaleString()} | Expires: ${new Date(signal.expiresAt).toLocaleString()}
+            </div>
+          `;
+
+          signalList.appendChild(signalEl);
+        });
+      }
+
+      window.refreshSignals = () => {
+        updateDisplay();
+      };
+
+      window.showConsensus = () => {
+        showConsensusOnly = true;
+        updateDisplay();
+      };
+
+      window.showAll = () => {
+        showConsensusOnly = false;
+        updateDisplay();
+      };
+
+      window.clearSignals = () => {
+        if (confirm('Clear all signals?')) {
+          signalBus.clear();
+          updateDisplay();
+        }
+      };
+
+      // Initialize on load
+      init();
+    </script>
+  </body>
+</html>

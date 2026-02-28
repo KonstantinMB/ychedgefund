@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Risk Management Test Suite</title>
+    <style>
+      body {
+        font-family: 'Monaco', 'Courier New', monospace;
+        background: #0a0f0a;
+        color: #00ff00;
+        padding: 20px;
+        margin: 0;
+      }
+
+      h1 {
+        color: #00ff00;
+        border-bottom: 2px solid #00ff00;
+        padding-bottom: 10px;
+      }
+
+      h2 {
+        color: #ffff00;
+        margin-top: 30px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      .test-section {
+        background: #1a1f1a;
+        border: 1px solid #00ff00;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin: 20px 0;
+      }
+
+      .stat-card {
+        background: #0f140f;
+        border: 1px solid #00ff00;
+        padding: 15px;
+        border-radius: 8px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        color: #ffff00;
+        font-weight: bold;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: #888;
+        margin-top: 5px;
+      }
+
+      .decision {
+        background: #0f140f;
+        border-left: 3px solid #00ff00;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 4px;
+      }
+
+      .decision.approved {
+        border-left-color: #00ff00;
+      }
+
+      .decision.rejected {
+        border-left-color: #ff0000;
+      }
+
+      .decision-header {
+        display: flex;
+        justify-content: space-between;
+        font-weight: bold;
+        margin-bottom: 8px;
+      }
+
+      .approved {
+        color: #00ff00;
+      }
+
+      .rejected {
+        color: #ff0000;
+      }
+
+      .check {
+        font-size: 12px;
+        margin: 5px 0;
+        padding-left: 20px;
+      }
+
+      .check.passed {
+        color: #888;
+      }
+
+      .check.failed {
+        color: #ff6600;
+      }
+
+      button {
+        background: #00ff00;
+        color: #0a0f0a;
+        border: none;
+        padding: 10px 20px;
+        font-family: inherit;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 4px;
+        margin: 5px;
+      }
+
+      button:hover {
+        background: #ffff00;
+      }
+
+      .cb-state {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 12px;
+      }
+
+      .cb-GREEN {
+        background: #00ff00;
+        color: #000;
+      }
+
+      .cb-YELLOW {
+        background: #ffff00;
+        color: #000;
+      }
+
+      .cb-RED {
+        background: #ff0000;
+        color: #fff;
+      }
+
+      .cb-BLACK {
+        background: #000;
+        color: #fff;
+        border: 1px solid #fff;
+      }
+
+      pre {
+        background: #0f140f;
+        border: 1px solid #00ff00;
+        padding: 15px;
+        border-radius: 4px;
+        overflow-x: auto;
+        font-size: 11px;
+      }
+
+      .risk-metrics {
+        background: #0f140f;
+        border: 1px solid #00ff00;
+        padding: 15px;
+        border-radius: 4px;
+        font-family: 'Monaco', monospace;
+        font-size: 12px;
+        white-space: pre;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Risk Management System Test Suite</h1>
+
+      <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="runAllTests()">Run All Tests (20 Mock Signals)</button>
+        <button onclick="testCircuitBreaker()">Test Circuit Breaker States</button>
+        <button onclick="testRiskMetrics()">Calculate Portfolio Risk Metrics</button>
+        <button onclick="exportAuditLog()">Export Audit Log (CSV)</button>
+        <button onclick="clearAll()">Clear All Data</button>
+      </div>
+
+      <div class="test-section">
+        <h2>Circuit Breaker Status</h2>
+        <div id="circuit-breaker-status"></div>
+      </div>
+
+      <div class="test-section">
+        <h2>Test Results</h2>
+        <div class="stats-grid" id="test-stats"></div>
+      </div>
+
+      <div class="test-section">
+        <h2>Risk Decisions (Last 20)</h2>
+        <div id="decisions-list"></div>
+      </div>
+
+      <div class="test-section">
+        <h2>Portfolio Risk Metrics</h2>
+        <div class="risk-metrics" id="risk-metrics"></div>
+      </div>
+
+      <div class="test-section">
+        <h2>Audit Log Statistics</h2>
+        <pre id="audit-stats"></pre>
+      </div>
+    </div>
+
+    <script type="module">
+      import { riskManager } from '/src/trading/risk/risk-manager.ts';
+      import { auditLog } from '/src/trading/risk/audit-log.ts';
+      import {
+        calculatePortfolioRisk,
+        generateMockHistoricalReturns,
+        formatRiskMetrics,
+      } from '/src/trading/risk/portfolio-risk.ts';
+      import { PAPER_CONFIG } from '/src/trading/engine.ts';
+      import { getAllSymbols } from '/src/trading/data/universe.ts';
+
+      // Generate 20 mock signals for testing
+      function generateMockSignals() {
+        const symbols = getAllSymbols();
+        const strategies = ['momentum', 'sentiment', 'geopolitical', 'macro', 'cross-asset'];
+        const signals = [];
+
+        for (let i = 0; i < 20; i++) {
+          const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+          const strategy = strategies[Math.floor(Math.random() * strategies.length)];
+          const direction = Math.random() > 0.5 ? 'LONG' : 'SHORT';
+          const confidence = 0.5 + Math.random() * 0.4; // 0.5-0.9
+
+          signals.push({
+            id: `test-signal-${i + 1}`,
+            timestamp: Date.now() + i * 1000,
+            strategy,
+            symbol,
+            direction,
+            confidence,
+            reasoning: `Test signal ${i + 1}: ${strategy} strategy detected ${direction} opportunity in ${symbol}`,
+            targetReturn: 0.03 + Math.random() * 0.05, // 3-8%
+            stopLoss: 0.015 + Math.random() * 0.015, // 1.5-3%
+            takeProfit: 0.05 + Math.random() * 0.05, // 5-10%
+            expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+          });
+        }
+
+        return signals;
+      }
+
+      // Generate mock portfolio state
+      function generateMockPortfolio(numPositions = 3) {
+        const symbols = getAllSymbols();
+        const positions = new Map();
+        const openTrades = [];
+
+        let totalValue = 1_000_000;
+        let cash = 800_000;
+
+        for (let i = 0; i < numPositions; i++) {
+          const symbol = symbols[i];
+          const shares = 100 + Math.floor(Math.random() * 400);
+          const avgPrice = 100 + Math.random() * 50;
+          const currentPrice = avgPrice * (0.95 + Math.random() * 0.1);
+          const marketValue = shares * currentPrice;
+
+          cash -= shares * avgPrice;
+
+          positions.set(symbol, {
+            symbol,
+            shares,
+            avgPrice,
+            currentPrice,
+            marketValue,
+            unrealizedPnL: (currentPrice - avgPrice) * shares,
+            unrealizedPnLPct: (currentPrice - avgPrice) / avgPrice,
+          });
+
+          openTrades.push({
+            id: `trade-${i + 1}`,
+            symbol,
+            strategy: ['momentum', 'sentiment', 'macro'][i % 3],
+            direction: 'LONG',
+            entryTime: Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000,
+            shares,
+            entryPrice: avgPrice,
+          });
+        }
+
+        totalValue = cash + Array.from(positions.values()).reduce((sum, p) => sum + p.marketValue, 0);
+
+        return {
+          cash,
+          positions,
+          totalValue,
+          openTrades,
+          realizedPnL: 0,
+        };
+      }
+
+      // Run all tests
+      window.runAllTests = async function () {
+        console.log('[Test] Starting risk management test suite...');
+
+        const signals = generateMockSignals();
+        const portfolio = generateMockPortfolio(3);
+        const highWaterMark = 1_050_000;
+        const dailyStartValue = 1_000_000;
+
+        let approved = 0;
+        let rejected = 0;
+        const decisions = [];
+
+        for (const signal of signals) {
+          const requestedSize = portfolio.totalValue * 0.08; // 8% position size
+          const currentPrice = 100 + Math.random() * 50;
+
+          const decision = await riskManager.evaluateOrder(
+            signal,
+            portfolio,
+            requestedSize,
+            currentPrice,
+            highWaterMark,
+            dailyStartValue
+          );
+
+          decisions.push({ signal, decision });
+
+          if (decision.approved) {
+            approved++;
+          } else {
+            rejected++;
+          }
+
+          // Log to audit
+          auditLog.logDecision(signal.id, decision, signal);
+        }
+
+        // Update stats display
+        updateStatsDisplay(approved, rejected, signals.length);
+        updateDecisionsList(decisions);
+        updateCircuitBreakerStatus();
+        updateAuditStats();
+
+        console.log('[Test] Test suite complete');
+        console.log(`  Approved: ${approved}`);
+        console.log(`  Rejected: ${rejected}`);
+        console.log(`  Approval rate: ${((approved / signals.length) * 100).toFixed(1)}%`);
+      };
+
+      // Test circuit breaker states
+      window.testCircuitBreaker = async function () {
+        console.log('[Test] Testing circuit breaker state transitions...');
+
+        const portfolio = generateMockPortfolio(3);
+        const signal = generateMockSignals()[0];
+        const requestedSize = portfolio.totalValue * 0.08;
+        const currentPrice = 100;
+        const highWaterMark = 1_050_000;
+
+        // Test GREEN state (normal)
+        let dailyStartValue = 1_000_000;
+        let decision = await riskManager.evaluateOrder(
+          signal,
+          portfolio,
+          requestedSize,
+          currentPrice,
+          highWaterMark,
+          dailyStartValue
+        );
+        console.log(`  GREEN state: ${decision.circuitBreakerState}`);
+
+        // Test YELLOW state (3-5% loss)
+        dailyStartValue = 1_040_000; // 4% loss
+        portfolio.totalValue = 1_000_000;
+        decision = await riskManager.evaluateOrder(
+          signal,
+          portfolio,
+          requestedSize,
+          currentPrice,
+          highWaterMark,
+          dailyStartValue
+        );
+        console.log(`  YELLOW state: ${decision.circuitBreakerState}, adjusted size: ${decision.adjustedSize}`);
+
+        // Test RED state (>5% loss)
+        dailyStartValue = 1_060_000; // 6% loss
+        portfolio.totalValue = 1_000_000;
+        decision = await riskManager.evaluateOrder(
+          signal,
+          portfolio,
+          requestedSize,
+          currentPrice,
+          highWaterMark,
+          dailyStartValue
+        );
+        console.log(`  RED state: ${decision.circuitBreakerState}, approved: ${decision.approved}`);
+
+        // Test BLACK state (>15% drawdown)
+        dailyStartValue = 1_000_000;
+        portfolio.totalValue = 850_000; // 19% drawdown
+        decision = await riskManager.evaluateOrder(
+          signal,
+          portfolio,
+          requestedSize,
+          currentPrice,
+          highWaterMark,
+          dailyStartValue
+        );
+        console.log(`  BLACK state: ${decision.circuitBreakerState}, approved: ${decision.approved}`);
+
+        updateCircuitBreakerStatus();
+      };
+
+      // Test risk metrics
+      window.testRiskMetrics = async function () {
+        console.log('[Test] Calculating portfolio risk metrics...');
+
+        const portfolio = generateMockPortfolio(5);
+        const historicalReturns = generateMockHistoricalReturns(60, 1_000_000);
+
+        const metrics = await calculatePortfolioRisk(portfolio, historicalReturns);
+
+        const formatted = formatRiskMetrics(metrics);
+        document.getElementById('risk-metrics').textContent = formatted;
+
+        console.log('[Test] Risk metrics calculated');
+      };
+
+      // Export audit log
+      window.exportAuditLog = function () {
+        const csv = auditLog.exportCSV();
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `risk-audit-log-${Date.now()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        console.log('[Test] Audit log exported');
+      };
+
+      // Clear all data
+      window.clearAll = function () {
+        if (confirm('Clear all risk data and audit logs?')) {
+          auditLog.clear();
+          riskManager.getCircuitBreaker().forceReset();
+
+          updateStatsDisplay(0, 0, 0);
+          updateDecisionsList([]);
+          updateCircuitBreakerStatus();
+          updateAuditStats();
+
+          console.log('[Test] All data cleared');
+        }
+      };
+
+      // Update stats display
+      function updateStatsDisplay(approved, rejected, total) {
+        const statsEl = document.getElementById('test-stats');
+        statsEl.innerHTML = `
+          <div class="stat-card">
+            <div class="stat-value">${total}</div>
+            <div class="stat-label">Total Signals Tested</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="color: #00ff00">${approved}</div>
+            <div class="stat-label">Approved</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="color: #ff0000">${rejected}</div>
+            <div class="stat-label">Rejected</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${total > 0 ? ((approved / total) * 100).toFixed(1) : 0}%</div>
+            <div class="stat-label">Approval Rate</div>
+          </div>
+        `;
+      }
+
+      // Update decisions list
+      function updateDecisionsList(decisions) {
+        const listEl = document.getElementById('decisions-list');
+        listEl.innerHTML = '';
+
+        if (decisions.length === 0) {
+          listEl.innerHTML = '<p>No decisions yet. Run tests to see results.</p>';
+          return;
+        }
+
+        // Show last 20
+        const recentDecisions = decisions.slice(-20).reverse();
+
+        for (const { signal, decision } of recentDecisions) {
+          const decisionEl = document.createElement('div');
+          decisionEl.className = decision.approved ? 'decision approved' : 'decision rejected';
+
+          const checksHTML = decision.checks
+            .map(
+              check => `
+            <div class="check ${check.passed ? 'passed' : 'failed'}">
+              ${check.passed ? '✓' : '✗'} ${check.name}: ${check.message}
+            </div>
+          `
+            )
+            .join('');
+
+          decisionEl.innerHTML = `
+            <div class="decision-header">
+              <span>${signal.symbol} ${signal.direction} (${signal.strategy})</span>
+              <span class="${decision.approved ? 'approved' : 'rejected'}">
+                ${decision.approved ? '✅ APPROVED' : '❌ REJECTED'}
+              </span>
+            </div>
+            <div style="font-size: 12px; color: #888; margin-bottom: 10px;">
+              Confidence: ${(signal.confidence * 100).toFixed(0)}% |
+              Circuit Breaker: <span class="cb-state cb-${decision.circuitBreakerState}">${decision.circuitBreakerState}</span>
+              ${decision.adjustedSize ? ` | Size adjusted to 50%` : ''}
+            </div>
+            ${checksHTML}
+            ${decision.reason && !decision.approved ? `<div style="color: #ff6600; margin-top: 10px;">Rejection: ${decision.reason}</div>` : ''}
+          `;
+
+          listEl.appendChild(decisionEl);
+        }
+      }
+
+      // Update circuit breaker status
+      function updateCircuitBreakerStatus() {
+        const cb = riskManager.getCircuitBreaker();
+        const metrics = cb.getMetrics();
+        const history = cb.getTodayEvents();
+
+        const statusEl = document.getElementById('circuit-breaker-status');
+        statusEl.innerHTML = `
+          <div style="font-size: 24px; margin-bottom: 15px;">
+            Current State: <span class="cb-state cb-${metrics.state}">${metrics.state}</span>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <strong>Daily P&L:</strong> ${(metrics.dailyPnLPct * 100).toFixed(2)}%<br>
+            <strong>Drawdown:</strong> ${(metrics.drawdownPct * 100).toFixed(2)}%<br>
+            <strong>Can Trade:</strong> ${metrics.canTrade ? 'YES' : 'NO'}<br>
+            <strong>Position Size Multiplier:</strong> ${metrics.positionSizeMultiplier}x
+          </div>
+          <div>
+            <strong>Today's Events:</strong> ${history.length === 0 ? 'None' : ''}
+            ${history
+              .map(
+                e =>
+                  `<div style="margin: 5px 0; padding: 5px; background: #0f140f; border-left: 3px solid #ffff00;">
+                ${new Date(e.timestamp).toLocaleTimeString()}: ${e.fromState} → ${e.toState}<br>
+                <span style="font-size: 11px; color: #888;">${e.reason}</span>
+              </div>`
+              )
+              .join('')}
+          </div>
+        `;
+      }
+
+      // Update audit stats
+      function updateAuditStats() {
+        const stats = auditLog.getStats();
+
+        const rejectionsList = Object.entries(stats.rejectionsByCheck)
+          .map(([check, count]) => `  ${check}: ${count}`)
+          .join('\n');
+
+        const cbTripsList = Object.entries(stats.circuitBreakerTrips)
+          .map(([state, count]) => `  ${state}: ${count}`)
+          .join('\n');
+
+        document.getElementById('audit-stats').textContent = `
+Total Decisions: ${stats.totalDecisions}
+Approval Rate: ${(stats.approvalRate * 100).toFixed(1)}%
+Avg Checks per Decision: ${stats.avgChecksPerDecision.toFixed(1)}
+
+Rejections by Check:
+${rejectionsList || '  None'}
+
+Circuit Breaker Trips:
+${cbTripsList || '  None'}
+
+Recent Rejections: ${stats.recentRejections.length}
+        `.trim();
+      }
+
+      // Initialize
+      updateStatsDisplay(0, 0, 0);
+      updateDecisionsList([]);
+      updateCircuitBreakerStatus();
+      updateAuditStats();
+      document.getElementById('risk-metrics').textContent = 'Click "Calculate Portfolio Risk Metrics" to generate report';
+
+      console.log('[Test] Risk management test suite loaded');
+    </script>
+  </body>
+</html>
