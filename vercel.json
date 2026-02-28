@@ -1,4 +1,7 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": null,
   "routes": [
     { "src": "/api/data/gdelt", "dest": "/api/data/gdelt.ts" },
     { "src": "/api/data/usgs", "dest": "/api/data/usgs.ts" },
@@ -17,7 +20,9 @@
     { "src": "/api/ai/sentiment", "dest": "/api/ai/sentiment.ts" },
     { "src": "/api/osint/opensky", "dest": "/api/osint/opensky.ts" },
     { "src": "/api/osint/sanctions", "dest": "/api/osint/sanctions.ts" },
-    { "src": "/api/health", "dest": "/api/health.ts" }
+    { "src": "/api/health", "dest": "/api/health.ts" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ],
   "headers": [
     {
