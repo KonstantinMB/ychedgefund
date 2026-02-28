@@ -1,6 +1,7 @@
 /**
- * Entity popup panel — shows when user clicks a globe marker
- * Anchored center-right, not mouse-following
+ * Entity popup panel — shows next to the clicked globe marker.
+ * Positioned at the click screen coordinates with smart edge-flip so it
+ * never overflows the viewport.
  */
 
 export interface EntityInfo {
@@ -43,10 +44,16 @@ export function initEntityPopup(): void {
   document.getElementById('ep-close')?.addEventListener('click', hideEntityPopup);
 }
 
+const POPUP_WIDTH  = 280;
+const POPUP_OFFSET = 14; // px gap from the dot
+
 /**
- * Show the popup with the given entity info
+ * Show the popup next to the clicked dot.
+ * @param info    Entity data to display
+ * @param screenX Click X in viewport pixels (from deck.gl PickingInfo.x)
+ * @param screenY Click Y in viewport pixels (from deck.gl PickingInfo.y)
  */
-export function showEntityPopup(info: EntityInfo): void {
+export function showEntityPopup(info: EntityInfo, screenX?: number, screenY?: number): void {
   if (!popupEl) initEntityPopup();
   const el = popupEl!;
 
@@ -106,6 +113,30 @@ export function showEntityPopup(info: EntityInfo): void {
   } else {
     el.style.borderLeftColor = '';
     el.style.borderLeftWidth = '';
+  }
+
+  // ── Position near the clicked dot ────────────────────────────────────────
+  if (screenX !== undefined && screenY !== undefined) {
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    // Measure actual rendered height (or estimate before first render)
+    const popupH = el.offsetHeight || 220;
+
+    // Horizontal: prefer right of dot; flip left if it would overflow
+    const fitsRight = screenX + POPUP_OFFSET + POPUP_WIDTH <= vw - 8;
+    const left = fitsRight
+      ? screenX + POPUP_OFFSET
+      : screenX - POPUP_OFFSET - POPUP_WIDTH;
+
+    // Vertical: centre on the dot; clamp to viewport
+    let top = screenY - popupH / 2;
+    top = Math.max(8, Math.min(top, vh - popupH - 8));
+
+    el.style.left   = `${left}px`;
+    el.style.top    = `${top}px`;
+    el.style.right  = '';
+    el.style.transform = '';
   }
 
   el.classList.add('visible');

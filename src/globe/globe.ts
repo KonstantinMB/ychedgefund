@@ -264,9 +264,9 @@ class GlobeManager {
     const layerId = info.layer?.id ?? '';
     const obj = info.object as Record<string, unknown>;
 
-    // Show entity popup
+    // Show entity popup next to the clicked dot
     const entity = buildEntityInfo(layerId, obj);
-    if (entity) showEntityPopup(entity);
+    if (entity) showEntityPopup(entity, info.x, info.y);
 
     // Update selected state
     const store = getStore();
