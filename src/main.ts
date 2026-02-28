@@ -234,9 +234,22 @@ async function init(): Promise<void> {
   const { initIntelligenceEngine } = await import('./intelligence/index');
   initIntelligenceEngine();
 
-  // Initialize paper trading engine (strategies, signals, portfolio)
+  // Initialize paper trading engine (strategies, signals, portfolio, execution loop)
   const { initTradingEngine } = await import('./trading/index');
   initTradingEngine();
+
+  // Sync trading engine NAV → AppState for header bar indicators
+  window.addEventListener('trading:legacy-sync', (e: Event) => {
+    const detail = (e as CustomEvent<{
+      enabled: boolean; balance: number; dailyPnL: number; positions: number;
+    }>).detail;
+    state.set('trading', {
+      enabled: detail.enabled,
+      balance: detail.balance,
+      dailyPnL: detail.dailyPnL,
+      positions: detail.positions,
+    });
+  });
 
   // Initialize command palette (after globe and panels are ready)
   const { commandPalette } = await import('./lib/command-palette');
