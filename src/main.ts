@@ -113,13 +113,13 @@ async function initPanels(): Promise<void> {
     const { initPortfolioPanel } = await import('./panels/portfolio');
 
     initPanelManager();
+    initPortfolioPanel();       // Top — always visible first
     initStrategicRiskPanel();
+    initSignalsPanel();
     initNewsFeedPanel();
     initAIInsightsPanel();
     initMarketsPanel();
     initInstabilityPanel();
-    initSignalsPanel();
-    initPortfolioPanel();
 
     console.log('[Atlas] Panels initialized');
 

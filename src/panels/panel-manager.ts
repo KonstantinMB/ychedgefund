@@ -38,8 +38,17 @@ const collapsedState: Record<string, boolean> = loadCollapsedState();
  * Create and register a collapsible panel in the right sidebar.
  * The panel body is populated by calling config.init(bodyEl).
  */
+export function forceExpand(panelId: string): void {
+  collapsedState[panelId] = false;
+  saveCollapsedState(collapsedState);
+}
+
 export function createPanel(config: PanelConfig): HTMLElement {
-  const isCollapsed = collapsedState[config.id] ?? config.defaultCollapsed ?? false;
+  // If defaultCollapsed is explicitly false, never let stored state keep it collapsed
+  const storedValue = collapsedState[config.id];
+  const isCollapsed = config.defaultCollapsed === false
+    ? false
+    : (storedValue ?? config.defaultCollapsed ?? false);
 
   // Outer panel wrapper
   const panel = document.createElement('div');
