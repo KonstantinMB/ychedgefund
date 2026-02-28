@@ -1,0 +1,1595 @@
+[
+  {
+    "id": "fukushima-daiichi",
+    "name": "Fukushima Daiichi Nuclear Power Plant",
+    "country": "Japan",
+    "lat": 37.4211,
+    "lon": 141.0325,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "chernobyl",
+    "name": "Chernobyl Nuclear Power Plant",
+    "country": "Ukraine",
+    "lat": 51.3886,
+    "lon": 30.0986,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "zaporizhzhia",
+    "name": "Zaporizhzhia Nuclear Power Plant",
+    "country": "Ukraine",
+    "lat": 47.5081,
+    "lon": 34.5858,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "south-ukraine",
+    "name": "South Ukraine Nuclear Power Plant",
+    "country": "Ukraine",
+    "lat": 47.8156,
+    "lon": 31.2189,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "rivne",
+    "name": "Rivne Nuclear Power Plant",
+    "country": "Ukraine",
+    "lat": 51.3214,
+    "lon": 25.8931,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "khmelnytskyi",
+    "name": "Khmelnytskyi Nuclear Power Plant",
+    "country": "Ukraine",
+    "lat": 50.3000,
+    "lon": 26.6500,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "paks",
+    "name": "Paks Nuclear Power Plant",
+    "country": "Hungary",
+    "lat": 46.5772,
+    "lon": 18.8553,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "dukovany",
+    "name": "Dukovany Nuclear Power Station",
+    "country": "Czech Republic",
+    "lat": 49.0819,
+    "lon": 16.2236,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "temelin",
+    "name": "Temelín Nuclear Power Station",
+    "country": "Czech Republic",
+    "lat": 49.1811,
+    "lon": 14.3761,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "bohunice",
+    "name": "Bohunice Nuclear Power Plant",
+    "country": "Slovakia",
+    "lat": 48.5186,
+    "lon": 17.6644,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "mochovce",
+    "name": "Mochovce Nuclear Power Plant",
+    "country": "Slovakia",
+    "lat": 48.2864,
+    "lon": 18.4581,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "kozloduy",
+    "name": "Kozloduy Nuclear Power Plant",
+    "country": "Bulgaria",
+    "lat": 43.7761,
+    "lon": 23.6028,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "cernavoda",
+    "name": "Cernavodă Nuclear Power Plant",
+    "country": "Romania",
+    "lat": 44.3397,
+    "lon": 28.0264,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "krsko",
+    "name": "Krško Nuclear Power Plant",
+    "country": "Slovenia",
+    "lat": 45.9317,
+    "lon": 15.5089,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "kalinin",
+    "name": "Kalinin Nuclear Power Plant",
+    "country": "Russia",
+    "lat": 56.8261,
+    "lon": 32.4661,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "kola",
+    "name": "Kola Nuclear Power Plant",
+    "country": "Russia",
+    "lat": 67.4667,
+    "lon": 32.4833,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "kursk",
+    "name": "Kursk Nuclear Power Plant",
+    "country": "Russia",
+    "lat": 51.6775,
+    "lon": 35.6247,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "leningrad",
+    "name": "Leningrad Nuclear Power Plant",
+    "country": "Russia",
+    "lat": 59.8867,
+    "lon": 29.0547,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "novovoronezh",
+    "name": "Novovoronezh Nuclear Power Plant",
+    "country": "Russia",
+    "lat": 51.3094,
+    "lon": 39.2203,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "rostov",
+    "name": "Rostov Nuclear Power Plant",
+    "country": "Russia",
+    "lat": 47.1500,
+    "lon": 42.1167,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "smolensk",
+    "name": "Smolensk Nuclear Power Plant",
+    "country": "Russia",
+    "lat": 54.1642,
+    "lon": 33.2311,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "balakovo",
+    "name": "Balakovo Nuclear Power Plant",
+    "country": "Russia",
+    "lat": 51.7169,
+    "lon": 47.9644,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "beloyarsk",
+    "name": "Beloyarsk Nuclear Power Station",
+    "country": "Russia",
+    "lat": 56.8433,
+    "lon": 61.3189,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "bilibino",
+    "name": "Bilibino Nuclear Power Plant",
+    "country": "Russia",
+    "lat": 68.0500,
+    "lon": 166.5333,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "bushehr",
+    "name": "Bushehr Nuclear Power Plant",
+    "country": "Iran",
+    "lat": 28.8417,
+    "lon": 50.8817,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "natanz",
+    "name": "Natanz Enrichment Facility",
+    "country": "Iran",
+    "lat": 33.7317,
+    "lon": 51.7292,
+    "type": "enrichment",
+    "status": "active"
+  },
+  {
+    "id": "fordow",
+    "name": "Fordow Fuel Enrichment Plant",
+    "country": "Iran",
+    "lat": 34.9558,
+    "lon": 50.9878,
+    "type": "enrichment",
+    "status": "active"
+  },
+  {
+    "id": "arak",
+    "name": "Arak Heavy Water Reactor",
+    "country": "Iran",
+    "lat": 34.0739,
+    "lon": 49.6619,
+    "type": "research",
+    "status": "active"
+  },
+  {
+    "id": "yongbyon",
+    "name": "Yongbyon Nuclear Scientific Research Center",
+    "country": "North Korea",
+    "lat": 39.7919,
+    "lon": 125.7547,
+    "type": "enrichment",
+    "status": "active"
+  },
+  {
+    "id": "punggye-ri",
+    "name": "Punggye-ri Nuclear Test Site",
+    "country": "North Korea",
+    "lat": 41.2792,
+    "lon": 129.0889,
+    "type": "research",
+    "status": "inactive"
+  },
+  {
+    "id": "qinshan",
+    "name": "Qinshan Nuclear Power Plant",
+    "country": "China",
+    "lat": 30.4358,
+    "lon": 120.9550,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "tianwan",
+    "name": "Tianwan Nuclear Power Station",
+    "country": "China",
+    "lat": 34.6889,
+    "lon": 119.4583,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "yangjiang",
+    "name": "Yangjiang Nuclear Power Station",
+    "country": "China",
+    "lat": 21.8167,
+    "lon": 111.9333,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "taishan",
+    "name": "Taishan Nuclear Power Plant",
+    "country": "China",
+    "lat": 21.9167,
+    "lon": 112.9833,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "hongyanhe",
+    "name": "Hongyanhe Nuclear Power Plant",
+    "country": "China",
+    "lat": 39.7500,
+    "lon": 121.6667,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "ningde",
+    "name": "Ningde Nuclear Power Plant",
+    "country": "China",
+    "lat": 27.0833,
+    "lon": 120.0167,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "fuqing",
+    "name": "Fuqing Nuclear Power Plant",
+    "country": "China",
+    "lat": 25.4833,
+    "lon": 119.4333,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "fangjiashan",
+    "name": "Fangjiashan Nuclear Power Plant",
+    "country": "China",
+    "lat": 30.4333,
+    "lon": 121.0167,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "haiyang",
+    "name": "Haiyang Nuclear Power Plant",
+    "country": "China",
+    "lat": 36.7500,
+    "lon": 121.1833,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "sanmen",
+    "name": "Sanmen Nuclear Power Station",
+    "country": "China",
+    "lat": 29.2167,
+    "lon": 121.5833,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "changjiang",
+    "name": "Changjiang Nuclear Power Plant",
+    "country": "China",
+    "lat": 19.6167,
+    "lon": 108.7833,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "fangchenggang",
+    "name": "Fangchenggang Nuclear Power Plant",
+    "country": "China",
+    "lat": 21.6167,
+    "lon": 108.4833,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "lop-nur",
+    "name": "Lop Nur Nuclear Test Site",
+    "country": "China",
+    "lat": 41.6500,
+    "lon": 88.7000,
+    "type": "research",
+    "status": "inactive"
+  },
+  {
+    "id": "takasago",
+    "name": "Takahama Nuclear Power Plant",
+    "country": "Japan",
+    "lat": 35.5236,
+    "lon": 135.5081,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "ohi",
+    "name": "Ōi Nuclear Power Plant",
+    "country": "Japan",
+    "lat": 35.5419,
+    "lon": 135.6522,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "genkai",
+    "name": "Genkai Nuclear Power Plant",
+    "country": "Japan",
+    "lat": 33.5156,
+    "lon": 129.8381,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "sendai",
+    "name": "Sendai Nuclear Power Plant",
+    "country": "Japan",
+    "lat": 31.8353,
+    "lon": 130.1903,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "ikata",
+    "name": "Ikata Nuclear Power Plant",
+    "country": "Japan",
+    "lat": 33.4900,
+    "lon": 132.3089,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "tokai",
+    "name": "Tōkai Nuclear Power Plant",
+    "country": "Japan",
+    "lat": 36.4667,
+    "lon": 140.6000,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "kashiwazaki",
+    "name": "Kashiwazaki-Kariwa Nuclear Power Plant",
+    "country": "Japan",
+    "lat": 37.4258,
+    "lon": 138.5958,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "hamaoka",
+    "name": "Hamaoka Nuclear Power Plant",
+    "country": "Japan",
+    "lat": 34.6228,
+    "lon": 138.1433,
+    "type": "reactor",
+    "status": "inactive"
+  },
+  {
+    "id": "kori",
+    "name": "Kori Nuclear Power Plant",
+    "country": "South Korea",
+    "lat": 35.3181,
+    "lon": 129.2956,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "hanbit",
+    "name": "Hanbit Nuclear Power Plant",
+    "country": "South Korea",
+    "lat": 35.4083,
+    "lon": 126.4225,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "hanul",
+    "name": "Hanul Nuclear Power Plant",
+    "country": "South Korea",
+    "lat": 37.0958,
+    "lon": 129.3903,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "shin-kori",
+    "name": "Shin Kori Nuclear Power Plant",
+    "country": "South Korea",
+    "lat": 35.3189,
+    "lon": 129.2919,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "shin-wolsong",
+    "name": "Shin Wolsong Nuclear Power Plant",
+    "country": "South Korea",
+    "lat": 35.7164,
+    "lon": 129.4661,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "wolsong",
+    "name": "Wolsong Nuclear Power Plant",
+    "country": "South Korea",
+    "lat": 35.7167,
+    "lon": 129.4500,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "chinshan",
+    "name": "Chinshan Nuclear Power Plant",
+    "country": "Taiwan",
+    "lat": 25.3000,
+    "lon": 121.6167,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "kuosheng",
+    "name": "Kuosheng Nuclear Power Plant",
+    "country": "Taiwan",
+    "lat": 25.3000,
+    "lon": 121.6500,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "maanshan",
+    "name": "Maanshan Nuclear Power Plant",
+    "country": "Taiwan",
+    "lat": 21.9500,
+    "lon": 120.7500,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "barakah",
+    "name": "Barakah Nuclear Power Plant",
+    "country": "United Arab Emirates",
+    "lat": 24.5333,
+    "lon": 52.2000,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "dimona",
+    "name": "Negev Nuclear Research Center",
+    "country": "Israel",
+    "lat": 31.0000,
+    "lon": 35.1458,
+    "type": "research",
+    "status": "active"
+  },
+  {
+    "id": "tarapur",
+    "name": "Tarapur Atomic Power Station",
+    "country": "India",
+    "lat": 19.8342,
+    "lon": 72.6681,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "kudankulam",
+    "name": "Kudankulam Nuclear Power Plant",
+    "country": "India",
+    "lat": 8.1881,
+    "lon": 77.7056,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "kakrapar",
+    "name": "Kakrapar Atomic Power Station",
+    "country": "India",
+    "lat": 21.2417,
+    "lon": 73.3500,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "rajasthan",
+    "name": "Rajasthan Atomic Power Station",
+    "country": "India",
+    "lat": 24.8878,
+    "lon": 75.6028,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "narora",
+    "name": "Narora Atomic Power Station",
+    "country": "India",
+    "lat": 28.2014,
+    "lon": 78.3847,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "kaiga",
+    "name": "Kaiga Generating Station",
+    "country": "India",
+    "lat": 14.8475,
+    "lon": 74.4378,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "madras",
+    "name": "Madras Atomic Power Station",
+    "country": "India",
+    "lat": 12.5522,
+    "lon": 80.2244,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "pokhran",
+    "name": "Pokhran Test Range",
+    "country": "India",
+    "lat": 27.0950,
+    "lon": 71.7517,
+    "type": "research",
+    "status": "inactive"
+  },
+  {
+    "id": "chashma",
+    "name": "Chashma Nuclear Power Plant",
+    "country": "Pakistan",
+    "lat": 32.4500,
+    "lon": 71.4667,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "karachi",
+    "name": "Karachi Nuclear Power Plant",
+    "country": "Pakistan",
+    "lat": 24.8667,
+    "lon": 66.7667,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "khushab",
+    "name": "Khushab Nuclear Complex",
+    "country": "Pakistan",
+    "lat": 32.0500,
+    "lon": 72.3333,
+    "type": "research",
+    "status": "active"
+  },
+  {
+    "id": "ras-laffan",
+    "name": "Chagai Nuclear Test Site",
+    "country": "Pakistan",
+    "lat": 29.0767,
+    "lon": 64.4000,
+    "type": "research",
+    "status": "inactive"
+  },
+  {
+    "id": "bruce",
+    "name": "Bruce Nuclear Generating Station",
+    "country": "Canada",
+    "lat": 44.3333,
+    "lon": -81.6000,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "darlington",
+    "name": "Darlington Nuclear Generating Station",
+    "country": "Canada",
+    "lat": 43.8722,
+    "lon": -78.7167,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "pickering",
+    "name": "Pickering Nuclear Generating Station",
+    "country": "Canada",
+    "lat": 43.8106,
+    "lon": -79.0692,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "point-lepreau",
+    "name": "Point Lepreau Nuclear Generating Station",
+    "country": "Canada",
+    "lat": 45.0667,
+    "lon": -66.0500,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "gentilly",
+    "name": "Gentilly Nuclear Generating Station",
+    "country": "Canada",
+    "lat": 46.2667,
+    "lon": -72.5167,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "chalk-river",
+    "name": "Chalk River Laboratories",
+    "country": "Canada",
+    "lat": 46.0500,
+    "lon": -77.3833,
+    "type": "research",
+    "status": "active"
+  },
+  {
+    "id": "palo-verde",
+    "name": "Palo Verde Nuclear Generating Station",
+    "country": "United States",
+    "lat": 33.3878,
+    "lon": -112.8622,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "browns-ferry",
+    "name": "Browns Ferry Nuclear Plant",
+    "country": "United States",
+    "lat": 34.7042,
+    "lon": -87.1186,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "vogtle",
+    "name": "Vogtle Electric Generating Plant",
+    "country": "United States",
+    "lat": 33.1419,
+    "lon": -81.7611,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "mcguire",
+    "name": "McGuire Nuclear Station",
+    "country": "United States",
+    "lat": 35.4328,
+    "lon": -80.9486,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "catawba",
+    "name": "Catawba Nuclear Station",
+    "country": "United States",
+    "lat": 35.0522,
+    "lon": -81.0742,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "south-texas",
+    "name": "South Texas Project",
+    "country": "United States",
+    "lat": 28.7953,
+    "lon": -96.0486,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "peach-bottom",
+    "name": "Peach Bottom Nuclear Generating Station",
+    "country": "United States",
+    "lat": 39.7594,
+    "lon": -76.2689,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "susquehanna",
+    "name": "Susquehanna Steam Electric Station",
+    "country": "United States",
+    "lat": 41.0931,
+    "lon": -76.1506,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "limerick",
+    "name": "Limerick Generating Station",
+    "country": "United States",
+    "lat": 40.2242,
+    "lon": -75.5869,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "byron",
+    "name": "Byron Nuclear Generating Station",
+    "country": "United States",
+    "lat": 42.0761,
+    "lon": -89.2867,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "braidwood",
+    "name": "Braidwood Generating Station",
+    "country": "United States",
+    "lat": 41.2644,
+    "lon": -88.2264,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "lasalle",
+    "name": "LaSalle Nuclear Generating Station",
+    "country": "United States",
+    "lat": 41.2433,
+    "lon": -88.6708,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "dresden",
+    "name": "Dresden Generating Station",
+    "country": "United States",
+    "lat": 41.3894,
+    "lon": -88.2717,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "quad-cities",
+    "name": "Quad Cities Generating Station",
+    "country": "United States",
+    "lat": 41.7267,
+    "lon": -90.3103,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "grand-gulf",
+    "name": "Grand Gulf Nuclear Station",
+    "country": "United States",
+    "lat": 32.0289,
+    "lon": -91.0494,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "river-bend",
+    "name": "River Bend Nuclear Generating Station",
+    "country": "United States",
+    "lat": 30.7572,
+    "lon": -91.3328,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "waterford",
+    "name": "Waterford Steam Electric Station",
+    "country": "United States",
+    "lat": 29.9936,
+    "lon": -90.4711,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "comanche-peak",
+    "name": "Comanche Peak Nuclear Power Plant",
+    "country": "United States",
+    "lat": 32.2928,
+    "lon": -97.7850,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "wolf-creek",
+    "name": "Wolf Creek Generating Station",
+    "country": "United States",
+    "lat": 38.2406,
+    "lon": -95.6858,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "callaway",
+    "name": "Callaway Energy Center",
+    "country": "United States",
+    "lat": 38.7619,
+    "lon": -91.7831,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "seabrook",
+    "name": "Seabrook Station",
+    "country": "United States",
+    "lat": 42.8942,
+    "lon": -70.8503,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "millstone",
+    "name": "Millstone Nuclear Power Station",
+    "country": "United States",
+    "lat": 41.3089,
+    "lon": -72.1683,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "nine-mile-point",
+    "name": "Nine Mile Point Nuclear Station",
+    "country": "United States",
+    "lat": 43.5222,
+    "lon": -76.4100,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "fitzpatrick",
+    "name": "James A. FitzPatrick Nuclear Power Plant",
+    "country": "United States",
+    "lat": 43.5239,
+    "lon": -76.3983,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "ginna",
+    "name": "R.E. Ginna Nuclear Power Plant",
+    "country": "United States",
+    "lat": 43.2778,
+    "lon": -77.3089,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "calvert-cliffs",
+    "name": "Calvert Cliffs Nuclear Power Plant",
+    "country": "United States",
+    "lat": 38.4347,
+    "lon": -76.4419,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "north-anna",
+    "name": "North Anna Nuclear Generating Station",
+    "country": "United States",
+    "lat": 38.0606,
+    "lon": -77.7883,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "surry",
+    "name": "Surry Nuclear Power Plant",
+    "country": "United States",
+    "lat": 37.1656,
+    "lon": -76.6986,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "brunswick",
+    "name": "Brunswick Nuclear Plant",
+    "country": "United States",
+    "lat": 33.9581,
+    "lon": -77.9386,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "shearon-harris",
+    "name": "Shearon Harris Nuclear Power Plant",
+    "country": "United States",
+    "lat": 35.6361,
+    "lon": -78.9506,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "robinson",
+    "name": "H. B. Robinson Nuclear Plant",
+    "country": "United States",
+    "lat": 34.4044,
+    "lon": -80.1589,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "oconee",
+    "name": "Oconee Nuclear Station",
+    "country": "United States",
+    "lat": 34.7922,
+    "lon": -82.8986,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "summer",
+    "name": "Virgil C. Summer Nuclear Station",
+    "country": "United States",
+    "lat": 34.3014,
+    "lon": -81.3144,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "turkey-point",
+    "name": "Turkey Point Nuclear Generating Station",
+    "country": "United States",
+    "lat": 25.4356,
+    "lon": -80.3311,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "st-lucie",
+    "name": "St. Lucie Nuclear Power Plant",
+    "country": "United States",
+    "lat": 27.3483,
+    "lon": -80.2464,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "crystal-river",
+    "name": "Crystal River Nuclear Plant",
+    "country": "United States",
+    "lat": 28.9578,
+    "lon": -82.6986,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "hatch",
+    "name": "Edwin I. Hatch Nuclear Plant",
+    "country": "United States",
+    "lat": 31.9344,
+    "lon": -82.3444,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "sequoyah",
+    "name": "Sequoyah Nuclear Plant",
+    "country": "United States",
+    "lat": 35.2244,
+    "lon": -85.0878,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "watts-bar",
+    "name": "Watts Bar Nuclear Plant",
+    "country": "United States",
+    "lat": 35.5997,
+    "lon": -84.7881,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "diablo-canyon",
+    "name": "Diablo Canyon Power Plant",
+    "country": "United States",
+    "lat": 35.2111,
+    "lon": -120.8522,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "columbia",
+    "name": "Columbia Generating Station",
+    "country": "United States",
+    "lat": 46.4717,
+    "lon": -119.3328,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "prairie-island",
+    "name": "Prairie Island Nuclear Generating Plant",
+    "country": "United States",
+    "lat": 44.6228,
+    "lon": -92.6333,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "monticello",
+    "name": "Monticello Nuclear Generating Plant",
+    "country": "United States",
+    "lat": 45.3333,
+    "lon": -93.8478,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "point-beach",
+    "name": "Point Beach Nuclear Plant",
+    "country": "United States",
+    "lat": 44.2808,
+    "lon": -87.5364,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "kewaunee",
+    "name": "Kewaunee Power Station",
+    "country": "United States",
+    "lat": 44.3431,
+    "lon": -87.5364,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "cooper",
+    "name": "Cooper Nuclear Station",
+    "country": "United States",
+    "lat": 40.3619,
+    "lon": -95.6411,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "fort-calhoun",
+    "name": "Fort Calhoun Nuclear Generating Station",
+    "country": "United States",
+    "lat": 41.5206,
+    "lon": -96.0772,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "arkansas-one",
+    "name": "Arkansas Nuclear One",
+    "country": "United States",
+    "lat": 35.3100,
+    "lon": -93.2306,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "davis-besse",
+    "name": "Davis-Besse Nuclear Power Station",
+    "country": "United States",
+    "lat": 41.5972,
+    "lon": -83.0861,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "perry",
+    "name": "Perry Nuclear Generating Station",
+    "country": "United States",
+    "lat": 41.8006,
+    "lon": -81.1453,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "beaver-valley",
+    "name": "Beaver Valley Power Station",
+    "country": "United States",
+    "lat": 40.6219,
+    "lon": -80.4344,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "dc-cook",
+    "name": "Donald C. Cook Nuclear Plant",
+    "country": "United States",
+    "lat": 41.9764,
+    "lon": -86.5658,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "palisades",
+    "name": "Palisades Nuclear Plant",
+    "country": "United States",
+    "lat": 42.3222,
+    "lon": -86.3150,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "fermi",
+    "name": "Enrico Fermi Nuclear Generating Station",
+    "country": "United States",
+    "lat": 41.9611,
+    "lon": -83.2597,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "clinton",
+    "name": "Clinton Power Station",
+    "country": "United States",
+    "lat": 40.1517,
+    "lon": -88.9594,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "duane-arnold",
+    "name": "Duane Arnold Energy Center",
+    "country": "United States",
+    "lat": 42.1006,
+    "lon": -91.7772,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "salem",
+    "name": "Salem Nuclear Power Plant",
+    "country": "United States",
+    "lat": 39.4628,
+    "lon": -75.5358,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "hope-creek",
+    "name": "Hope Creek Generating Station",
+    "country": "United States",
+    "lat": 39.4667,
+    "lon": -75.5347,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "indian-point",
+    "name": "Indian Point Energy Center",
+    "country": "United States",
+    "lat": 41.2714,
+    "lon": -73.9522,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "three-mile-island",
+    "name": "Three Mile Island Nuclear Generating Station",
+    "country": "United States",
+    "lat": 40.1536,
+    "lon": -76.7250,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "hanford",
+    "name": "Hanford Site",
+    "country": "United States",
+    "lat": 46.5500,
+    "lon": -119.6000,
+    "type": "storage",
+    "status": "active"
+  },
+  {
+    "id": "savannah-river",
+    "name": "Savannah River Site",
+    "country": "United States",
+    "lat": 33.2500,
+    "lon": -81.6333,
+    "type": "storage",
+    "status": "active"
+  },
+  {
+    "id": "los-alamos",
+    "name": "Los Alamos National Laboratory",
+    "country": "United States",
+    "lat": 35.8894,
+    "lon": -106.3053,
+    "type": "research",
+    "status": "active"
+  },
+  {
+    "id": "oak-ridge",
+    "name": "Oak Ridge National Laboratory",
+    "country": "United States",
+    "lat": 35.9306,
+    "lon": -84.3103,
+    "type": "research",
+    "status": "active"
+  },
+  {
+    "id": "lawrence-livermore",
+    "name": "Lawrence Livermore National Laboratory",
+    "country": "United States",
+    "lat": 37.6908,
+    "lon": -121.7667,
+    "type": "research",
+    "status": "active"
+  },
+  {
+    "id": "sandia",
+    "name": "Sandia National Laboratories",
+    "country": "United States",
+    "lat": 35.0528,
+    "lon": -106.5369,
+    "type": "research",
+    "status": "active"
+  },
+  {
+    "id": "nevada-test-site",
+    "name": "Nevada National Security Site",
+    "country": "United States",
+    "lat": 37.1000,
+    "lon": -116.0500,
+    "type": "research",
+    "status": "inactive"
+  },
+  {
+    "id": "yucca-mountain",
+    "name": "Yucca Mountain Nuclear Waste Repository",
+    "country": "United States",
+    "lat": 36.8603,
+    "lon": -116.4581,
+    "type": "storage",
+    "status": "inactive"
+  },
+  {
+    "id": "wipp",
+    "name": "Waste Isolation Pilot Plant",
+    "country": "United States",
+    "lat": 32.3731,
+    "lon": -103.7944,
+    "type": "storage",
+    "status": "active"
+  },
+  {
+    "id": "flamanville",
+    "name": "Flamanville Nuclear Power Plant",
+    "country": "France",
+    "lat": 49.5339,
+    "lon": -1.8819,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "gravelines",
+    "name": "Gravelines Nuclear Power Station",
+    "country": "France",
+    "lat": 51.0133,
+    "lon": 2.1308,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "paluel",
+    "name": "Paluel Nuclear Power Plant",
+    "country": "France",
+    "lat": 49.8583,
+    "lon": 0.6347,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "penly",
+    "name": "Penly Nuclear Power Plant",
+    "country": "France",
+    "lat": 49.9736,
+    "lon": 1.2111,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "cattenom",
+    "name": "Cattenom Nuclear Power Plant",
+    "country": "France",
+    "lat": 49.4167,
+    "lon": 6.2167,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "chooz",
+    "name": "Chooz Nuclear Power Plant",
+    "country": "France",
+    "lat": 50.0900,
+    "lon": 4.7642,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "civaux",
+    "name": "Civaux Nuclear Power Plant",
+    "country": "France",
+    "lat": 46.4558,
+    "lon": 0.6539,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "cruas",
+    "name": "Cruas Nuclear Power Plant",
+    "country": "France",
+    "lat": 44.6333,
+    "lon": 4.7583,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "dampierre",
+    "name": "Dampierre Nuclear Power Plant",
+    "country": "France",
+    "lat": 47.7333,
+    "lon": 2.5167,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "golfech",
+    "name": "Golfech Nuclear Power Plant",
+    "country": "France",
+    "lat": 44.1083,
+    "lon": 0.8472,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "nogent",
+    "name": "Nogent Nuclear Power Plant",
+    "country": "France",
+    "lat": 48.5167,
+    "lon": 3.5167,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "st-alban",
+    "name": "Saint-Alban Nuclear Power Plant",
+    "country": "France",
+    "lat": 45.4042,
+    "lon": 4.7556,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "st-laurent",
+    "name": "Saint-Laurent Nuclear Power Plant",
+    "country": "France",
+    "lat": 47.7167,
+    "lon": 1.5833,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "tricastin",
+    "name": "Tricastin Nuclear Power Plant",
+    "country": "France",
+    "lat": 44.3278,
+    "lon": 4.7278,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "bugey",
+    "name": "Bugey Nuclear Power Plant",
+    "country": "France",
+    "lat": 45.7972,
+    "lon": 5.2722,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "blayais",
+    "name": "Blayais Nuclear Power Plant",
+    "country": "France",
+    "lat": 45.2558,
+    "lon": -0.6922,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "chinon",
+    "name": "Chinon Nuclear Power Plant",
+    "country": "France",
+    "lat": 47.2333,
+    "lon": 0.1667,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "fessenheim",
+    "name": "Fessenheim Nuclear Power Plant",
+    "country": "France",
+    "lat": 47.9036,
+    "lon": 7.5619,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "la-hague",
+    "name": "La Hague Reprocessing Plant",
+    "country": "France",
+    "lat": 49.6761,
+    "lon": -1.8825,
+    "type": "enrichment",
+    "status": "active"
+  },
+  {
+    "id": "sellafield",
+    "name": "Sellafield Nuclear Site",
+    "country": "United Kingdom",
+    "lat": 54.4208,
+    "lon": -3.4947,
+    "type": "enrichment",
+    "status": "active"
+  },
+  {
+    "id": "dounreay",
+    "name": "Dounreay Nuclear Power Development Establishment",
+    "country": "United Kingdom",
+    "lat": 58.5778,
+    "lon": -3.7328,
+    "type": "research",
+    "status": "decommissioned"
+  },
+  {
+    "id": "heysham",
+    "name": "Heysham Nuclear Power Station",
+    "country": "United Kingdom",
+    "lat": 54.0292,
+    "lon": -2.9194,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "hartlepool",
+    "name": "Hartlepool Nuclear Power Station",
+    "country": "United Kingdom",
+    "lat": 54.6375,
+    "lon": -1.1814,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "torness",
+    "name": "Torness Nuclear Power Station",
+    "country": "United Kingdom",
+    "lat": 55.9694,
+    "lon": -2.4111,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "sizewell",
+    "name": "Sizewell Nuclear Power Station",
+    "country": "United Kingdom",
+    "lat": 52.2133,
+    "lon": 1.6203,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "hinkley-point",
+    "name": "Hinkley Point Nuclear Power Station",
+    "country": "United Kingdom",
+    "lat": 51.2086,
+    "lon": -3.1311,
+    "type": "reactor",
+    "status": "active"
+  },
+  {
+    "id": "dungeness",
+    "name": "Dungeness Nuclear Power Station",
+    "country": "United Kingdom",
+    "lat": 50.9136,
+    "lon": 0.9647,
+    "type": "reactor",
+    "status": "decommissioned"
+  },
+  {
+    "id": "wylfa",
+    "name": "Wylfa Nuclear Power Station",
+    "country": "United Kingdom",
+    "lat": 53.4167,
+    "lon": -4.4833,
+    "type": "reactor",
+    "status": "decommissioned"
+  }
+]

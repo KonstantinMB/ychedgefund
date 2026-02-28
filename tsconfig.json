@@ -43,8 +43,7 @@
   },
   "include": [
     "src/**/*",
-    "api/**/*",
-    "relay/**/*"
+    "api/**/*"
   ],
   "exclude": [
     "node_modules",

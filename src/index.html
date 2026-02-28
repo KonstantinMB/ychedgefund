@@ -5,21 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0f0a">
   <meta name="description" content="AI-powered global intelligence dashboard with paper trading capabilities">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Atlas">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon.svg">
   <title>Atlas - Global Intelligence Platform</title>
   <link rel="stylesheet" href="/styles/base.css">
 </head>
 <body>
   <div id="app">
+    <!-- Globe/Map Container -->
     <div id="globe-container" class="globe-container"></div>
+
+    <!-- Top Header Bar with Controls -->
+    <div class="header-bar">
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle dark/light theme">
+        <span class="theme-icon">🌙</span>
+      </button>
+      <div class="header-hint" id="cmd-palette-hint" title="Open command palette (Cmd+K)">⌘K</div>
+    </div>
+
+    <!-- Left Panel: Layer Toggles -->
     <div id="left-panel" class="left-panel">
       <!-- Layer toggles will be rendered here -->
     </div>
+
+    <!-- Right Panel: Intelligence Panels -->
     <div id="right-panel" class="right-panel">
       <!-- Intelligence panels will be rendered here -->
     </div>
-    <div id="command-palette" class="command-palette hidden">
-      <!-- Cmd+K search interface -->
-    </div>
+
+    <!-- Command Palette injected by command-palette.ts -->
   </div>
   <script type="module" src="/main.ts"></script>
 </body>

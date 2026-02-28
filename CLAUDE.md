@@ -196,8 +196,30 @@ const PAPER_CONFIG = {
 ## Current Build Status
 <!-- UPDATE THIS AFTER EACH SESSION -->
 - [x] Phase 0: Foundation (repo, tooling, CORS, 3-tier cache, state management, WebSocket) ✅
-- [ ] Phase 1: Globe + static layers (deck.gl, 12+ toggleable layers)
-- [ ] Phase 2: Live data + news (edge functions, RSS proxy, markets panel)
+- [x] Phase 1: Globe + static layers (deck.gl, 8 toggleable layers: military bases, nuclear, cables, pipelines, chokepoints, financial centers, conflict zones, test markers) ✅
+- [x] Phase 1: Dark/light theme system fully implemented ✅
+- [x] Phase 1: Panel system (news-feed, markets, instability, strategic-risk panels with mock data) ✅
+- [x] Phase 2: Data edge functions (GDELT, USGS, GDACS, EONET) ✅
+- [x] Phase 2: Market edge functions (fear-greed, CoinGecko, Yahoo Finance) ✅
+- [x] Phase 2: RSS proxy + Polymarket OSINT adapter ✅
+- [x] Phase 2: ACLED + FIRMS data adapters ✅
+- [x] Phase 2: AI edge functions (summarize, sentiment via Groq + keyword fallback) ✅
+- [x] Phase 2: OSINT adapters (OpenSky, sanctions, Polymarket) ✅
+- [x] Phase 2: Connect panels to live data (news-feed ← GDELT, markets ← Yahoo/fear-greed, risk ← USGS/GDACS) ✅
+- [x] Phase 2: Client-side API client + DataService (event-driven, staggered polling) ✅
+- [x] Phase 2: FRED + Finnhub market data edge functions ✅
+- [ ] Phase 2: Railway WebSocket relay + AIS vessel stream (deferred to Phase 5)
+- [x] Phase 3: Intelligence engine - CII, convergence (5°grid), Welford anomaly detection ✅
+- [x] Phase 3: Live earthquake (USGS), fire (FIRMS), aircraft (OpenSky) globe layers ✅
+- [x] Phase 3: AI briefs panel (Groq summaries, auto-regenerate 30min, topic tags) ✅
+- [x] Phase 3: Instability panel wired to live CII engine output ✅
+- [x] Phase 4: Paper trading engine (engine, portfolio, signals, risk management) ✅
+- [x] Phase 4: 3 strategies: geopolitical (CII-triggered), sentiment (GDELT rolling tone), macro (FRED yield curve) ✅
+- [x] Phase 4: Portfolio panel + signals panel with execute buttons ✅
+- [x] Phase 5: Cmd+K command palette (fuzzy search, 20+ commands, keyboard nav) ✅
+- [x] Phase 5: PWA manifest + icons ✅
+- [x] Phase 5: Railway WebSocket relay (AIS+OpenSky multiplexer, exponential-backoff reconnect) ✅
+- [ ] Phase 5: Production deploy to Vercel + Railway + set env variables in dashboards
 - [ ] Phase 3: Intelligence engine (CII, convergence, anomaly, AI briefs)
 - [ ] Phase 4: Paper trading + signals (engine, 3 strategies, portfolio UI)
 - [ ] Phase 5: Polish + deploy (WebSocket, Cmd+K, PWA, production deploy)

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlas Theme System Demo</title>
+  <link rel="stylesheet" href="/styles/base.css">
+  <style>
+    .demo-container {
+      padding: var(--spacing-xl);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .demo-section {
+      margin-bottom: var(--spacing-xl);
+      padding: var(--spacing-lg);
+      background: var(--bg-panel);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--radius-md);
+    }
+
+    .demo-section h2 {
+      margin-bottom: var(--spacing-md);
+      color: var(--text-accent);
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-md);
+    }
+
+    .demo-card {
+      padding: var(--spacing-md);
+      background: var(--bg-input);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--radius-sm);
+    }
+
+    .controls {
+      position: fixed;
+      top: var(--spacing-md);
+      right: var(--spacing-md);
+      z-index: 1000;
+    }
+  </style>
+</head>
+<body>
+  <div class="controls">
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+      <span class="theme-icon">🌙</span>
+    </button>
+  </div>
+
+  <div class="demo-container">
+    <h1>Atlas Theme System Demo</h1>
+    <p class="text-secondary" style="margin-bottom: var(--spacing-xl);">
+      Click the theme toggle button or press <code>Ctrl/Cmd + Shift + T</code> to switch themes.
+    </p>
+
+    <!-- Typography Section -->
+    <div class="demo-section">
+      <h2>Typography</h2>
+      <h1>Heading 1</h1>
+      <h2>Heading 2</h2>
+      <h3>Heading 3</h3>
+      <h4>Heading 4</h4>
+      <p class="text-primary">Primary text color</p>
+      <p class="text-secondary">Secondary text color</p>
+      <p class="text-tertiary">Tertiary text color</p>
+      <p class="mono">Monospace font family (1234567890)</p>
+    </div>
+
+    <!-- Status Badges Section -->
+    <div class="demo-section">
+      <h2>Status Badges</h2>
+      <div class="flex gap-md" style="margin-top: var(--spacing-md);">
+        <span class="badge badge-critical">Critical</span>
+        <span class="badge badge-high">High</span>
+        <span class="badge badge-medium">Medium</span>
+        <span class="badge badge-low">Low</span>
+        <span class="badge badge-info">Info</span>
+      </div>
+    </div>
+
+    <!-- Sentiment Indicators -->
+    <div class="demo-section">
+      <h2>Sentiment Indicators</h2>
+      <div class="flex gap-md" style="margin-top: var(--spacing-md);">
+        <span class="sentiment-positive">Positive Sentiment</span>
+        <span class="sentiment-negative">Negative Sentiment</span>
+        <span class="sentiment-neutral">Neutral Sentiment</span>
+      </div>
+    </div>
+
+    <!-- Buttons Section -->
+    <div class="demo-section">
+      <h2>Buttons</h2>
+      <div class="flex gap-md" style="margin-top: var(--spacing-md);">
+        <button class="btn">Primary Button</button>
+        <button class="btn" disabled>Disabled Button</button>
+      </div>
+    </div>
+
+    <!-- Inputs Section -->
+    <div class="demo-section">
+      <h2>Form Inputs</h2>
+      <div class="flex flex-col gap-md" style="margin-top: var(--spacing-md);">
+        <input type="text" placeholder="Text input placeholder">
+        <textarea placeholder="Textarea placeholder" rows="3"></textarea>
+      </div>
+    </div>
+
+    <!-- Data Cards Grid -->
+    <div class="demo-section">
+      <h2>Data Cards</h2>
+      <div class="demo-grid">
+        <div class="demo-card">
+          <h4>Market Status</h4>
+          <p class="value sentiment-positive">+2.45%</p>
+        </div>
+        <div class="demo-card">
+          <h4>Risk Level</h4>
+          <p class="value sentiment-negative">High</p>
+        </div>
+        <div class="demo-card">
+          <h4>Active Signals</h4>
+          <p class="value mono">127</p>
+        </div>
+        <div class="demo-card">
+          <h4>Portfolio Value</h4>
+          <p class="value mono">$1,234,567.89</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading States -->
+    <div class="demo-section">
+      <h2>Loading States</h2>
+      <div class="flex gap-md" style="margin-top: var(--spacing-md);">
+        <div class="loading">Loading pulse animation</div>
+        <div class="spinning">↻</div>
+      </div>
+    </div>
+
+    <!-- Code Blocks -->
+    <div class="demo-section">
+      <h2>Code Display</h2>
+      <code>inline code snippet</code>
+      <pre style="margin-top: var(--spacing-md);">
+// Code block example
+const theme = getTheme();
+console.log('Current theme:', theme);
+      </pre>
+    </div>
+
+    <!-- Links -->
+    <div class="demo-section">
+      <h2>Links</h2>
+      <p><a href="#demo">Example hyperlink</a></p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initTheme, toggleTheme, getTheme } from './lib/theme.ts';
+
+    // Initialize theme
+    initTheme();
+
+    // Setup theme toggle
+    const toggleButton = document.getElementById('theme-toggle');
+    const iconSpan = toggleButton?.querySelector('.theme-icon');
+
+    const updateIcon = () => {
+      const theme = getTheme();
+      iconSpan.textContent = theme === 'dark' ? '🌙' : '☀️';
+    };
+
+    updateIcon();
+
+    toggleButton?.addEventListener('click', () => {
+      toggleTheme();
+      updateIcon();
+    });
+
+    // Keyboard shortcut: Ctrl/Cmd + Shift + T
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'T') {
+        e.preventDefault();
+        toggleTheme();
+        updateIcon();
+      }
+    });
+
+    window.addEventListener('themechange', updateIcon);
+
+    console.log('[Theme Demo] Ready');
+  </script>
+</body>
+</html>

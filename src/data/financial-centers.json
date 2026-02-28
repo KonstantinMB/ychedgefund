@@ -1,0 +1,830 @@
+[
+  {
+    "id": "nyse",
+    "name": "New York Stock Exchange",
+    "city": "New York",
+    "country": "United States",
+    "lat": 40.7069,
+    "lon": -74.0113,
+    "type": "exchange"
+  },
+  {
+    "id": "nasdaq",
+    "name": "NASDAQ",
+    "city": "New York",
+    "country": "United States",
+    "lat": 40.7589,
+    "lon": -73.9851,
+    "type": "exchange"
+  },
+  {
+    "id": "fed-ny",
+    "name": "Federal Reserve Bank of New York",
+    "city": "New York",
+    "country": "United States",
+    "lat": 40.7089,
+    "lon": -74.0089,
+    "type": "central_bank"
+  },
+  {
+    "id": "fed-dc",
+    "name": "Federal Reserve Board",
+    "city": "Washington DC",
+    "country": "United States",
+    "lat": 38.8931,
+    "lon": -77.0451,
+    "type": "central_bank"
+  },
+  {
+    "id": "cme",
+    "name": "Chicago Mercantile Exchange",
+    "city": "Chicago",
+    "country": "United States",
+    "lat": 41.8781,
+    "lon": -87.6298,
+    "type": "exchange"
+  },
+  {
+    "id": "cboe",
+    "name": "Chicago Board Options Exchange",
+    "city": "Chicago",
+    "country": "United States",
+    "lat": 41.8803,
+    "lon": -87.6331,
+    "type": "exchange"
+  },
+  {
+    "id": "lse",
+    "name": "London Stock Exchange",
+    "city": "London",
+    "country": "United Kingdom",
+    "lat": 51.5148,
+    "lon": -0.0886,
+    "type": "exchange"
+  },
+  {
+    "id": "boe",
+    "name": "Bank of England",
+    "city": "London",
+    "country": "United Kingdom",
+    "lat": 51.5142,
+    "lon": -0.0885,
+    "type": "central_bank"
+  },
+  {
+    "id": "lme",
+    "name": "London Metal Exchange",
+    "city": "London",
+    "country": "United Kingdom",
+    "lat": 51.5155,
+    "lon": -0.0922,
+    "type": "exchange"
+  },
+  {
+    "id": "city-of-london",
+    "name": "City of London Financial District",
+    "city": "London",
+    "country": "United Kingdom",
+    "lat": 51.5155,
+    "lon": -0.0922,
+    "type": "financial_hub"
+  },
+  {
+    "id": "jse",
+    "name": "Japan Exchange Group (Tokyo Stock Exchange)",
+    "city": "Tokyo",
+    "country": "Japan",
+    "lat": 35.6762,
+    "lon": 139.7633,
+    "type": "exchange"
+  },
+  {
+    "id": "boj",
+    "name": "Bank of Japan",
+    "city": "Tokyo",
+    "country": "Japan",
+    "lat": 35.6895,
+    "lon": 139.7672,
+    "type": "central_bank"
+  },
+  {
+    "id": "sse",
+    "name": "Shanghai Stock Exchange",
+    "city": "Shanghai",
+    "country": "China",
+    "lat": 31.2397,
+    "lon": 121.4986,
+    "type": "exchange"
+  },
+  {
+    "id": "szse",
+    "name": "Shenzhen Stock Exchange",
+    "city": "Shenzhen",
+    "country": "China",
+    "lat": 22.5431,
+    "lon": 114.0579,
+    "type": "exchange"
+  },
+  {
+    "id": "pboc",
+    "name": "People's Bank of China",
+    "city": "Beijing",
+    "country": "China",
+    "lat": 39.9042,
+    "lon": 116.4074,
+    "type": "central_bank"
+  },
+  {
+    "id": "hkex",
+    "name": "Hong Kong Stock Exchange",
+    "city": "Hong Kong",
+    "country": "Hong Kong",
+    "lat": 22.2845,
+    "lon": 114.1580,
+    "type": "exchange"
+  },
+  {
+    "id": "hkma",
+    "name": "Hong Kong Monetary Authority",
+    "city": "Hong Kong",
+    "country": "Hong Kong",
+    "lat": 22.2828,
+    "lon": 114.1581,
+    "type": "central_bank"
+  },
+  {
+    "id": "sgx",
+    "name": "Singapore Exchange",
+    "city": "Singapore",
+    "country": "Singapore",
+    "lat": 1.2797,
+    "lon": 103.8500,
+    "type": "exchange"
+  },
+  {
+    "id": "mas",
+    "name": "Monetary Authority of Singapore",
+    "city": "Singapore",
+    "country": "Singapore",
+    "lat": 1.2894,
+    "lon": 103.8503,
+    "type": "central_bank"
+  },
+  {
+    "id": "euronext-paris",
+    "name": "Euronext Paris",
+    "city": "Paris",
+    "country": "France",
+    "lat": 48.8707,
+    "lon": 2.3393,
+    "type": "exchange"
+  },
+  {
+    "id": "ecb",
+    "name": "European Central Bank",
+    "city": "Frankfurt",
+    "country": "Germany",
+    "lat": 50.1106,
+    "lon": 8.7079,
+    "type": "central_bank"
+  },
+  {
+    "id": "deutsche-borse",
+    "name": "Deutsche Börse (Frankfurt Stock Exchange)",
+    "city": "Frankfurt",
+    "country": "Germany",
+    "lat": 50.1155,
+    "lon": 8.6842,
+    "type": "exchange"
+  },
+  {
+    "id": "six",
+    "name": "SIX Swiss Exchange",
+    "city": "Zurich",
+    "country": "Switzerland",
+    "lat": 47.3744,
+    "lon": 8.5411,
+    "type": "exchange"
+  },
+  {
+    "id": "snb",
+    "name": "Swiss National Bank",
+    "city": "Zurich",
+    "country": "Switzerland",
+    "lat": 47.3680,
+    "lon": 8.5407,
+    "type": "central_bank"
+  },
+  {
+    "id": "tsx",
+    "name": "Toronto Stock Exchange",
+    "city": "Toronto",
+    "country": "Canada",
+    "lat": 43.6489,
+    "lon": -79.3806,
+    "type": "exchange"
+  },
+  {
+    "id": "boc",
+    "name": "Bank of Canada",
+    "city": "Ottawa",
+    "country": "Canada",
+    "lat": 45.4215,
+    "lon": -75.6972,
+    "type": "central_bank"
+  },
+  {
+    "id": "asx",
+    "name": "Australian Securities Exchange",
+    "city": "Sydney",
+    "country": "Australia",
+    "lat": -33.8688,
+    "lon": 151.2093,
+    "type": "exchange"
+  },
+  {
+    "id": "rba",
+    "name": "Reserve Bank of Australia",
+    "city": "Sydney",
+    "country": "Australia",
+    "lat": -33.8650,
+    "lon": 151.2094,
+    "type": "central_bank"
+  },
+  {
+    "id": "nse-india",
+    "name": "National Stock Exchange of India",
+    "city": "Mumbai",
+    "country": "India",
+    "lat": 19.0760,
+    "lon": 72.8777,
+    "type": "exchange"
+  },
+  {
+    "id": "bse",
+    "name": "Bombay Stock Exchange",
+    "city": "Mumbai",
+    "country": "India",
+    "lat": 18.9292,
+    "lon": 72.8342,
+    "type": "exchange"
+  },
+  {
+    "id": "rbi",
+    "name": "Reserve Bank of India",
+    "city": "Mumbai",
+    "country": "India",
+    "lat": 18.9388,
+    "lon": 72.8354,
+    "type": "central_bank"
+  },
+  {
+    "id": "krx",
+    "name": "Korea Exchange",
+    "city": "Seoul",
+    "country": "South Korea",
+    "lat": 37.5665,
+    "lon": 126.9780,
+    "type": "exchange"
+  },
+  {
+    "id": "bok",
+    "name": "Bank of Korea",
+    "city": "Seoul",
+    "country": "South Korea",
+    "lat": 37.5636,
+    "lon": 126.9828,
+    "type": "central_bank"
+  },
+  {
+    "id": "bmv",
+    "name": "Bolsa Mexicana de Valores",
+    "city": "Mexico City",
+    "country": "Mexico",
+    "lat": 19.4326,
+    "lon": -99.1332,
+    "type": "exchange"
+  },
+  {
+    "id": "banxico",
+    "name": "Bank of Mexico",
+    "city": "Mexico City",
+    "country": "Mexico",
+    "lat": 19.4363,
+    "lon": -99.1414,
+    "type": "central_bank"
+  },
+  {
+    "id": "b3",
+    "name": "B3 (Brasil Bolsa Balcão)",
+    "city": "São Paulo",
+    "country": "Brazil",
+    "lat": -23.5505,
+    "lon": -46.6333,
+    "type": "exchange"
+  },
+  {
+    "id": "bcb",
+    "name": "Central Bank of Brazil",
+    "city": "Brasília",
+    "country": "Brazil",
+    "lat": -15.7975,
+    "lon": -47.8919,
+    "type": "central_bank"
+  },
+  {
+    "id": "jse-sa",
+    "name": "Johannesburg Stock Exchange",
+    "city": "Johannesburg",
+    "country": "South Africa",
+    "lat": -26.2041,
+    "lon": 28.0473,
+    "type": "exchange"
+  },
+  {
+    "id": "sarb",
+    "name": "South African Reserve Bank",
+    "city": "Pretoria",
+    "country": "South Africa",
+    "lat": -25.7479,
+    "lon": 28.2293,
+    "type": "central_bank"
+  },
+  {
+    "id": "moex",
+    "name": "Moscow Exchange",
+    "city": "Moscow",
+    "country": "Russia",
+    "lat": 55.7558,
+    "lon": 37.6173,
+    "type": "exchange"
+  },
+  {
+    "id": "cbr",
+    "name": "Central Bank of Russia",
+    "city": "Moscow",
+    "country": "Russia",
+    "lat": 55.7558,
+    "lon": 37.6206,
+    "type": "central_bank"
+  },
+  {
+    "id": "tadawul",
+    "name": "Saudi Stock Exchange (Tadawul)",
+    "city": "Riyadh",
+    "country": "Saudi Arabia",
+    "lat": 24.7136,
+    "lon": 46.6753,
+    "type": "exchange"
+  },
+  {
+    "id": "sama",
+    "name": "Saudi Central Bank (SAMA)",
+    "city": "Riyadh",
+    "country": "Saudi Arabia",
+    "lat": 24.7136,
+    "lon": 46.6777,
+    "type": "central_bank"
+  },
+  {
+    "id": "dfm",
+    "name": "Dubai Financial Market",
+    "city": "Dubai",
+    "country": "United Arab Emirates",
+    "lat": 25.2048,
+    "lon": 55.2708,
+    "type": "exchange"
+  },
+  {
+    "id": "adx",
+    "name": "Abu Dhabi Securities Exchange",
+    "city": "Abu Dhabi",
+    "country": "United Arab Emirates",
+    "lat": 24.4539,
+    "lon": 54.3773,
+    "type": "exchange"
+  },
+  {
+    "id": "qse",
+    "name": "Qatar Stock Exchange",
+    "city": "Doha",
+    "country": "Qatar",
+    "lat": 25.2854,
+    "lon": 51.5310,
+    "type": "exchange"
+  },
+  {
+    "id": "tel-aviv-se",
+    "name": "Tel Aviv Stock Exchange",
+    "city": "Tel Aviv",
+    "country": "Israel",
+    "lat": 32.0853,
+    "lon": 34.7818,
+    "type": "exchange"
+  },
+  {
+    "id": "boi",
+    "name": "Bank of Israel",
+    "city": "Jerusalem",
+    "country": "Israel",
+    "lat": 31.7683,
+    "lon": 35.2137,
+    "type": "central_bank"
+  },
+  {
+    "id": "ist",
+    "name": "Borsa Istanbul",
+    "city": "Istanbul",
+    "country": "Turkey",
+    "lat": 41.0082,
+    "lon": 28.9784,
+    "type": "exchange"
+  },
+  {
+    "id": "tcmb",
+    "name": "Central Bank of Turkey",
+    "city": "Ankara",
+    "country": "Turkey",
+    "lat": 39.9334,
+    "lon": 32.8597,
+    "type": "central_bank"
+  },
+  {
+    "id": "euronext-amsterdam",
+    "name": "Euronext Amsterdam",
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "lat": 52.3676,
+    "lon": 4.9041,
+    "type": "exchange"
+  },
+  {
+    "id": "dnb",
+    "name": "De Nederlandsche Bank",
+    "city": "Amsterdam",
+    "country": "Netherlands",
+    "lat": 52.3702,
+    "lon": 4.8952,
+    "type": "central_bank"
+  },
+  {
+    "id": "euronext-brussels",
+    "name": "Euronext Brussels",
+    "city": "Brussels",
+    "country": "Belgium",
+    "lat": 50.8503,
+    "lon": 4.3517,
+    "type": "exchange"
+  },
+  {
+    "id": "nbb",
+    "name": "National Bank of Belgium",
+    "city": "Brussels",
+    "country": "Belgium",
+    "lat": 50.8467,
+    "lon": 4.3525,
+    "type": "central_bank"
+  },
+  {
+    "id": "nasdaq-nordic",
+    "name": "Nasdaq Nordic (Stockholm)",
+    "city": "Stockholm",
+    "country": "Sweden",
+    "lat": 59.3293,
+    "lon": 18.0686,
+    "type": "exchange"
+  },
+  {
+    "id": "riksbank",
+    "name": "Sveriges Riksbank",
+    "city": "Stockholm",
+    "country": "Sweden",
+    "lat": 59.3326,
+    "lon": 18.0649,
+    "type": "central_bank"
+  },
+  {
+    "id": "oslo-bors",
+    "name": "Oslo Børs",
+    "city": "Oslo",
+    "country": "Norway",
+    "lat": 59.9139,
+    "lon": 10.7522,
+    "type": "exchange"
+  },
+  {
+    "id": "norges-bank",
+    "name": "Norges Bank",
+    "city": "Oslo",
+    "country": "Norway",
+    "lat": 59.9127,
+    "lon": 10.7461,
+    "type": "central_bank"
+  },
+  {
+    "id": "bmad",
+    "name": "Bolsa de Madrid",
+    "city": "Madrid",
+    "country": "Spain",
+    "lat": 40.4168,
+    "lon": -3.7038,
+    "type": "exchange"
+  },
+  {
+    "id": "bde",
+    "name": "Bank of Spain",
+    "city": "Madrid",
+    "country": "Spain",
+    "lat": 40.4182,
+    "lon": -3.6923,
+    "type": "central_bank"
+  },
+  {
+    "id": "borsa-italiana",
+    "name": "Borsa Italiana",
+    "city": "Milan",
+    "country": "Italy",
+    "lat": 45.4642,
+    "lon": 9.1900,
+    "type": "exchange"
+  },
+  {
+    "id": "bdi",
+    "name": "Bank of Italy",
+    "city": "Rome",
+    "country": "Italy",
+    "lat": 41.9028,
+    "lon": 12.4964,
+    "type": "central_bank"
+  },
+  {
+    "id": "wiener-borse",
+    "name": "Wiener Börse",
+    "city": "Vienna",
+    "country": "Austria",
+    "lat": 48.2082,
+    "lon": 16.3738,
+    "type": "exchange"
+  },
+  {
+    "id": "onb",
+    "name": "Oesterreichische Nationalbank",
+    "city": "Vienna",
+    "country": "Austria",
+    "lat": 48.2069,
+    "lon": 16.3661,
+    "type": "central_bank"
+  },
+  {
+    "id": "bmf-budapest",
+    "name": "Budapest Stock Exchange",
+    "city": "Budapest",
+    "country": "Hungary",
+    "lat": 47.4979,
+    "lon": 19.0402,
+    "type": "exchange"
+  },
+  {
+    "id": "mnb",
+    "name": "Magyar Nemzeti Bank",
+    "city": "Budapest",
+    "country": "Hungary",
+    "lat": 47.4975,
+    "lon": 19.0548,
+    "type": "central_bank"
+  },
+  {
+    "id": "gpw",
+    "name": "Warsaw Stock Exchange",
+    "city": "Warsaw",
+    "country": "Poland",
+    "lat": 52.2297,
+    "lon": 21.0122,
+    "type": "exchange"
+  },
+  {
+    "id": "nbp",
+    "name": "National Bank of Poland",
+    "city": "Warsaw",
+    "country": "Poland",
+    "lat": 52.2405,
+    "lon": 21.0441,
+    "type": "central_bank"
+  },
+  {
+    "id": "pse",
+    "name": "Prague Stock Exchange",
+    "city": "Prague",
+    "country": "Czech Republic",
+    "lat": 50.0755,
+    "lon": 14.4378,
+    "type": "exchange"
+  },
+  {
+    "id": "cnb",
+    "name": "Czech National Bank",
+    "city": "Prague",
+    "country": "Czech Republic",
+    "lat": 50.0855,
+    "lon": 14.4209,
+    "type": "central_bank"
+  },
+  {
+    "id": "egx",
+    "name": "Egyptian Exchange",
+    "city": "Cairo",
+    "country": "Egypt",
+    "lat": 30.0444,
+    "lon": 31.2357,
+    "type": "exchange"
+  },
+  {
+    "id": "cbe",
+    "name": "Central Bank of Egypt",
+    "city": "Cairo",
+    "country": "Egypt",
+    "lat": 30.0471,
+    "lon": 31.2372,
+    "type": "central_bank"
+  },
+  {
+    "id": "nse-nigeria",
+    "name": "Nigerian Exchange Group",
+    "city": "Lagos",
+    "country": "Nigeria",
+    "lat": 6.5244,
+    "lon": 3.3792,
+    "type": "exchange"
+  },
+  {
+    "id": "cbn",
+    "name": "Central Bank of Nigeria",
+    "city": "Abuja",
+    "country": "Nigeria",
+    "lat": 9.0765,
+    "lon": 7.3986,
+    "type": "central_bank"
+  },
+  {
+    "id": "nze",
+    "name": "Nairobi Securities Exchange",
+    "city": "Nairobi",
+    "country": "Kenya",
+    "lat": -1.2864,
+    "lon": 36.8172,
+    "type": "exchange"
+  },
+  {
+    "id": "cbk",
+    "name": "Central Bank of Kenya",
+    "city": "Nairobi",
+    "country": "Kenya",
+    "lat": -1.2921,
+    "lon": 36.8219,
+    "type": "central_bank"
+  },
+  {
+    "id": "idx",
+    "name": "Indonesia Stock Exchange",
+    "city": "Jakarta",
+    "country": "Indonesia",
+    "lat": -6.2088,
+    "lon": 106.8456,
+    "type": "exchange"
+  },
+  {
+    "id": "bi",
+    "name": "Bank Indonesia",
+    "city": "Jakarta",
+    "country": "Indonesia",
+    "lat": -6.1753,
+    "lon": 106.8271,
+    "type": "central_bank"
+  },
+  {
+    "id": "set",
+    "name": "Stock Exchange of Thailand",
+    "city": "Bangkok",
+    "country": "Thailand",
+    "lat": 13.7563,
+    "lon": 100.5018,
+    "type": "exchange"
+  },
+  {
+    "id": "bot",
+    "name": "Bank of Thailand",
+    "city": "Bangkok",
+    "country": "Thailand",
+    "lat": 13.7539,
+    "lon": 100.4928,
+    "type": "central_bank"
+  },
+  {
+    "id": "pse-phil",
+    "name": "Philippine Stock Exchange",
+    "city": "Manila",
+    "country": "Philippines",
+    "lat": 14.5995,
+    "lon": 120.9842,
+    "type": "exchange"
+  },
+  {
+    "id": "bsp",
+    "name": "Bangko Sentral ng Pilipinas",
+    "city": "Manila",
+    "country": "Philippines",
+    "lat": 14.5547,
+    "lon": 120.9902,
+    "type": "central_bank"
+  },
+  {
+    "id": "bursa-malaysia",
+    "name": "Bursa Malaysia",
+    "city": "Kuala Lumpur",
+    "country": "Malaysia",
+    "lat": 3.1390,
+    "lon": 101.6869,
+    "type": "exchange"
+  },
+  {
+    "id": "bnm",
+    "name": "Bank Negara Malaysia",
+    "city": "Kuala Lumpur",
+    "country": "Malaysia",
+    "lat": 3.1478,
+    "lon": 101.6953,
+    "type": "central_bank"
+  },
+  {
+    "id": "twse",
+    "name": "Taiwan Stock Exchange",
+    "city": "Taipei",
+    "country": "Taiwan",
+    "lat": 25.0330,
+    "lon": 121.5654,
+    "type": "exchange"
+  },
+  {
+    "id": "cbc",
+    "name": "Central Bank of the Republic of China (Taiwan)",
+    "city": "Taipei",
+    "country": "Taiwan",
+    "lat": 25.0375,
+    "lon": 121.5120,
+    "type": "central_bank"
+  },
+  {
+    "id": "nzx",
+    "name": "New Zealand Exchange",
+    "city": "Wellington",
+    "country": "New Zealand",
+    "lat": -41.2865,
+    "lon": 174.7762,
+    "type": "exchange"
+  },
+  {
+    "id": "rbnz",
+    "name": "Reserve Bank of New Zealand",
+    "city": "Wellington",
+    "country": "New Zealand",
+    "lat": -41.2787,
+    "lon": 174.7772,
+    "type": "central_bank"
+  },
+  {
+    "id": "imf",
+    "name": "International Monetary Fund",
+    "city": "Washington DC",
+    "country": "United States",
+    "lat": 38.8997,
+    "lon": -77.0453,
+    "type": "financial_hub"
+  },
+  {
+    "id": "world-bank",
+    "name": "World Bank Group",
+    "city": "Washington DC",
+    "country": "United States",
+    "lat": 38.8991,
+    "lon": -77.0415,
+    "type": "financial_hub"
+  },
+  {
+    "id": "bis",
+    "name": "Bank for International Settlements",
+    "city": "Basel",
+    "country": "Switzerland",
+    "lat": 47.5596,
+    "lon": 7.5886,
+    "type": "financial_hub"
+  },
+  {
+    "id": "swift",
+    "name": "SWIFT (Society for Worldwide Interbank Financial Telecommunication)",
+    "city": "La Hulpe",
+    "country": "Belgium",
+    "lat": 50.7267,
+    "lon": 4.4897,
+    "type": "financial_hub"
+  }
+]

@@ -202,12 +202,12 @@ class Store {
 const initialState: AppState = {
   globe: {
     initialized: false,
-    activeLayers: new Set(['military-bases', 'conflict-zones']),
+    activeLayers: new Set(['test-markers']),
     viewState: {
-      longitude: 0,
-      latitude: 20,
-      zoom: 1.5,
-      pitch: 0,
+      longitude: 30,
+      latitude: 25,
+      zoom: 2.5,
+      pitch: 35,
       bearing: 0,
     },
   },

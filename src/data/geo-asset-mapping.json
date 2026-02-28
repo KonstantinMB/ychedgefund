@@ -1,0 +1,608 @@
+{
+  "UA": {
+    "long": ["WEAT", "DBA", "GLD", "UNG", "XLE"],
+    "short": ["RSX", "EWU", "FXE", "EWG"],
+    "confidence_base": 0.75,
+    "rationale": "Ukraine conflict escalation → grain/energy prices up, European/Russian assets down"
+  },
+  "RU": {
+    "long": ["USO", "UNG", "XLE", "GLD", "DBA"],
+    "short": ["RSX", "EWU", "FXE", "ERUS"],
+    "confidence_base": 0.7,
+    "rationale": "Russia sanctions/instability → energy/commodity prices up, Russian/European assets down"
+  },
+  "IL": {
+    "long": ["USO", "XLE", "GLD", "IAU", "IEF"],
+    "short": ["EWI", "JETS", "XLY"],
+    "confidence_base": 0.65,
+    "rationale": "Israel-Gaza escalation → oil prices up (Middle East risk premium), travel/consumer down"
+  },
+  "PS": {
+    "long": ["GLD", "USO", "XLE"],
+    "short": ["JETS", "XLY", "EWI"],
+    "confidence_base": 0.6,
+    "rationale": "Palestinian territories conflict → safe haven demand, regional instability"
+  },
+  "SY": {
+    "long": ["USO", "XLE", "GLD"],
+    "short": ["EWI", "JETS"],
+    "confidence_base": 0.55,
+    "rationale": "Syria instability → regional oil risk premium, travel sector caution"
+  },
+  "IQ": {
+    "long": ["USO", "XLE", "UNG"],
+    "short": ["JETS", "EWI"],
+    "confidence_base": 0.6,
+    "rationale": "Iraq conflict → oil supply concerns, regional instability"
+  },
+  "IR": {
+    "long": ["USO", "XLE", "GLD", "UNG"],
+    "short": ["JETS", "EWI", "DAL", "UAL"],
+    "confidence_base": 0.8,
+    "rationale": "Iran tensions → Strait of Hormuz risk (21% of oil), safe haven flows, aviation down"
+  },
+  "YE": {
+    "long": ["USO", "XLE", "GLD"],
+    "short": ["JETS", "EWI"],
+    "confidence_base": 0.65,
+    "rationale": "Yemen conflict → Bab el-Mandeb chokepoint risk, oil shipping disruption"
+  },
+  "SA": {
+    "long": ["USO", "XLE"],
+    "short": ["JETS", "EWI"],
+    "confidence_base": 0.6,
+    "rationale": "Saudi Arabia instability → global oil supply risk (10% of production)"
+  },
+  "SO": {
+    "long": ["GLD", "XLE", "USO"],
+    "short": ["JETS", "EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Somalia piracy/instability → shipping insurance costs, safe haven demand"
+  },
+  "ET": {
+    "long": ["GLD", "DBA", "CORN"],
+    "short": ["EEM", "EWZ"],
+    "confidence_base": 0.5,
+    "rationale": "Ethiopia Tigray conflict → East Africa instability, commodity disruption"
+  },
+  "CD": {
+    "long": ["GLD", "SLV", "COPX"],
+    "short": ["EEM", "XLE"],
+    "confidence_base": 0.55,
+    "rationale": "Congo (DRC) instability → cobalt/copper supply risk (60% global cobalt), metals up"
+  },
+  "CF": {
+    "long": ["GLD", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.45,
+    "rationale": "Central African Republic → regional instability, limited global impact"
+  },
+  "CM": {
+    "long": ["USO", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Cameroon Boko Haram → West Africa oil region instability"
+  },
+  "NG": {
+    "long": ["USO", "XLE", "UNG"],
+    "short": ["EEM", "EWZ"],
+    "confidence_base": 0.6,
+    "rationale": "Nigeria conflict → Africa's largest oil producer at risk, LNG supply concerns"
+  },
+  "BF": {
+    "long": ["GLD", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Burkina Faso jihadist insurgency → Sahel regional instability, gold mining disruption"
+  },
+  "ML": {
+    "long": ["GLD", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Mali conflict → Sahel instability, potential French intervention"
+  },
+  "NE": {
+    "long": ["USO", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.45,
+    "rationale": "Niger instability → uranium supply concerns (5% global), Sahel instability"
+  },
+  "TD": {
+    "long": ["USO", "GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.45,
+    "rationale": "Chad rebel activity → regional instability, limited direct market impact"
+  },
+  "SD": {
+    "long": ["GLD", "USO", "DBA"],
+    "short": ["EEM", "EWZ"],
+    "confidence_base": 0.7,
+    "rationale": "Sudan civil war → grain export disruption, regional instability, safe haven demand"
+  },
+  "MZ": {
+    "long": ["UNG", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.55,
+    "rationale": "Mozambique Cabo Delgado → LNG megaprojects at risk (TotalEnergies, ExxonMobil)"
+  },
+  "AF": {
+    "long": ["GLD", "IEF", "TLT"],
+    "short": ["EEM", "JETS"],
+    "confidence_base": 0.6,
+    "rationale": "Afghanistan Taliban → regional instability, safe haven flows, terror risk premium"
+  },
+  "PK": {
+    "long": ["GLD", "USO"],
+    "short": ["EEM", "JETS"],
+    "confidence_base": 0.65,
+    "rationale": "Pakistan TTP/Balochistan → nuclear state instability, regional terror risk"
+  },
+  "IN": {
+    "long": ["INDA", "GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "India Kashmir conflict → regional nuclear tensions, defensive positioning"
+  },
+  "MM": {
+    "long": ["GLD", "DBA"],
+    "short": ["EEM", "JETS"],
+    "confidence_base": 0.6,
+    "rationale": "Myanmar civil war → Southeast Asia instability, rare earth/jade supply disruption"
+  },
+  "TH": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.4,
+    "rationale": "Thailand southern insurgency → tourism risk, regional caution"
+  },
+  "PH": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.45,
+    "rationale": "Philippines Mindanao conflict → regional terror risk, limited global impact"
+  },
+  "ID": {
+    "long": ["UNG", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Indonesia West Papua → LNG/coal supply risk (major exporter), social unrest"
+  },
+  "AM": {
+    "long": ["GLD", "XLE"],
+    "short": ["EEM", "RSX"],
+    "confidence_base": 0.55,
+    "rationale": "Armenia-Azerbaijan Nagorno-Karabakh → Caucasus energy corridor risk"
+  },
+  "AZ": {
+    "long": ["USO", "XLE", "UNG"],
+    "short": ["EEM"],
+    "confidence_base": 0.6,
+    "rationale": "Azerbaijan conflict → BTC pipeline risk, Caspian energy exports threatened"
+  },
+  "GE": {
+    "long": ["GLD", "XLE"],
+    "short": ["EEM", "RSX"],
+    "confidence_base": 0.5,
+    "rationale": "Georgia Abkhazia/South Ossetia → Caucasus instability, Russia-West tensions"
+  },
+  "MD": {
+    "long": ["GLD", "FXE"],
+    "short": ["EEM", "RSX"],
+    "confidence_base": 0.5,
+    "rationale": "Moldova Transnistria → Russia-EU tensions, energy transit risk"
+  },
+  "CN": {
+    "long": ["GLD", "IEF", "TLT", "DXY"],
+    "short": ["FXI", "MCHI", "EEM", "JETS"],
+    "confidence_base": 0.8,
+    "rationale": "China Taiwan Strait/SCS → global supply chain crisis, tech sector collapse, safe haven surge"
+  },
+  "TW": {
+    "long": ["GLD", "IEF", "VIX", "DXY"],
+    "short": ["FXI", "TSM", "SOXX", "JETS"],
+    "confidence_base": 0.85,
+    "rationale": "Taiwan conflict → semiconductor apocalypse (60% advanced chips), global recession trigger"
+  },
+  "CO": {
+    "long": ["GLD", "COPX"],
+    "short": ["EWZ", "EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Colombia ELN/FARC → cocaine trade instability, regional cautious sentiment"
+  },
+  "GT": {
+    "long": ["GLD"],
+    "short": ["EWZ"],
+    "confidence_base": 0.4,
+    "rationale": "Guatemala cartel violence → Central America instability, migration pressure"
+  },
+  "MX": {
+    "long": ["GLD", "IEF"],
+    "short": ["EWW", "EEM"],
+    "confidence_base": 0.65,
+    "rationale": "Mexico cartel wars → NAFTA/USMCA supply chain risk, border instability, peso weakness"
+  },
+  "PE": {
+    "long": ["GLD", "COPX"],
+    "short": ["EWZ", "EEM"],
+    "confidence_base": 0.45,
+    "rationale": "Peru Shining Path → copper mining risk (2nd largest producer), social unrest"
+  },
+  "VE": {
+    "long": ["USO", "XLE"],
+    "short": ["EWZ", "EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Venezuela collapse → oil production loss (once top 5 exporter), migration crisis"
+  },
+  "KP": {
+    "long": ["GLD", "IEF", "VIX", "DXY"],
+    "short": ["EWY", "JETS", "EEM"],
+    "confidence_base": 0.75,
+    "rationale": "North Korea nuclear test/launch → Korean peninsula war risk, safe haven surge, Asia panic"
+  },
+  "TR": {
+    "long": ["GLD", "USO", "XLE"],
+    "short": ["TUR", "EEM"],
+    "confidence_base": 0.6,
+    "rationale": "Turkey Kurdish conflict → Bosphorus chokepoint risk (3M bbl/day), NATO-Russia tensions"
+  },
+  "EG": {
+    "long": ["WEAT", "DBA", "CORN", "GLD"],
+    "short": ["EEM", "JETS"],
+    "confidence_base": 0.7,
+    "rationale": "Egypt Suez Canal closure → 12% global trade disruption, grain/fertilizer exports halted"
+  },
+  "LB": {
+    "long": ["GLD", "IEF"],
+    "short": ["EEM"],
+    "confidence_base": 0.55,
+    "rationale": "Lebanon Hezbollah conflict → Israel-Iran tensions proxy, regional escalation risk"
+  },
+  "LY": {
+    "long": ["USO", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.6,
+    "rationale": "Libya civil war → oil supply disruption (1.2M bbl/day), Mediterranean migration"
+  },
+  "TN": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.4,
+    "rationale": "Tunisia political instability → Arab Spring 2.0 risk, regional contagion fears"
+  },
+  "DZ": {
+    "long": ["UNG", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Algeria instability → Europe gas supply risk (Italy/Spain dependent), Sahel spillover"
+  },
+  "MA": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.4,
+    "rationale": "Morocco Western Sahara → phosphate supply concerns (75% global reserves)"
+  },
+  "IND": {
+    "long": ["GLD", "IEF", "TLT"],
+    "short": ["JETS", "XLY", "EEM"],
+    "confidence_base": 0.7,
+    "rationale": "Indonesia Malacca Strait → 40% global trade blockage risk, oil tanker chokepoint"
+  },
+  "SG": {
+    "long": ["USO", "XLE", "GLD"],
+    "short": ["JETS", "EEM"],
+    "confidence_base": 0.75,
+    "rationale": "Singapore (Malacca proxy) → global shipping crisis, semiconductor supply chain collapse"
+  },
+  "MY": {
+    "long": ["UNG", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.6,
+    "rationale": "Malaysia conflict → Malacca Strait risk, LNG export disruption (4th largest exporter)"
+  },
+  "OM": {
+    "long": ["USO", "XLE", "UNG"],
+    "short": ["JETS", "EWI"],
+    "confidence_base": 0.8,
+    "rationale": "Oman Strait of Hormuz → 21% of global oil at risk, tanker war scenario"
+  },
+  "AE": {
+    "long": ["USO", "XLE"],
+    "short": ["JETS"],
+    "confidence_base": 0.7,
+    "rationale": "UAE conflict → Hormuz chokepoint risk, major oil exporter (3M bbl/day)"
+  },
+  "KW": {
+    "long": ["USO", "XLE"],
+    "short": ["JETS"],
+    "confidence_base": 0.65,
+    "rationale": "Kuwait instability → Gulf oil production risk (2.4M bbl/day), Iraq invasion 2.0 fears"
+  },
+  "QA": {
+    "long": ["UNG", "XLE"],
+    "short": ["JETS"],
+    "confidence_base": 0.7,
+    "rationale": "Qatar blockade/conflict → LNG supply crisis (world's largest exporter), Al Udeid base risk"
+  },
+  "BH": {
+    "long": ["USO", "XLE", "GLD"],
+    "short": ["JETS"],
+    "confidence_base": 0.6,
+    "rationale": "Bahrain Shia uprising → US 5th Fleet HQ risk, Saudi intervention scenario"
+  },
+  "JO": {
+    "long": ["GLD", "IEF"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Jordan instability → Palestinian refugee crisis, Israel security buffer erosion"
+  },
+  "PA": {
+    "long": ["GLD", "IEF"],
+    "short": ["JETS", "EWZ"],
+    "confidence_base": 0.65,
+    "rationale": "Panama Canal disruption → 6% global trade, US-Asia supply chain rerouting adds 8K miles"
+  },
+  "CU": {
+    "long": ["GLD", "IEF"],
+    "short": ["EWZ"],
+    "confidence_base": 0.5,
+    "rationale": "Cuba regime change → Caribbean instability, migration surge, Russia-US tensions"
+  },
+  "HT": {
+    "long": ["GLD"],
+    "short": ["EWZ"],
+    "confidence_base": 0.4,
+    "rationale": "Haiti gang violence → Caribbean instability, US intervention risk"
+  },
+  "ZA": {
+    "long": ["GLD", "PPLT", "SLV"],
+    "short": ["EEM", "EZA"],
+    "confidence_base": 0.6,
+    "rationale": "South Africa unrest → platinum/palladium supply (70% global), gold mining disruption"
+  },
+  "ZW": {
+    "long": ["GLD", "PPLT"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Zimbabwe collapse → platinum/chrome supply risk, regional migration crisis"
+  },
+  "GR": {
+    "long": ["GLD", "IEF"],
+    "short": ["FXE", "EWU", "GREK"],
+    "confidence_base": 0.6,
+    "rationale": "Greece debt crisis 2.0 → Eurozone contagion, Turkish Straits tensions"
+  },
+  "CY": {
+    "long": ["GLD", "UNG"],
+    "short": ["FXE", "EEM"],
+    "confidence_base": 0.55,
+    "rationale": "Cyprus conflict → Eastern Mediterranean gas field disputes, Turkey-EU tensions"
+  },
+  "BY": {
+    "long": ["GLD", "XLE"],
+    "short": ["RSX", "FXE"],
+    "confidence_base": 0.6,
+    "rationale": "Belarus uprising → Russia intervention risk, Yamal-Europe pipeline disruption"
+  },
+  "KZ": {
+    "long": ["USO", "UNG", "URA"],
+    "short": ["EEM", "RSX"],
+    "confidence_base": 0.55,
+    "rationale": "Kazakhstan unrest → uranium supply risk (40% global), oil export disruption (1.8M bbl/day)"
+  },
+  "UZ": {
+    "long": ["GLD", "UNG"],
+    "short": ["EEM"],
+    "confidence_base": 0.45,
+    "rationale": "Uzbekistan instability → Central Asia gas hub, China pipeline risk"
+  },
+  "TM": {
+    "long": ["UNG", "XLE"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Turkmenistan collapse → China gas pipeline (25% of imports), Caspian energy crisis"
+  },
+  "KG": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.45,
+    "rationale": "Kyrgyzstan coup → Central Asia instability, Russia-China competition flashpoint"
+  },
+  "TJ": {
+    "long": ["GLD", "SLV"],
+    "short": ["EEM"],
+    "confidence_base": 0.4,
+    "rationale": "Tajikistan conflict → Central Asia drug route, Afghanistan spillover"
+  },
+  "LK": {
+    "long": ["GLD", "IEF"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Sri Lanka economic collapse → Indian Ocean shipping hub risk, China debt-trap diplomacy"
+  },
+  "BD": {
+    "long": ["GLD", "DBA"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Bangladesh unrest → garment supply chain (2nd largest exporter), climate migration crisis"
+  },
+  "NP": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.4,
+    "rationale": "Nepal instability → India-China buffer state, limited direct market impact"
+  },
+  "BT": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.35,
+    "rationale": "Bhutan tensions → India-China border flashpoint, minimal market impact"
+  },
+  "MN": {
+    "long": ["COPX", "GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Mongolia instability → copper/coal supply to China, Russia-China competition zone"
+  },
+  "KH": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.4,
+    "rationale": "Cambodia (China base) → Ream Naval Base escalation, SCS tensions proxy"
+  },
+  "LA": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.35,
+    "rationale": "Laos instability → Mekong River disputes, China debt dependency"
+  },
+  "VN": {
+    "long": ["GLD", "DBA"],
+    "short": ["EEM", "VNM"],
+    "confidence_base": 0.6,
+    "rationale": "Vietnam SCS conflict → manufacturing exodus risk (Apple/Samsung), US-China proxy"
+  },
+  "KR": {
+    "long": ["GLD", "IEF", "VIX"],
+    "short": ["EWY", "JETS", "SOXX"],
+    "confidence_base": 0.8,
+    "rationale": "South Korea war → semiconductor collapse (Samsung/SK Hynix 30% DRAM), global tech crisis"
+  },
+  "JP": {
+    "long": ["GLD", "IEF", "DXY"],
+    "short": ["EWJ", "JETS"],
+    "confidence_base": 0.7,
+    "rationale": "Japan (North Korea/China threat) → yen safe haven paradox, US base strikes, regional panic"
+  },
+  "AU": {
+    "long": ["EWA", "GLD"],
+    "short": ["FXI", "EEM"],
+    "confidence_base": 0.6,
+    "rationale": "Australia-China tensions → iron ore/coal export bans (60% to China), AUKUS escalation"
+  },
+  "NZ": {
+    "long": ["GLD", "DBA"],
+    "short": ["EEM"],
+    "confidence_base": 0.4,
+    "rationale": "New Zealand instability → minimal market impact, Pacific safe haven perception"
+  },
+  "FJ": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.35,
+    "rationale": "Fiji coup → Pacific Island instability, China-US competition for influence"
+  },
+  "PG": {
+    "long": ["GLD", "COPX"],
+    "short": ["EEM"],
+    "confidence_base": 0.5,
+    "rationale": "Papua New Guinea unrest → copper/gold mining risk, LNG export disruption"
+  },
+  "SB": {
+    "long": ["GLD"],
+    "short": ["EEM"],
+    "confidence_base": 0.35,
+    "rationale": "Solomon Islands (China base) → Pacific geopolitical flashpoint, minimal economic impact"
+  },
+  "AR": {
+    "long": ["GLD", "DBA", "WEAT"],
+    "short": ["EWZ", "ARGT"],
+    "confidence_base": 0.55,
+    "rationale": "Argentina default/crisis → grain export disruption (3rd largest soy), regional contagion"
+  },
+  "CL": {
+    "long": ["COPX", "SLV"],
+    "short": ["EWZ", "ECH"],
+    "confidence_base": 0.6,
+    "rationale": "Chile unrest → copper supply crisis (25% global), lithium export risk (battery metals)"
+  },
+  "BO": {
+    "long": ["SLV", "GLD"],
+    "short": ["EWZ"],
+    "confidence_base": 0.5,
+    "rationale": "Bolivia coup → lithium reserves risk (25% global), natural gas to Argentina/Brazil"
+  },
+  "EC": {
+    "long": ["USO", "XLE"],
+    "short": ["EWZ"],
+    "confidence_base": 0.5,
+    "rationale": "Ecuador instability → oil export disruption (OPEC member), regional migration pressure"
+  },
+  "PY": {
+    "long": ["DBA"],
+    "short": ["EWZ"],
+    "confidence_base": 0.4,
+    "rationale": "Paraguay political crisis → soy export risk, regional instability"
+  },
+  "UY": {
+    "long": ["GLD", "DBA"],
+    "short": ["EWZ"],
+    "confidence_base": 0.4,
+    "rationale": "Uruguay instability → minimal market impact, regional safe haven status"
+  },
+  "BR": {
+    "long": ["DBA", "SOYB", "COPX"],
+    "short": ["EWZ", "EEM"],
+    "confidence_base": 0.65,
+    "rationale": "Brazil political crisis → soy/beef export risk (1st globally), iron ore/coffee supply disruption"
+  },
+  "SV": {
+    "long": ["GLD"],
+    "short": ["EWZ"],
+    "confidence_base": 0.45,
+    "rationale": "El Salvador gang violence → Bitcoin legal tender experiment collapse, migration pressure"
+  },
+  "HN": {
+    "long": ["GLD"],
+    "short": ["EWZ"],
+    "confidence_base": 0.4,
+    "rationale": "Honduras instability → Central America migration crisis, limited market impact"
+  },
+  "NI": {
+    "long": ["GLD", "DBA"],
+    "short": ["EWZ"],
+    "confidence_base": 0.45,
+    "rationale": "Nicaragua authoritarianism → regional instability, canal project tensions"
+  },
+  "CR": {
+    "long": ["GLD"],
+    "short": ["EWZ"],
+    "confidence_base": 0.35,
+    "rationale": "Costa Rica instability → minimal impact, regional safe haven perception"
+  },
+  "BZ": {
+    "long": ["GLD"],
+    "short": ["EWZ"],
+    "confidence_base": 0.3,
+    "rationale": "Belize conflict → minimal market impact, small economy"
+  },
+  "JM": {
+    "long": ["GLD"],
+    "short": ["EWZ"],
+    "confidence_base": 0.35,
+    "rationale": "Jamaica gang violence → Caribbean tourism risk, bauxite supply concerns"
+  },
+  "TT": {
+    "long": ["UNG", "XLE"],
+    "short": ["EWZ"],
+    "confidence_base": 0.5,
+    "rationale": "Trinidad and Tobago instability → LNG/natural gas export risk to US"
+  },
+  "GY": {
+    "long": ["USO", "XLE"],
+    "short": ["EWZ"],
+    "confidence_base": 0.55,
+    "rationale": "Guyana oil boom → ExxonMobil offshore fields (1M bbl/day potential), Venezuela border dispute"
+  },
+  "SR": {
+    "long": ["GLD"],
+    "short": ["EWZ"],
+    "confidence_base": 0.4,
+    "rationale": "Suriname instability → bauxite/gold mining risk, minimal global impact"
+  },
+  "GF": {
+    "long": ["GLD"],
+    "short": ["FXE"],
+    "confidence_base": 0.35,
+    "rationale": "French Guiana → European Space Agency launch site risk, minimal market impact"
+  }
+}

@@ -1,0 +1,432 @@
+/**
+ * Globe Initialization
+ * deck.gl + MapLibre GL JS
+ * No Mapbox license required - using free CartoDB basemaps
+ */
+
+import { Deck } from '@deck.gl/core';
+import type { Layer, PickingInfo } from '@deck.gl/core';
+import type { MapViewState } from '@deck.gl/core';
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+import { getStore } from '../lib/state';
+
+/**
+ * Theme-aware basemap styles
+ */
+const BASEMAP_STYLES = {
+  dark: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+  light: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+} as const;
+
+/**
+ * Initial view state configuration
+ * Centered on Middle East/Mediterranean region
+ */
+const INITIAL_VIEW_STATE: MapViewState = {
+  longitude: 30,
+  latitude: 25,
+  zoom: 2.5,
+  pitch: 35,
+  bearing: 0,
+  minZoom: 1,
+  maxZoom: 18,
+  minPitch: 0,
+  maxPitch: 60,
+};
+
+/**
+ * Globe manager class
+ * Handles deck.gl instance, MapLibre basemap, and layer management
+ */
+class GlobeManager {
+  private deck: Deck | null = null;
+  private map: maplibregl.Map | null = null;
+  private container: HTMLElement | null = null;
+  private currentTheme: 'dark' | 'light' = 'dark';
+  private layerRegistry: Map<string, Layer> = new Map();
+  private activeLayerIds: Set<string> = new Set();
+
+  /**
+   * Initialize the globe
+   */
+  init(container: HTMLElement): void {
+    if (this.deck) {
+      console.warn('[Globe] Already initialized');
+      return;
+    }
+
+    this.container = container;
+    const store = getStore();
+
+    // Get initial active layers from state
+    const globeState = store.get('globe');
+    this.activeLayerIds = new Set(globeState.activeLayers);
+
+    // Create MapLibre GL JS map
+    this.map = new maplibregl.Map({
+      container,
+      style: BASEMAP_STYLES[this.currentTheme],
+      center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
+      zoom: INITIAL_VIEW_STATE.zoom,
+      pitch: INITIAL_VIEW_STATE.pitch ?? 0,
+      bearing: INITIAL_VIEW_STATE.bearing ?? 0,
+      interactive: false, // deck.gl will handle interaction
+      attributionControl: false, // Clean UI
+    });
+
+    // Initialize deck.gl
+    this.deck = new Deck({
+      parent: container as HTMLDivElement,
+      style: {
+        position: 'absolute',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'auto',
+      },
+      initialViewState: INITIAL_VIEW_STATE,
+      controller: {
+        dragRotate: true,
+        touchRotate: true,
+        scrollZoom: true,
+        doubleClickZoom: true,
+        keyboard: true,
+        inertia: true,
+      },
+      // Sync deck.gl view state with MapLibre
+      onViewStateChange: ({ viewState }) => {
+        if (this.map) {
+          this.map.jumpTo({
+            center: [viewState.longitude, viewState.latitude],
+            zoom: viewState.zoom,
+            bearing: viewState.bearing ?? 0,
+            pitch: viewState.pitch ?? 0,
+          });
+        }
+
+        // Update state
+        store.update('globe', (current) => ({
+          ...current,
+          viewState: {
+            longitude: viewState.longitude,
+            latitude: viewState.latitude,
+            zoom: viewState.zoom,
+            pitch: viewState.pitch ?? 0,
+            bearing: viewState.bearing ?? 0,
+          },
+        }));
+
+        return viewState;
+      },
+      // Handle clicks and hovers
+      onClick: (info: PickingInfo) => this.handleClick(info),
+      onHover: (info: PickingInfo) => this.handleHover(info),
+      // Performance optimizations
+      _pickable: true,
+      pickingRadius: 5,
+      useDevicePixels: true,
+    });
+
+    // Update state to mark globe as initialized
+    store.update('globe', (current) => ({
+      ...current,
+      initialized: true,
+    }));
+
+    // Subscribe to active layer changes
+    store.subscribe('globe', (globeState) => {
+      const newActiveLayerIds = new Set(globeState.activeLayers);
+      if (!this.setsEqual(newActiveLayerIds, this.activeLayerIds)) {
+        this.activeLayerIds = newActiveLayerIds;
+        this.updateLayers();
+      }
+    });
+
+    console.log('[Globe] Initialized with deck.gl + MapLibre');
+  }
+
+  /**
+   * Register a layer in the registry
+   */
+  registerLayer(id: string, layer: Layer): void {
+    this.layerRegistry.set(id, layer);
+    this.updateLayers();
+  }
+
+  /**
+   * Unregister a layer
+   */
+  unregisterLayer(id: string): void {
+    this.layerRegistry.delete(id);
+    this.updateLayers();
+  }
+
+  /**
+   * Update deck.gl with currently active layers
+   */
+  updateLayers(layers?: Layer[]): void {
+    if (!this.deck) {
+      console.warn('[Globe] Cannot update layers - deck not initialized');
+      return;
+    }
+
+    // If layers array is provided, use it directly
+    if (layers) {
+      this.deck.setProps({ layers });
+      return;
+    }
+
+    // Otherwise, filter from registry based on active layer IDs
+    const activeLayers: Layer[] = [];
+    this.layerRegistry.forEach((layer, id) => {
+      if (this.activeLayerIds.has(id)) {
+        activeLayers.push(layer);
+      }
+    });
+
+    this.deck.setProps({ layers: activeLayers });
+  }
+
+  /**
+   * Toggle a layer on/off
+   */
+  toggleLayer(layerId: string): void {
+    const store = getStore();
+    store.update('globe', (current) => {
+      const newActiveLayers = new Set(current.activeLayers);
+      if (newActiveLayers.has(layerId)) {
+        newActiveLayers.delete(layerId);
+      } else {
+        newActiveLayers.add(layerId);
+      }
+      return {
+        ...current,
+        activeLayers: newActiveLayers,
+      };
+    });
+  }
+
+  /**
+   * Switch between dark and light basemap
+   */
+  setTheme(theme: 'dark' | 'light'): void {
+    if (!this.map) return;
+
+    this.currentTheme = theme;
+    this.map.setStyle(BASEMAP_STYLES[theme]);
+    console.log(`[Globe] Switched to ${theme} theme`);
+  }
+
+  /**
+   * Fly to a specific location
+   */
+  flyTo(options: {
+    longitude: number;
+    latitude: number;
+    zoom?: number;
+    pitch?: number;
+    bearing?: number;
+    duration?: number;
+  }): void {
+    if (!this.deck) return;
+
+    const currentViewState = this.deck.getViewports()[0] as any;
+    const viewState: MapViewState = {
+      longitude: options.longitude,
+      latitude: options.latitude,
+      zoom: options.zoom ?? currentViewState?.zoom ?? 2.5,
+      pitch: options.pitch ?? currentViewState?.pitch ?? 0,
+      bearing: options.bearing ?? currentViewState?.bearing ?? 0,
+      transitionDuration: options.duration ?? 1000,
+    };
+
+    this.deck.setProps({ initialViewState: viewState });
+  }
+
+  /**
+   * Handle click events on the globe
+   */
+  private handleClick(info: PickingInfo): void {
+    if (!info.object) {
+      // Clicked on empty space - clear selection
+      const store = getStore();
+      store.set('selected', {
+        country: null,
+        event: null,
+        asset: null,
+      });
+      return;
+    }
+
+    // Handle clicks on different layer types
+    const layerId = info.layer?.id;
+    const object = info.object;
+
+    console.log('[Globe] Clicked:', { layerId, object });
+
+    // Update selected entity in state
+    const store = getStore();
+    store.update('selected', (current) => {
+      // Determine what type of entity was clicked
+      if (object.type === 'country' || object.country) {
+        return { ...current, country: object.id || object.country };
+      } else if (object.type === 'event' || object.eventId) {
+        return { ...current, event: object.id || object.eventId };
+      } else if (object.type === 'asset' || object.assetId) {
+        return { ...current, asset: object.id || object.assetId };
+      }
+      return current;
+    });
+  }
+
+  /**
+   * Handle hover events on the globe
+   */
+  private handleHover(info: PickingInfo): void {
+    if (!this.container) return;
+
+    // Update cursor style
+    this.container.style.cursor = info.object ? 'pointer' : 'grab';
+
+    // Could show tooltip here in the future
+    if (info.object) {
+      // console.log('[Globe] Hover:', info.object);
+    }
+  }
+
+  /**
+   * Clean up resources
+   */
+  destroy(): void {
+    if (this.deck) {
+      this.deck.finalize();
+      this.deck = null;
+    }
+
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+    }
+
+    this.layerRegistry.clear();
+    this.activeLayerIds.clear();
+    console.log('[Globe] Destroyed');
+  }
+
+  /**
+   * Get current deck.gl instance (for debugging)
+   */
+  getDeck(): Deck | null {
+    return this.deck;
+  }
+
+  /**
+   * Get current MapLibre instance (for debugging)
+   */
+  getMap(): maplibregl.Map | null {
+    return this.map;
+  }
+
+  /**
+   * Helper: Compare two sets for equality
+   */
+  private setsEqual<T>(a: Set<T>, b: Set<T>): boolean {
+    if (a.size !== b.size) return false;
+    for (const item of a) {
+      if (!b.has(item)) return false;
+    }
+    return true;
+  }
+
+  /**
+   * Handle window resize
+   */
+  resize(): void {
+    if (this.deck) {
+      this.deck.setProps({
+        width: this.container?.clientWidth ?? window.innerWidth,
+        height: this.container?.clientHeight ?? window.innerHeight,
+      });
+    }
+    if (this.map) {
+      this.map.resize();
+    }
+  }
+}
+
+// Singleton instance
+let globeManager: GlobeManager | null = null;
+
+/**
+ * Initialize the globe
+ */
+export function initGlobe(container: HTMLElement): GlobeManager {
+  if (!globeManager) {
+    globeManager = new GlobeManager();
+  }
+  globeManager.init(container);
+  return globeManager;
+}
+
+/**
+ * Get the globe manager instance
+ */
+export function getGlobe(): GlobeManager {
+  if (!globeManager) {
+    throw new Error('Globe not initialized. Call initGlobe() first.');
+  }
+  return globeManager;
+}
+
+/**
+ * Update globe layers (convenience function)
+ */
+export function updateGlobeLayers(layers: Layer[]): void {
+  const globe = getGlobe();
+  globe.updateLayers(layers);
+}
+
+/**
+ * Register a layer
+ */
+export function registerLayer(id: string, layer: Layer): void {
+  const globe = getGlobe();
+  globe.registerLayer(id, layer);
+}
+
+/**
+ * Toggle a layer on/off
+ */
+export function toggleLayer(layerId: string): void {
+  const globe = getGlobe();
+  globe.toggleLayer(layerId);
+}
+
+/**
+ * Switch basemap theme
+ */
+export function setGlobeTheme(theme: 'dark' | 'light'): void {
+  const globe = getGlobe();
+  globe.setTheme(theme);
+}
+
+/**
+ * Fly to location
+ */
+export function flyToLocation(options: {
+  longitude: number;
+  latitude: number;
+  zoom?: number;
+  pitch?: number;
+  bearing?: number;
+  duration?: number;
+}): void {
+  const globe = getGlobe();
+  globe.flyTo(options);
+}
+
+// Export types
+export type { Layer, PickingInfo, MapViewState };
+export { GlobeManager };

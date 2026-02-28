@@ -1,0 +1,122 @@
+[
+  {
+    "id": "hormuz",
+    "name": "Strait of Hormuz",
+    "lat": 26.5667,
+    "lon": 56.2500,
+    "throughput": "21 million barrels/day oil (21% of global petroleum)",
+    "importance": "Critical - Primary route for Persian Gulf oil exports to Asia, Europe, North America"
+  },
+  {
+    "id": "malacca",
+    "name": "Strait of Malacca",
+    "lat": 1.4300,
+    "lon": 102.8900,
+    "throughput": "16 million barrels/day oil, 40% of world maritime trade",
+    "importance": "Critical - Main shipping channel between Indian and Pacific Oceans, essential for China/Japan/South Korea energy security"
+  },
+  {
+    "id": "suez",
+    "name": "Suez Canal",
+    "lat": 30.5852,
+    "lon": 32.3439,
+    "throughput": "12% of global trade, 5-10 million barrels/day oil",
+    "importance": "Critical - Shortcut between Europe and Asia, saves 8,900 km voyage around Africa"
+  },
+  {
+    "id": "bab-el-mandeb",
+    "name": "Bab el-Mandeb Strait",
+    "lat": 12.5833,
+    "lon": 43.3333,
+    "throughput": "6.2 million barrels/day oil northbound to Suez Canal",
+    "importance": "Critical - Connects Red Sea to Gulf of Aden, vital for Europe-Asia trade and oil to Europe"
+  },
+  {
+    "id": "panama",
+    "name": "Panama Canal",
+    "lat": 9.0800,
+    "lon": -79.6800,
+    "throughput": "6% of global maritime trade, 144 million tons LNG annually",
+    "importance": "High - Connects Atlantic and Pacific, saves 8,000 nautical miles around South America"
+  },
+  {
+    "id": "turkish-straits",
+    "name": "Turkish Straits (Bosphorus & Dardanelles)",
+    "lat": 41.1200,
+    "lon": 29.0783,
+    "throughput": "3 million barrels/day oil from Caspian/Black Sea",
+    "importance": "High - Only route between Black Sea and Mediterranean, regulated by Montreux Convention"
+  },
+  {
+    "id": "dover",
+    "name": "Strait of Dover / English Channel",
+    "lat": 51.0661,
+    "lon": 1.3347,
+    "throughput": "500+ vessels/day, busiest shipping lane globally",
+    "importance": "Medium - Critical European trade route between North Sea and Atlantic"
+  },
+  {
+    "id": "gibraltar",
+    "name": "Strait of Gibraltar",
+    "lat": 35.9667,
+    "lon": -5.6000,
+    "throughput": "300+ vessels/day, Mediterranean-Atlantic gateway",
+    "importance": "High - Only natural entrance to Mediterranean Sea from Atlantic Ocean"
+  },
+  {
+    "id": "luzon",
+    "name": "Luzon Strait",
+    "lat": 20.5000,
+    "lon": 121.0000,
+    "throughput": "Major oil/LNG route to China, Japan, South Korea",
+    "importance": "Medium - Alternative to Malacca for Pacific-South China Sea transit"
+  },
+  {
+    "id": "sunda",
+    "name": "Sunda Strait",
+    "lat": -6.0500,
+    "lon": 105.8667,
+    "throughput": "Alternative route bypassing Malacca",
+    "importance": "Medium - Backup chokepoint between Java and Sumatra"
+  },
+  {
+    "id": "lombok",
+    "name": "Lombok Strait",
+    "lat": -8.5667,
+    "lon": 115.7167,
+    "throughput": "Deep-water alternative to Malacca for large tankers",
+    "importance": "Medium - Strategic for submarines and deep-draft vessels"
+  },
+  {
+    "id": "taiwan",
+    "name": "Taiwan Strait",
+    "lat": 24.5000,
+    "lon": 119.5000,
+    "throughput": "Major China-Japan-South Korea trade corridor",
+    "importance": "High - Geopolitically contested, 50% of world's container ships pass through"
+  },
+  {
+    "id": "danish-straits",
+    "name": "Danish Straits (Great Belt, Little Belt, Øresund)",
+    "lat": 55.3333,
+    "lon": 11.1667,
+    "throughput": "Baltic Sea-North Sea gateway, Russian oil exports",
+    "importance": "Medium - Only route for Baltic nations to Atlantic, NATO strategic interest"
+  },
+  {
+    "id": "mozambique",
+    "name": "Mozambique Channel",
+    "lat": -19.0000,
+    "lon": 41.0000,
+    "throughput": "30% of global tanker traffic around Cape of Good Hope",
+    "importance": "Medium - Alternative to Suez for Asia-Europe oil/LNG trade"
+  },
+  {
+    "id": "cape-horn",
+    "name": "Cape Horn / Drake Passage",
+    "lat": -55.9833,
+    "lon": -67.2667,
+    "throughput": "Declining since Panama Canal expansion",
+    "importance": "Low - Historical importance, now backup route for oversized vessels"
+  }
+]
