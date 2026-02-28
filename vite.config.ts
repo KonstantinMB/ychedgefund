@@ -1,5 +1,7 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+// @ts-ignore — vitest types are only needed in test files
+type VitestConfig = import('vitest/config').UserConfig;
 
 export default defineConfig({
   root: './src',
@@ -53,6 +55,19 @@ export default defineConfig({
   preview: {
     port: 3000,
   },
+
+  // Vitest configuration
+  test: {
+    // root is ./src — patterns are relative to it
+    environment: 'jsdom',
+    globals: true,
+    include: ['**/*.test.ts'],
+    setupFiles: ['test-setup.ts'],
+    coverage: {
+      provider: 'v8',
+      include: ['trading/risk/**'],
+    },
+  } as Record<string, unknown>,
 
   // Optimize dependencies
   optimizeDeps: {

@@ -463,3 +463,52 @@ export const auditLog = new AuditLog();
 export function logRiskDecision(signalId: string, decision: RiskDecision, signal?: Signal): void {
   auditLog.logDecision(signalId, decision, signal);
 }
+
+/**
+ * Download the full audit log as a CSV file (triggers browser file save dialog).
+ * Call from the command palette or developer console.
+ */
+export function downloadAuditLog(): void {
+  const csv = auditLog.exportCSV();
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const filename = `atlas-audit-log-${new Date().toISOString().slice(0, 10)}.csv`;
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.style.display = 'none';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setTimeout(() => URL.revokeObjectURL(url), 5_000);
+
+  const stats = auditLog.getStats();
+  console.log(
+    `[AuditLog] Downloaded ${stats.totalDecisions} decisions as ${filename}`,
+    `(approval rate: ${(stats.approvalRate * 100).toFixed(1)}%)`
+  );
+}
+
+/**
+ * Download the full audit log as a JSON file.
+ */
+export function downloadAuditLogJSON(): void {
+  const json = auditLog.exportJSON();
+  const blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+
+  const filename = `atlas-audit-log-${new Date().toISOString().slice(0, 10)}.json`;
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.style.display = 'none';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  setTimeout(() => URL.revokeObjectURL(url), 5_000);
+}
