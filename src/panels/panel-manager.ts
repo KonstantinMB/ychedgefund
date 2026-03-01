@@ -10,6 +10,8 @@ export interface PanelConfig {
   badge?: string;
   badgeClass?: string;
   defaultCollapsed?: boolean;
+  /** Optional action button rendered in the panel header (e.g. "+ Trade") */
+  headerAction?: { label: string; onClick: () => void };
   init: (container: HTMLElement) => void;
 }
 
@@ -65,6 +67,17 @@ export function createPanel(config: PanelConfig): HTMLElement {
 
   const controls = document.createElement('div');
   controls.className = 'panel-controls';
+
+  if (config.headerAction) {
+    const actionBtn = document.createElement('button');
+    actionBtn.className = 'panel-header-action';
+    actionBtn.textContent = config.headerAction.label;
+    actionBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // don't collapse panel on click
+      config.headerAction!.onClick();
+    });
+    controls.appendChild(actionBtn);
+  }
 
   if (config.badge) {
     const badge = document.createElement('span');

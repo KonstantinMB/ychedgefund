@@ -895,6 +895,12 @@ export function initPortfolioPanel(): void {
     badge: 'PAPER',
     badgeClass: 'mock',
     defaultCollapsed: false,
+    headerAction: {
+      label: '＋ Trade',
+      onClick: () => {
+        import('./trade-ticket').then(({ openTradeTicket }) => openTradeTicket()).catch(console.error);
+      },
+    },
     init: buildPortfolioBody,
   });
 }

@@ -383,6 +383,120 @@ export class ExecutionLoop {
     void e; // event is used for side-effect triggering only
   };
 
+  // ── Manual order entry ────────────────────────────────────────────────────
+
+  /** Return a cached price for `symbol`, or null if not yet received. */
+  getPrice(symbol: string): number | null {
+    return this.priceCache.get(symbol) ?? null;
+  }
+
+  /** Fetch price from Yahoo if not in priceCache. */
+  async fetchPrice(symbol: string): Promise<number | null> {
+    const cached = this.priceCache.get(symbol);
+    if (cached) return cached;
+    try {
+      const res = await fetch(
+        `/api/market/yahoo?symbols=${encodeURIComponent(symbol)}`,
+        { signal: AbortSignal.timeout(5_000) }
+      );
+      if (!res.ok) return null;
+      const data = await res.json() as { quotes?: Array<{ symbol: string; price: number }> };
+      const quote = data.quotes?.find(q => q.symbol === symbol);
+      if (quote?.price) {
+        this.priceCache.set(symbol, quote.price);
+        paperBroker.updatePrices({ [symbol]: quote.price });
+        portfolioManager.updateMarkToMarket({ [symbol]: quote.price });
+        return quote.price;
+      }
+    } catch { /* fall through */ }
+    return null;
+  }
+
+  /**
+   * Place a manual paper trade order directly — bypasses the signal bus and
+   * auto-execute gate. Goes through broker simulation and risk checks.
+   * Returns a result object; on success, position appears in portfolio panel.
+   */
+  async placeManualOrder(params: {
+    symbol: string;
+    direction: 'LONG' | 'SHORT';
+    dollars: number;          // dollar amount to invest
+    stopLossPct: number;      // e.g. 0.05 for 5%
+    takeProfitPct: number;    // e.g. 0.15 for 15%
+    currentPrice: number;
+  }): Promise<{ ok: boolean; reason?: string; fill?: Fill }> {
+    const { symbol, direction, dollars, stopLossPct, takeProfitPct, currentPrice } = params;
+
+    if (dollars < 100) return { ok: false, reason: 'Minimum order size is $100' };
+    if (currentPrice <= 0) return { ok: false, reason: 'Invalid price' };
+
+    const cash = portfolioManager.getCash();
+    if (dollars > cash) {
+      return { ok: false, reason: `Insufficient cash — have $${cash.toFixed(0)}, need $${dollars.toFixed(0)}` };
+    }
+
+    if (portfolioManager.hasPosition(symbol)) {
+      return { ok: false, reason: `Already holding ${symbol}. Close existing position first.` };
+    }
+
+    const quantity = Math.floor(dollars / currentPrice);
+    if (quantity < 1) return { ok: false, reason: 'Order too small for current price — increase dollar amount' };
+
+    // Synthetic signal for this manual order
+    const syntheticSignal: import('../engine').Signal = {
+      id: `manual-${Date.now().toString(36)}`,
+      timestamp: Date.now(),
+      strategy: 'MANUAL',
+      symbol,
+      direction,
+      confidence: 0.75,
+      reasoning: 'Manual order placed by user',
+      targetReturn: takeProfitPct,
+      stopLoss: stopLossPct,
+      takeProfit: takeProfitPct,
+      expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 day expiry
+    };
+
+    // Light risk check — skip full risk manager for manual trades, just size limit
+    const maxPosition = PAPER_CONFIG.maxPositionPct * portfolioManager.getTotalValue();
+    if (dollars > maxPosition) {
+      return {
+        ok: false,
+        reason: `Exceeds max position size ($${maxPosition.toFixed(0)} / 10% NAV). Reduce amount.`,
+      };
+    }
+
+    // Update price cache so broker can fill
+    this.priceCache.set(symbol, currentPrice);
+    paperBroker.updatePrices({ [symbol]: currentPrice });
+
+    const orderId = makeOrderId('manual');
+    const fill = await paperBroker.submitOrder({
+      id: orderId,
+      symbol,
+      type: 'MARKET',
+      side: direction === 'LONG' ? 'BUY' : 'SELL',
+      quantity,
+      submittedAt: Date.now(),
+      strategy: 'MANUAL',
+    });
+
+    if (!fill) {
+      return { ok: false, reason: 'Order rejected by broker simulation' };
+    }
+
+    portfolioManager.openPosition(fill, syntheticSignal);
+    this.stats.tradesOpened++;
+
+    console.log(
+      `[ExecutionLoop] Manual ${direction} ${symbol} — ` +
+      `${quantity} shares @ $${fill.fillPrice.toFixed(2)} = $${(quantity * fill.fillPrice).toFixed(0)}`
+    );
+
+    window.dispatchEvent(new CustomEvent('trading:manual-order', { detail: { fill, signal: syntheticSignal } }));
+    return { ok: true, fill };
+  }
+
   // ── Compatibility shim ───────────────────────────────────────────────────
   // The existing RiskManager.evaluateOrder() expects a legacy PortfolioState
   // (Map-based positions, openTrades array). Build it from PortfolioManager.

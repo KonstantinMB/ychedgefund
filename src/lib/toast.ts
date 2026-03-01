@@ -3,7 +3,7 @@
  * Displays a transient message at the bottom of the screen.
  */
 
-export function showToast(message: string, duration = 3000): void {
+export function showToast(message: string, type: 'info' | 'success' | 'error' = 'info', duration = 3500): void {
   let toast = document.querySelector<HTMLElement>('.atlas-toast');
   if (!toast) {
     toast = document.createElement('div');
@@ -12,13 +12,13 @@ export function showToast(message: string, duration = 3000): void {
   }
 
   toast.textContent = message;
+  toast.dataset['type'] = type;
   toast.classList.add('visible');
 
-  // Clear any pending hide timer
-  const existing = (toast as any).__toastTimer as ReturnType<typeof setTimeout> | undefined;
+  const existing = (toast as HTMLElement & { __toastTimer?: ReturnType<typeof setTimeout> }).__toastTimer;
   if (existing) clearTimeout(existing);
 
-  (toast as any).__toastTimer = setTimeout(() => {
+  (toast as HTMLElement & { __toastTimer?: ReturnType<typeof setTimeout> }).__toastTimer = setTimeout(() => {
     toast!.classList.remove('visible');
   }, duration);
 }
