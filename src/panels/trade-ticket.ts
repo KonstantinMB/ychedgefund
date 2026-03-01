@@ -234,34 +234,88 @@ export function openTradeTicket(prefill?: { symbol?: string; direction?: 'LONG' 
     priceRefreshTimer = setInterval(() => void loadPrice(symbol), 15_000);
   }
 
-  // ── Ticker search ──────────────────────────────────────────────────────────
+  // ── Ticker search with asset-class tabs ───────────────────────────────────
   const searchInput = card.querySelector<HTMLInputElement>('#tt-search')!;
   const dropdown    = card.querySelector<HTMLElement>('#tt-dropdown')!;
+  type AssetTab = 'all' | 'stock' | 'equity' | 'crypto';
+  let activeTab: AssetTab = 'all';
+
+  // Build tab bar inside dropdown header
+  const tabBar = document.createElement('div');
+  tabBar.className = 'tt-tab-bar';
+  const TABS: Array<{ id: AssetTab; label: string }> = [
+    { id: 'all',    label: 'All' },
+    { id: 'stock',  label: 'Stocks' },
+    { id: 'equity', label: 'ETFs' },
+    { id: 'crypto', label: 'Crypto' },
+  ];
+  for (const t of TABS) {
+    const btn = document.createElement('button');
+    btn.className = `tt-tab-btn${t.id === activeTab ? ' active' : ''}`;
+    btn.textContent = t.label;
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      activeTab = t.id;
+      tabBar.querySelectorAll('.tt-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderDropdown(searchInput.value);
+    });
+    tabBar.appendChild(btn);
+  }
+
+  const CLASS_BADGE: Record<string, string> = {
+    stock:          'STK',
+    equity:         'ETF',
+    crypto:         'CRYPTO',
+    commodity:      'CMDTY',
+    'fixed-income': 'BOND',
+    international:  'INTL',
+    thematic:       'THEME',
+  };
+  const CLASS_COLOR: Record<string, string> = {
+    stock:          '#3b82f6',
+    equity:         '#8b5cf6',
+    crypto:         '#f97316',
+    commodity:      '#eab308',
+    'fixed-income': '#22c55e',
+    international:  '#14b8a6',
+    thematic:       '#ec4899',
+  };
 
   function renderDropdown(query: string): void {
     const q = query.toUpperCase().trim();
+
+    let pool = TRADEABLE_UNIVERSE.filter(a => {
+      if (activeTab === 'all') return true;
+      if (activeTab === 'equity') return a.assetClass === 'equity' || a.assetClass === 'thematic' || a.assetClass === 'international' || a.assetClass === 'commodity' || a.assetClass === 'fixed-income';
+      return a.assetClass === activeTab;
+    });
+
     const matches = q.length === 0
-      ? TRADEABLE_UNIVERSE
-      : TRADEABLE_UNIVERSE.filter(a =>
+      ? pool
+      : pool.filter(a =>
           a.symbol.includes(q) || a.name.toUpperCase().includes(q) || a.sector.toUpperCase().includes(q)
         );
 
     dropdown.innerHTML = '';
+    dropdown.appendChild(tabBar);
+
     if (matches.length === 0) {
-      // Allow custom ticker
       const item = document.createElement('div');
       item.className = 'tt-dropdown-item tt-custom';
       item.textContent = `Use "${q}" (custom ticker)`;
       item.addEventListener('click', () => selectSymbol(q, q, true));
       dropdown.appendChild(item);
     } else {
-      for (const asset of matches.slice(0, 12)) {
+      for (const asset of matches.slice(0, 14)) {
         const item = document.createElement('div');
         item.className = 'tt-dropdown-item';
+        const badgeTxt   = CLASS_BADGE[asset.assetClass]  ?? asset.assetClass.toUpperCase();
+        const badgeColor = CLASS_COLOR[asset.assetClass]  ?? '#94a3b8';
         item.innerHTML = `
           <span class="tt-dd-symbol">${asset.symbol}</span>
           <span class="tt-dd-name">${asset.name}</span>
-          <span class="tt-dd-sector">${asset.sector}</span>
+          <span class="tt-dd-badge" style="background:${badgeColor}20;color:${badgeColor};border-color:${badgeColor}40">${badgeTxt}</span>
         `;
         item.addEventListener('click', () => selectSymbol(asset.symbol, asset.name, false));
         dropdown.appendChild(item);
@@ -286,6 +340,17 @@ export function openTradeTicket(prefill?: { symbol?: string; direction?: 'LONG' 
     if (!card.querySelector('.tt-search-wrap')?.contains(e.target as Node)) {
       dropdown.classList.remove('open');
     }
+  });
+
+  // ── Quick-pick buttons ─────────────────────────────────────────────────────
+  card.querySelectorAll<HTMLButtonElement>('.tt-qp-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sym  = btn.dataset['sym']  ?? '';
+      const name = btn.dataset['name'] ?? sym;
+      const asset = TRADEABLE_UNIVERSE.find(a => a.symbol === sym);
+      selectSymbol(sym, asset?.name ?? name, false);
+      searchInput.value = sym;
+    });
   });
 
   // ── Direction toggle ───────────────────────────────────────────────────────
@@ -400,13 +465,22 @@ function buildCardHTML(state: TicketState): string {
 
     <!-- Asset selector -->
     <div class="tt-section tt-asset-section">
+      <div class="tt-quick-picks">
+        <button class="tt-qp-btn" data-sym="NVDA"  data-name="NVIDIA">NVDA</button>
+        <button class="tt-qp-btn" data-sym="AAPL"  data-name="Apple">AAPL</button>
+        <button class="tt-qp-btn" data-sym="TSLA"  data-name="Tesla">TSLA</button>
+        <button class="tt-qp-btn" data-sym="BTC-USD" data-name="Bitcoin">BTC</button>
+        <button class="tt-qp-btn" data-sym="ETH-USD" data-name="Ethereum">ETH</button>
+        <button class="tt-qp-btn" data-sym="SPY"   data-name="S&P 500 ETF">SPY</button>
+        <button class="tt-qp-btn" data-sym="GLD"   data-name="Gold ETF">GLD</button>
+      </div>
       <div class="tt-search-wrap">
         <input
           id="tt-search"
           class="tt-search-input"
           type="text"
           value="${state.symbol}"
-          placeholder="Search ticker or name…"
+          placeholder="Search ticker, name, or sector…"
           autocomplete="off"
           spellcheck="false"
         />

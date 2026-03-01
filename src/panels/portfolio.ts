@@ -436,33 +436,26 @@ function renderPositionsTable(snap: PortfolioSnapshot): void {
     const legacy = tradingEngine.getState();
     const legacyPositions = Array.from(legacy.positions.values());
     if (legacyPositions.length > 0) {
-      // Fall back to rendering legacy positions
       renderLegacyPositions(legacyPositions, snap.totalValue);
       return;
     }
-    posTableBodyEl.innerHTML = `
-      <div class="port-empty">
-        <div class="port-empty-icon">📊</div>
-        <div class="port-empty-title">No open positions yet</div>
-        <div class="port-empty-steps">
-          <div class="port-empty-step">
-            <span class="port-empty-step-num">1</span>
-            <span>Scroll up to <strong>SIGNALS</strong></span>
-          </div>
-          <div class="port-empty-step">
-            <span class="port-empty-step-num">2</span>
-            <span>Click <strong>Paper Trade</strong> on any signal</span>
-          </div>
-          <div class="port-empty-step">
-            <span class="port-empty-step-num">3</span>
-            <span>Position appears here instantly</span>
-          </div>
-        </div>
-        <div class="port-empty-auto">
-          Or enable <strong>Auto-trade</strong> in the Signals panel to execute automatically
-        </div>
-      </div>
+
+    // Prominent empty state CTA
+    const emptyWrap = document.createElement('div');
+    emptyWrap.className = 'port-empty';
+    emptyWrap.innerHTML = `
+      <div class="port-empty-icon">📈</div>
+      <div class="port-empty-title">No open positions</div>
+      <div class="port-empty-sub">You have <strong>${new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(snap.cash)}</strong> ready to deploy</div>
     `;
+    const openBtn = document.createElement('button');
+    openBtn.className = 'port-empty-trade-btn';
+    openBtn.innerHTML = '＋ Place Your First Trade';
+    openBtn.addEventListener('click', () => {
+      import('./trade-ticket').then(({ openTradeTicket }) => openTradeTicket()).catch(console.error);
+    });
+    emptyWrap.appendChild(openBtn);
+    posTableBodyEl.appendChild(emptyWrap);
     return;
   }
 
@@ -806,7 +799,20 @@ function buildPortfolioBody(container: HTMLElement): void {
   tradesSection.appendChild(tradesBodyEl);
   container.appendChild(tradesSection);
 
-  // ── 6. Emergency controls ─────────────────────────────────────────────────
+  // ── 6. Floating "New Trade" action button ────────────────────────────────
+  const fabRow = document.createElement('div');
+  fabRow.className = 'port-fab-row';
+
+  const fab = document.createElement('button');
+  fab.className = 'port-fab-btn';
+  fab.innerHTML = `<span class="port-fab-plus">＋</span> NEW TRADE`;
+  fab.addEventListener('click', () => {
+    import('./trade-ticket').then(({ openTradeTicket }) => openTradeTicket()).catch(console.error);
+  });
+  fabRow.appendChild(fab);
+  container.appendChild(fabRow);
+
+  // ── 7. Emergency controls ─────────────────────────────────────────────────
   const emergencyRow = document.createElement('div');
   emergencyRow.className = 'port-emergency-row';
 
@@ -836,12 +842,30 @@ function buildPortfolioBody(container: HTMLElement): void {
   emergencyRow.appendChild(resetBtn);
   container.appendChild(emergencyRow);
 
-  // ── 7. Event subscriptions ────────────────────────────────────────────────
+  // ── 8. Event subscriptions ────────────────────────────────────────────────
 
   // Primary: new engine PortfolioSnapshot
   window.addEventListener('trading:portfolio', (e: Event) => {
     const snap = (e as CustomEvent<PortfolioSnapshot>).detail;
     if (snap) renderSnapshot(snap);
+  });
+
+  // Immediate re-render on manual order placed (no waiting for next tick)
+  window.addEventListener('trading:manual-order', () => {
+    const snap = portfolioManager.getSnapshot();
+    renderSnapshot(snap);
+  });
+
+  // Immediate re-render when engine opens a trade via signal
+  window.addEventListener('trading:trade-opened', () => {
+    const snap = portfolioManager.getSnapshot();
+    renderSnapshot(snap);
+  });
+
+  // Immediate re-render when a position is closed
+  window.addEventListener('trading:trade-closed', () => {
+    const snap = portfolioManager.getSnapshot();
+    renderSnapshot(snap);
   });
 
   // Primary: risk status
@@ -858,7 +882,7 @@ function buildPortfolioBody(container: HTMLElement): void {
     renderLegacyState();
   });
 
-  // Price feed tick → re-render positions
+  // Price feed tick → re-render positions with updated mark-to-market
   window.addEventListener('price-feed-updated', () => {
     const snap = portfolioManager.getSnapshot();
     if (snap.openPositionCount > 0) {
@@ -868,7 +892,7 @@ function buildPortfolioBody(container: HTMLElement): void {
     }
   });
 
-  // ── 8. Initial render ─────────────────────────────────────────────────────
+  // ── 9. Initial render ─────────────────────────────────────────────────────
   const initSnap = portfolioManager.getSnapshot();
   if (initSnap.totalValue > 0) {
     renderSnapshot(initSnap);

@@ -10,7 +10,7 @@ export interface UniverseAsset {
   symbol: string;
   name: string;
   sector: string;
-  assetClass: 'equity' | 'commodity' | 'fixed-income' | 'crypto' | 'international' | 'thematic';
+  assetClass: 'equity' | 'commodity' | 'fixed-income' | 'crypto' | 'international' | 'thematic' | 'stock';
   avgDailyVolume: number; // Average daily volume (shares)
   beta: number; // Beta vs SPY (1.0 = market, >1.0 = more volatile, <1.0 = less volatile)
   expense: number; // Expense ratio (annual %)
@@ -311,15 +311,187 @@ export const TRADEABLE_UNIVERSE: UniverseAsset[] = [
     expense: 0.75,
   },
 
-  // Crypto (3) — via CoinGecko, not traditional ETFs
+  // ── Individual Stocks — Mega-cap Tech (7) ─────────────────────────────────
+  {
+    symbol: 'AAPL',
+    name: 'Apple Inc.',
+    sector: 'Technology',
+    assetClass: 'stock',
+    avgDailyVolume: 55_000_000,
+    beta: 1.20,
+    expense: 0.0,
+  },
+  {
+    symbol: 'MSFT',
+    name: 'Microsoft Corporation',
+    sector: 'Technology',
+    assetClass: 'stock',
+    avgDailyVolume: 22_000_000,
+    beta: 0.90,
+    expense: 0.0,
+  },
+  {
+    symbol: 'NVDA',
+    name: 'NVIDIA Corporation',
+    sector: 'Semiconductors',
+    assetClass: 'stock',
+    avgDailyVolume: 310_000_000,
+    beta: 1.70,
+    expense: 0.0,
+  },
+  {
+    symbol: 'GOOGL',
+    name: 'Alphabet Inc. (Google)',
+    sector: 'Technology',
+    assetClass: 'stock',
+    avgDailyVolume: 25_000_000,
+    beta: 1.05,
+    expense: 0.0,
+  },
+  {
+    symbol: 'META',
+    name: 'Meta Platforms Inc.',
+    sector: 'Technology',
+    assetClass: 'stock',
+    avgDailyVolume: 18_000_000,
+    beta: 1.25,
+    expense: 0.0,
+  },
+  {
+    symbol: 'AMZN',
+    name: 'Amazon.com Inc.',
+    sector: 'Consumer Discretionary',
+    assetClass: 'stock',
+    avgDailyVolume: 35_000_000,
+    beta: 1.15,
+    expense: 0.0,
+  },
+  {
+    symbol: 'TSLA',
+    name: 'Tesla Inc.',
+    sector: 'Consumer Discretionary',
+    assetClass: 'stock',
+    avgDailyVolume: 120_000_000,
+    beta: 2.00,
+    expense: 0.0,
+  },
+
+  // ── Individual Stocks — Finance (4) ───────────────────────────────────────
+  {
+    symbol: 'JPM',
+    name: 'JPMorgan Chase & Co.',
+    sector: 'Financials',
+    assetClass: 'stock',
+    avgDailyVolume: 9_000_000,
+    beta: 1.10,
+    expense: 0.0,
+  },
+  {
+    symbol: 'BAC',
+    name: 'Bank of America Corp.',
+    sector: 'Financials',
+    assetClass: 'stock',
+    avgDailyVolume: 32_000_000,
+    beta: 1.35,
+    expense: 0.0,
+  },
+  {
+    symbol: 'V',
+    name: 'Visa Inc.',
+    sector: 'Financials',
+    assetClass: 'stock',
+    avgDailyVolume: 7_000_000,
+    beta: 0.95,
+    expense: 0.0,
+  },
+  {
+    symbol: 'GS',
+    name: 'Goldman Sachs Group Inc.',
+    sector: 'Financials',
+    assetClass: 'stock',
+    avgDailyVolume: 3_000_000,
+    beta: 1.30,
+    expense: 0.0,
+  },
+
+  // ── Individual Stocks — Healthcare (2) ────────────────────────────────────
+  {
+    symbol: 'JNJ',
+    name: 'Johnson & Johnson',
+    sector: 'Healthcare',
+    assetClass: 'stock',
+    avgDailyVolume: 8_000_000,
+    beta: 0.60,
+    expense: 0.0,
+  },
+  {
+    symbol: 'UNH',
+    name: 'UnitedHealth Group Inc.',
+    sector: 'Healthcare',
+    assetClass: 'stock',
+    avgDailyVolume: 3_000_000,
+    beta: 0.75,
+    expense: 0.0,
+  },
+
+  // ── Individual Stocks — Energy (2) ────────────────────────────────────────
+  {
+    symbol: 'XOM',
+    name: 'ExxonMobil Corporation',
+    sector: 'Energy',
+    assetClass: 'stock',
+    avgDailyVolume: 18_000_000,
+    beta: 0.85,
+    expense: 0.0,
+  },
+  {
+    symbol: 'CVX',
+    name: 'Chevron Corporation',
+    sector: 'Energy',
+    assetClass: 'stock',
+    avgDailyVolume: 10_000_000,
+    beta: 0.80,
+    expense: 0.0,
+  },
+
+  // ── Individual Stocks — Consumer (3) ──────────────────────────────────────
+  {
+    symbol: 'WMT',
+    name: 'Walmart Inc.',
+    sector: 'Consumer Staples',
+    assetClass: 'stock',
+    avgDailyVolume: 7_000_000,
+    beta: 0.55,
+    expense: 0.0,
+  },
+  {
+    symbol: 'COST',
+    name: 'Costco Wholesale Corporation',
+    sector: 'Consumer Staples',
+    assetClass: 'stock',
+    avgDailyVolume: 3_000_000,
+    beta: 0.80,
+    expense: 0.0,
+  },
+  {
+    symbol: 'HD',
+    name: 'Home Depot Inc.',
+    sector: 'Consumer Discretionary',
+    assetClass: 'stock',
+    avgDailyVolume: 4_000_000,
+    beta: 1.05,
+    expense: 0.0,
+  },
+
+  // ── Crypto (7) — via Yahoo Finance *-USD symbols ──────────────────────────
   {
     symbol: 'BTC-USD',
     name: 'Bitcoin',
     sector: 'Cryptocurrency',
     assetClass: 'crypto',
-    avgDailyVolume: 1_000_000_000, // Volume in USD, not shares
+    avgDailyVolume: 1_000_000_000,
     beta: 1.80,
-    expense: 0.0, // No expense ratio (direct holding simulation)
+    expense: 0.0,
   },
   {
     symbol: 'ETH-USD',
@@ -337,6 +509,42 @@ export const TRADEABLE_UNIVERSE: UniverseAsset[] = [
     assetClass: 'crypto',
     avgDailyVolume: 200_000_000,
     beta: 2.50,
+    expense: 0.0,
+  },
+  {
+    symbol: 'XRP-USD',
+    name: 'XRP (Ripple)',
+    sector: 'Cryptocurrency',
+    assetClass: 'crypto',
+    avgDailyVolume: 300_000_000,
+    beta: 2.10,
+    expense: 0.0,
+  },
+  {
+    symbol: 'DOGE-USD',
+    name: 'Dogecoin',
+    sector: 'Cryptocurrency',
+    assetClass: 'crypto',
+    avgDailyVolume: 150_000_000,
+    beta: 2.80,
+    expense: 0.0,
+  },
+  {
+    symbol: 'ADA-USD',
+    name: 'Cardano',
+    sector: 'Cryptocurrency',
+    assetClass: 'crypto',
+    avgDailyVolume: 80_000_000,
+    beta: 2.40,
+    expense: 0.0,
+  },
+  {
+    symbol: 'AVAX-USD',
+    name: 'Avalanche',
+    sector: 'Cryptocurrency',
+    assetClass: 'crypto',
+    avgDailyVolume: 60_000_000,
+    beta: 2.60,
     expense: 0.0,
   },
 ];
@@ -421,5 +629,7 @@ export const SECTOR_TO_SYMBOLS: Record<string, string[]> = {
   'Developed Markets': ['EFA'],
   'Treasury': ['TLT', 'IEF', 'SHY'],
   'Corporate Bonds': ['HYG', 'LQD'],
-  'Cryptocurrency': ['BTC-USD', 'ETH-USD', 'SOL-USD'],
+  'Cryptocurrency': ['BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD', 'DOGE-USD', 'ADA-USD', 'AVAX-USD'],
+  'Consumer Discretionary': ['AMZN', 'TSLA', 'HD'],
+  'Consumer Staples Stock': ['WMT', 'COST'],
 };
