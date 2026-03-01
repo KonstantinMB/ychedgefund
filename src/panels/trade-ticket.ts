@@ -236,6 +236,7 @@ export function openTradeTicket(prefill?: { symbol?: string; direction?: 'LONG' 
     } else {
       state.price = null;
       refs.priceEl.textContent = 'Price unavailable';
+      refs.priceEl.title = 'Market data not available for this symbol. Try BTC, ETH, SPY, or AAPL.';
     }
     recalc();
   }

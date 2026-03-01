@@ -133,9 +133,26 @@ async function fetchSymbol(symbol: string): Promise<MarketQuote | null> {
   }
 }
 
-export default withCors(async (_req: Request) => {
-  const quotes = await withCache<MarketQuote[]>('market:quotes:v2', 60, async () => {
-    const results = await Promise.allSettled(SYMBOLS.map((s) => fetchSymbol(s)));
+export default withCors(async (req: Request) => {
+  const url = new URL(req.url);
+  const symbolsParam = url.searchParams.get('symbols');
+  const symbolsToFetch = symbolsParam
+    ? symbolsParam.split(',').map(s => s.trim().toUpperCase()).filter(Boolean)
+    : SYMBOLS;
+
+  if (symbolsToFetch.length === 0) {
+    return new Response(JSON.stringify({ quotes: [], count: 0, timestamp: Date.now() }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const cacheKey = symbolsParam
+    ? `market:yahoo:${symbolsToFetch.join(',')}`
+    : 'market:quotes:v2';
+
+  const quotes = await withCache<MarketQuote[]>(cacheKey, 60, async () => {
+    const results = await Promise.allSettled(symbolsToFetch.map((s) => fetchSymbol(s)));
 
     const fetched: MarketQuote[] = [];
     for (const result of results) {
@@ -144,7 +161,7 @@ export default withCors(async (_req: Request) => {
       }
     }
 
-    if (fetched.length === 0) {
+    if (fetched.length === 0 && !symbolsParam) {
       throw new Error('All Yahoo Finance upstream fetches failed');
     }
 
