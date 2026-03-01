@@ -129,11 +129,14 @@ async function initPanels(): Promise<void> {
 // ── WebSocket relay ───────────────────────────────────────────────────────────
 
 function initWebSockets(): void {
-  const relayUrl = (import.meta.env.VITE_RELAY_URL as string | undefined)
-    ?? 'wss://atlas-relay.up.railway.app/ws';
+  const relayUrl = (import.meta.env.VITE_RELAY_URL as string | undefined)?.trim();
+  if (!relayUrl || relayUrl.includes('your-relay')) {
+    console.log('[YC Hedge Fund] Relay URL not configured — AIS/aircraft streams disabled. Set VITE_RELAY_URL in .env');
+    return;
+  }
 
   wsManager = new WebSocketManager({
-    url: relayUrl,
+    url: relayUrl!,
     reconnect: true,
     reconnectInterval: 5_000,
     maxReconnectAttempts: 20,

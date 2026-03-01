@@ -106,8 +106,7 @@ export class OpenSkyPoller {
     if (!reachable) {
       console.warn(
         '[OpenSky] Host unreachable from this environment (Railway IP likely blocked). ' +
-        'Aircraft tracking disabled. Set OPENSKY_CLIENT_ID + OPENSKY_CLIENT_SECRET or ' +
-        'use a proxy to enable it.'
+        'Aircraft tracking disabled. OAuth2 credentials will not bypass IP blocking — use a proxy or different host.'
       );
       this.disabled = true;
       return;
