@@ -1,8 +1,11 @@
 /**
- * OpenSky Aircraft Positions Edge Function
+ * Aircraft Positions Edge Function
  *
- * Uses OAuth2 client_credentials (OPENSKY_CLIENT_ID / OPENSKY_CLIENT_SECRET) when set.
- * Falls back to anonymous access (heavily rate-limited from shared datacenter IPs).
+ * Primary:  adsb.fi public API — lightweight JSON, datacenter-friendly, no auth
+ * Fallback: OpenSky Network (OAuth2 if credentials set, else anonymous)
+ *
+ * Caches for 5 minutes so the upstream is hit at most once every 300 s,
+ * well within rate limits and safely under Vercel's 25 s function timeout.
  * Returns empty array gracefully on any failure — never 500s.
  */
 
@@ -10,29 +13,6 @@ import { withCors } from '../_cors';
 import { withCache } from '../_cache';
 
 export const config = { runtime: 'edge' };
-
-// State vector field indices per OpenSky API docs
-const IDX_ICAO24 = 0;
-const IDX_CALLSIGN = 1;
-const IDX_ORIGIN_COUNTRY = 2;
-const IDX_LON = 5;
-const IDX_LAT = 6;
-const IDX_GEO_ALTITUDE = 7;
-const IDX_ON_GROUND = 8;
-const IDX_VELOCITY = 9;
-const IDX_HEADING = 10;
-
-const OPENSKY_URL =
-  'https://opensky-network.org/api/states/all?lamin=-90&lomin=-180&lamax=90&lomax=180';
-const OPENSKY_TOKEN_URL =
-  'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
-
-type StateVector = (string | number | boolean | null)[];
-
-interface OpenSkyResponse {
-  time: number;
-  states: StateVector[] | null;
-}
 
 interface Aircraft {
   icao24: string;
@@ -45,102 +25,174 @@ interface Aircraft {
   heading: number;
 }
 
-// ── OAuth2 token (edge functions are stateless, token fetched per cold start) ──
+// ── adsb.fi ───────────────────────────────────────────────────────────────────
+// Public ADS-B aggregator — no auth, no rate limit at reasonable polling rates.
+// Returns all globally tracked aircraft as compact JSON.
 
-async function fetchBearerToken(): Promise<string | null> {
-  const clientId = (typeof process !== 'undefined' ? process.env.OPENSKY_CLIENT_ID : undefined)
-    ?? (globalThis as Record<string, unknown>)['OPENSKY_CLIENT_ID'] as string | undefined;
-  const clientSecret = (typeof process !== 'undefined' ? process.env.OPENSKY_CLIENT_SECRET : undefined)
-    ?? (globalThis as Record<string, unknown>)['OPENSKY_CLIENT_SECRET'] as string | undefined;
+interface AdsbFiAircraft {
+  hex?: string;
+  flight?: string;
+  lat?: number;
+  lon?: number;
+  alt_baro?: number | 'ground';
+  gs?: number;
+  track?: number;
+  r?: string;
+  t?: string;
+}
 
-  if (!clientId || !clientSecret) return null;
+interface AdsbFiResponse {
+  ac?: AdsbFiAircraft[];
+  now?: number;
+  total?: number;
+}
 
-  try {
-    const body = new URLSearchParams({
-      grant_type: 'client_credentials',
-      client_id: clientId,
-      client_secret: clientSecret,
+function normalizeAdsbFi(raw: AdsbFiResponse): Aircraft[] {
+  const list = raw.ac ?? [];
+  const results: Aircraft[] = [];
+
+  for (const ac of list) {
+    if (results.length >= 800) break;
+    if (typeof ac.lat !== 'number' || typeof ac.lon !== 'number') continue;
+    // skip ground traffic
+    if (ac.alt_baro === 'ground' || ac.alt_baro === 0) continue;
+
+    results.push({
+      icao24: String(ac.hex ?? '').trim(),
+      callsign: String(ac.flight ?? ac.r ?? '').trim(),
+      country: '',
+      lat: ac.lat,
+      lon: ac.lon,
+      altitude: typeof ac.alt_baro === 'number' ? ac.alt_baro : 0,
+      velocity: typeof ac.gs === 'number' ? ac.gs : 0,
+      heading: typeof ac.track === 'number' ? ac.track : 0,
     });
+  }
 
+  return results;
+}
+
+async function fetchAdsbFi(): Promise<Aircraft[]> {
+  const res = await fetch('https://api.adsb.fi/v1/flights', {
+    headers: { Accept: 'application/json', 'User-Agent': 'Atlas/1.0' },
+    signal: AbortSignal.timeout(8_000),
+  });
+  if (!res.ok) throw new Error(`adsb.fi ${res.status}`);
+  const data: AdsbFiResponse = await res.json();
+  return normalizeAdsbFi(data);
+}
+
+// ── OpenSky fallback ──────────────────────────────────────────────────────────
+// Restricts to strategically interesting corridors (Europe, Middle East, Asia)
+// to keep the response size manageable (~2-3k aircraft vs 15k globally).
+
+type StateVector = (string | number | boolean | null)[];
+
+interface OpenSkyResponse {
+  states: StateVector[] | null;
+}
+
+const OPENSKY_URL =
+  'https://opensky-network.org/api/states/all?lamin=10&lomin=-30&lamax=75&lomax=145';
+const OPENSKY_TOKEN_URL =
+  'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
+
+function getEnv(key: string): string | undefined {
+  return (typeof process !== 'undefined' ? process.env[key] : undefined)
+    ?? (globalThis as Record<string, unknown>)[key] as string | undefined;
+}
+
+async function fetchOpenSkyToken(): Promise<string | null> {
+  const id = getEnv('OPENSKY_CLIENT_ID');
+  const secret = getEnv('OPENSKY_CLIENT_SECRET');
+  if (!id || !secret) return null;
+  try {
     const res = await fetch(OPENSKY_TOKEN_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: body.toString(),
-      signal: AbortSignal.timeout(8_000),
+      body: new URLSearchParams({ grant_type: 'client_credentials', client_id: id, client_secret: secret }).toString(),
+      signal: AbortSignal.timeout(5_000),
     });
-
     if (!res.ok) return null;
-    const json = await res.json() as { access_token: string };
-    return json.access_token ?? null;
+    const j = await res.json() as { access_token: string };
+    return j.access_token ?? null;
   } catch {
     return null;
   }
 }
 
-function normalizeState(s: StateVector): Aircraft | null {
-  if (s[IDX_ON_GROUND] === true) return null;
-
-  const lat = s[IDX_LAT] as number | null;
-  const lon = s[IDX_LON] as number | null;
-  if (lat == null || lon == null || isNaN(lat) || isNaN(lon)) return null;
-
-  return {
-    icao24: String(s[IDX_ICAO24] ?? '').trim(),
-    callsign: String(s[IDX_CALLSIGN] ?? '').trim(),
-    country: String(s[IDX_ORIGIN_COUNTRY] ?? '').trim(),
-    lat,
-    lon,
-    altitude: Number(s[IDX_GEO_ALTITUDE] ?? 0),
-    velocity: Number(s[IDX_VELOCITY] ?? 0),
-    heading: Number(s[IDX_HEADING] ?? 0),
-  };
+function normalizeOpenSky(states: StateVector[]): Aircraft[] {
+  const results: Aircraft[] = [];
+  for (const s of states) {
+    if (results.length >= 800) break;
+    if (s[8] === true) continue; // on ground
+    const lat = s[6] as number | null;
+    const lon = s[5] as number | null;
+    if (!lat || !lon || isNaN(lat) || isNaN(lon)) continue;
+    results.push({
+      icao24: String(s[0] ?? '').trim(),
+      callsign: String(s[1] ?? '').trim(),
+      country: String(s[2] ?? '').trim(),
+      lat,
+      lon,
+      altitude: Number(s[7] ?? 0),
+      velocity: Number(s[9] ?? 0),
+      heading: Number(s[10] ?? 0),
+    });
+  }
+  return results;
 }
 
+async function fetchOpenSky(): Promise<Aircraft[]> {
+  const token = await fetchOpenSkyToken();
+  const headers: Record<string, string> = { 'User-Agent': 'Atlas/1.0' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(OPENSKY_URL, {
+    headers,
+    signal: AbortSignal.timeout(8_000),
+  });
+  if (res.status === 401 || res.status === 403 || res.status === 429) return [];
+  if (!res.ok) throw new Error(`OpenSky ${res.status}`);
+  const data: OpenSkyResponse = await res.json();
+  return normalizeOpenSky(data.states ?? []);
+}
+
+// ── Handler ───────────────────────────────────────────────────────────────────
+
 export default withCors(async (_req: Request) => {
-  // Authenticated requests get 10-second cache; anonymous stay at 5 min
-  const isAuthenticated = !!(
-    (typeof process !== 'undefined' ? process.env.OPENSKY_CLIENT_ID : undefined)
-    ?? (globalThis as Record<string, unknown>)['OPENSKY_CLIENT_ID']
-  );
-  const cacheTtl = isAuthenticated ? 10 : 300;
+  // 5-minute cache — strategic aircraft positions don't need sub-minute freshness
+  const CACHE_TTL = 300;
 
   let aircraft: Aircraft[] = [];
+  let source = 'none';
+
   try {
-    aircraft = await withCache<Aircraft[]>('osint:aircraft', cacheTtl, async () => {
-      // Get OAuth2 token if credentials are available
-      const token = await fetchBearerToken();
-
-      const headers: Record<string, string> = {
-        'User-Agent': 'Atlas/1.0 (intelligence dashboard)',
-      };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+    aircraft = await withCache<Aircraft[]>('osint:aircraft:v2', CACHE_TTL, async () => {
+      // Try adsb.fi first — more reliable from datacenter IPs
+      try {
+        const planes = await fetchAdsbFi();
+        if (planes.length > 0) {
+          source = 'adsb.fi';
+          return planes;
+        }
+      } catch (err) {
+        console.warn('[OpenSky] adsb.fi failed, trying OpenSky:', err instanceof Error ? err.message : err);
       }
 
-      // Hard 12s timeout — well under Vercel's 25s function limit
-      const res = await fetch(OPENSKY_URL, {
-        headers,
-        signal: AbortSignal.timeout(12_000),
-      });
-
-      // Blocked, rate-limited, or any client error → return empty gracefully
-      if (res.status === 401 || res.status === 403 || res.status === 429 || res.status === 503) return [];
-      if (!res.ok) return []; // never throw — always return empty on error
-
-      const data: OpenSkyResponse = await res.json();
-      const states = data.states ?? [];
-
-      const results: Aircraft[] = [];
-      for (const state of states) {
-        if (results.length >= 1000) break;
-        const ac = normalizeState(state);
-        if (ac) results.push(ac);
+      // Fallback: OpenSky with strategic bbox
+      try {
+        const planes = await fetchOpenSky();
+        source = 'opensky';
+        return planes;
+      } catch (err) {
+        console.warn('[OpenSky] OpenSky fallback also failed:', err instanceof Error ? err.message : err);
+        return [];
       }
-
-      return results;
     });
+    // Determine actual source from cached result
+    if (aircraft.length > 0 && source === 'none') source = 'cache';
   } catch {
-    // Any error (Upstash overload, network failure) → return empty, never 500
     aircraft = [];
   }
 
@@ -148,15 +200,14 @@ export default withCors(async (_req: Request) => {
     JSON.stringify({
       aircraft,
       count: aircraft.length,
-      source: 'opensky',
-      authenticated: isAuthenticated,
+      source,
       timestamp: Date.now(),
     }),
     {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Cache-Control': `public, s-maxage=${cacheTtl}, stale-while-revalidate=${cacheTtl * 2}`,
+        'Cache-Control': `public, s-maxage=${CACHE_TTL}, stale-while-revalidate=${CACHE_TTL * 2}`,
       },
     }
   );

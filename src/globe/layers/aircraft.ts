@@ -79,9 +79,10 @@ async function fetchAndUpdate(): Promise<void> {
 
 registerLayerDef(metadata, createAircraftLayer);
 
-// Deferred initial fetch (REST polling fallback)
-setTimeout(() => { void fetchAndUpdate(); }, 7_000);
-setInterval(() => { void fetchAndUpdate(); }, 60 * 1_000);
+// Deferred initial fetch (REST polling fallback).
+// Server caches for 5 min so polling faster than that just hits the CDN edge cache.
+setTimeout(() => { void fetchAndUpdate(); }, 8_000);
+setInterval(() => { void fetchAndUpdate(); }, 5 * 60_000);
 
 // Real-time updates from Railway WebSocket relay (preferred path)
 window.addEventListener('aircraft-update', (e: Event) => {
