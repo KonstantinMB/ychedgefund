@@ -18,6 +18,7 @@ import { TRADEABLE_UNIVERSE } from '../trading/data/universe';
 import { executionLoop } from '../trading/engine/execution-loop';
 import { portfolioManager } from '../trading/engine/portfolio-manager';
 import { showToast } from '../lib/toast';
+import { getMarketStatus } from '../lib/market-hours';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -80,6 +81,7 @@ interface TicketRefs {
   slSlider: HTMLInputElement;
   tpSlider: HTMLInputElement;
   cashAvailEl: HTMLElement;
+  marketStatusEl: HTMLElement;
 }
 
 // ── Build the ticket ──────────────────────────────────────────────────────────
@@ -129,6 +131,7 @@ export function openTradeTicket(prefill?: { symbol?: string; direction?: 'LONG' 
     slSlider: card.querySelector<HTMLInputElement>('#tt-sl-slider')!,
     tpSlider: card.querySelector<HTMLInputElement>('#tt-tp-slider')!,
     cashAvailEl: card.querySelector('#tt-cash-avail')!,
+    marketStatusEl: card.querySelector('#tt-market-status')!,
   };
 
   // ── Recalculate and redraw numbers ─────────────────────────────────────────
@@ -137,6 +140,14 @@ export function openTradeTicket(prefill?: { symbol?: string; direction?: 'LONG' 
     const snap = portfolioManager.getSnapshot();
     const cash = snap.cash;
     const nav  = snap.totalValue || 1;
+
+    // Market status (out-of-market when NYSE closed for stocks/ETFs)
+    const marketStatus = getMarketStatus(state.symbol);
+    refs.marketStatusEl.textContent = marketStatus.message;
+    refs.marketStatusEl.className = `tt-market-status ${marketStatus.open ? 'open' : 'closed'}`;
+    refs.marketStatusEl.title = marketStatus.open
+      ? 'Market is open — you can trade'
+      : 'US markets are closed. Try crypto (24/7) or wait until 9:30 AM ET.';
 
     // Cash
     refs.cashAvailEl.textContent = usd(cash);
@@ -182,7 +193,8 @@ export function openTradeTicket(prefill?: { symbol?: string; direction?: 'LONG' 
       // Execute button label
       const label = state.direction === 'LONG' ? '▲ BUY LONG' : '▼ SELL SHORT';
       refs.executeBtn.textContent = `${label}  ${usd(state.dollars)}`;
-      refs.executeBtn.disabled    = state.submitting || state.dollars < 100 || state.dollars > cash;
+      const marketClosed = !marketStatus.open;
+      refs.executeBtn.disabled    = state.submitting || state.dollars < 100 || state.dollars > cash || marketClosed;
     } else {
       refs.priceEl.textContent    = 'Loading…';
       refs.sharesEl.textContent   = '—';
@@ -396,6 +408,11 @@ export function openTradeTicket(prefill?: { symbol?: string; direction?: 'LONG' 
   // ── Execute ────────────────────────────────────────────────────────────────
   refs.executeBtn.addEventListener('click', async () => {
     if (state.submitting || !state.price) return;
+    const status = getMarketStatus(state.symbol);
+    if (!status.open) {
+      showToast('Can\'t trade — markets are closed. Try crypto (24/7) or wait until 9:30 AM ET.', 'error');
+      return;
+    }
 
     state.submitting = true;
     recalc();
@@ -493,6 +510,7 @@ function buildCardHTML(state: TicketState): string {
           <span class="tt-price-change" id="tt-price-change"></span>
         </span>
       </div>
+      <div class="tt-market-status open" id="tt-market-status">Market open</div>
     </div>
 
     <!-- Direction -->
