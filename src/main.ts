@@ -648,13 +648,20 @@ async function initKeyboardShortcuts(): Promise<void> {
 async function init(): Promise<void> {
   console.log('[YC Hedge Fund] Initialising Global Intelligence Platform…');
 
+  initTheme();
+
+  // Mobile block — platform is desktop-only
+  const { showMobileBlockIfNeeded } = await import('./lib/mobile-block');
+  if (showMobileBlockIfNeeded()) {
+    console.log('[YC Hedge Fund] Mobile detected — showing desktop-only message');
+    return;
+  }
+
   // Vercel Analytics
   try {
     const { inject } = await import('@vercel/analytics');
     inject();
   } catch { /* no-op in dev */ }
-
-  initTheme();
 
   initGlobe();
 
