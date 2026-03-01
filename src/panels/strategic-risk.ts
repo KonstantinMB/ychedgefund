@@ -212,7 +212,10 @@ function buildGaugeSVG(score: number, color: string): SVGSVGElement {
     const angle = (score / 100) * Math.PI;
     const ex = cx + r * Math.cos(Math.PI - angle);
     const ey = cy - r * Math.sin(Math.PI - angle);
-    const largeArc = angle > Math.PI / 2 ? 1 : 0;
+    // The fill arc is always ≤ 180° (a fraction of the semicircle track),
+    // so large-arc-flag must always be 0.  Using 1 here caused the arc to
+    // take the long path under the track when score > 50.
+    const largeArc = 0;
 
     // Subtle shadow arc (slightly thicker, lower opacity)
     const shadow = document.createElementNS(ns, 'path');
