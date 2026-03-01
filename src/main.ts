@@ -686,6 +686,14 @@ async function init(): Promise<void> {
   initRightPanelResize();
   await initKeyboardShortcuts();
 
+  // Welcome popup (first visit only)
+  try {
+    const { initWelcomePopup } = await import('./lib/welcome-popup');
+    initWelcomePopup();
+  } catch (err) {
+    console.warn('[YC Hedge Fund] Welcome popup unavailable:', err);
+  }
+
   // Command palette
   try {
     const { commandPalette } = await import('./lib/command-palette');
