@@ -877,9 +877,23 @@ function buildPortfolioBody(container: HTMLElement): void {
     }
   });
 
-  // Legacy fallback: old engine portfolio-updated
-  window.addEventListener('portfolio-updated', () => {
-    renderLegacyState();
+  // portfolio-updated is emitted by BOTH PortfolioManager (new) and TradingEngine (legacy).
+  // PortfolioManager is source of truth when it has positions (manual trades live there).
+  // Use event detail to detect source; prefer new engine. Never let legacy overwrite when
+  // PortfolioManager has positions (fixes manual trades disappearing after 1–2s).
+  window.addEventListener('portfolio-updated', (e: Event) => {
+    const detail = (e as CustomEvent).detail;
+    const isNewEngineSnapshot =
+      detail &&
+      Array.isArray(detail.positions) &&
+      (detail.positions.length === 0 || ('avgCostPrice' in (detail.positions[0] as object)));
+    if (isNewEngineSnapshot) {
+      renderSnapshot(detail as PortfolioSnapshot);
+    } else {
+      // Legacy engine: only show when PortfolioManager has no positions (avoid overwriting manual trades)
+      if (portfolioManager.getSnapshot().openPositionCount > 0) return;
+      renderLegacyState();
+    }
   });
 
   // Price feed tick → re-render positions with updated mark-to-market
