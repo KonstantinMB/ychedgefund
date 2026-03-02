@@ -1,141 +1,141 @@
 /**
- * Portfolio Persistence Edge Function
- *
- * POST /api/trading/portfolio
- *   Body: { snapshot: PortfolioSnapshot, equityCurve: EquityPoint[] }
- *   Saves to Upstash Redis with a 30-day TTL.
- *   Returns 200 on success, 204 when Redis is unconfigured.
+ * Portfolio Persistence Edge Function (Auth-required, per-user)
  *
  * GET /api/trading/portfolio
- *   Returns the last saved portfolio snapshot from Redis (for cross-device access).
+ *   - Requires auth (Bearer token)
+ *   - Fetches portfolio:{username} from Redis
+ *   - If none → returns default { cash: 1_000_000, positions: [], ... }
  *
- * Cache: no caching — always returns fresh data.
+ * PUT /api/trading/portfolio
+ *   - Requires auth
+ *   - Body: full portfolio state
+ *   - Validates structure, saves to portfolio:{username}
+ *
+ * POST /api/trading/portfolio/reset
+ *   - Requires auth (see portfolio/reset.ts)
  */
 
 import { withCors } from '../_cors';
+import { requireAuth } from '../auth/_middleware';
+import { getAuthRedis } from '../auth/_redis';
 
 export const config = { runtime: 'edge' };
 
-const REDIS_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
-const REDIS_KEY = 'atlas:portfolio:v2';
+const REDIS_TTL_SECONDS = 365 * 24 * 60 * 60; // 1 year (no expiry for portfolios)
+const STARTING_CAPITAL = 1_000_000;
 
-interface RedisSetRequest {
-  snapshot: unknown;
-  equityCurve: unknown[];
+function portfolioKey(username: string): string {
+  return `portfolio:${username}`;
 }
 
-// ── Redis helpers (Upstash REST API) ─────────────────────────────────────────
-
-function getRedisConfig(): { url: string; token: string } | null {
-  const url   = (typeof process !== 'undefined' ? process.env.UPSTASH_REDIS_REST_URL   : undefined)
-    ?? (globalThis as Record<string, unknown>)['UPSTASH_REDIS_REST_URL'] as string | undefined;
-  const token = (typeof process !== 'undefined' ? process.env.UPSTASH_REDIS_REST_TOKEN : undefined)
-    ?? (globalThis as Record<string, unknown>)['UPSTASH_REDIS_REST_TOKEN'] as string | undefined;
-
-  if (!url || !token) return null;
-  return { url, token };
+function getRedis() {
+  return getAuthRedis();
 }
 
-async function redisSet(key: string, value: unknown, ttl: number): Promise<boolean> {
-  const cfg = getRedisConfig();
-  if (!cfg) return false;
-
-  const res = await fetch(`${cfg.url}/set/${encodeURIComponent(key)}`, {
-    method: 'POST',
+function jsonResponse(data: object, status: number, headers?: Record<string, string>): Response {
+  return new Response(JSON.stringify(data), {
+    status,
     headers: {
-      Authorization: `Bearer ${cfg.token}`,
       'Content-Type': 'application/json',
+      'Cache-Control': 'no-store',
+      ...headers,
     },
-    body: JSON.stringify({
-      value: JSON.stringify(value),
-      ex: ttl,
-    }),
-    signal: AbortSignal.timeout(4_000),
   });
-
-  return res.ok;
 }
 
-async function redisGet(key: string): Promise<unknown | null> {
-  const cfg = getRedisConfig();
-  if (!cfg) return null;
+function defaultPortfolio(createdAt: number) {
+  return {
+    cash: STARTING_CAPITAL,
+    positions: [] as unknown[],
+    closedTrades: [] as unknown[],
+    realizedPnl: 0,
+    highWaterMark: STARTING_CAPITAL,
+    maxDrawdown: 0,
+    dailyStartValue: STARTING_CAPITAL,
+    equityCurve: [] as unknown[],
+    savedAt: createdAt,
+    createdAt,
+  };
+}
 
-  const res = await fetch(`${cfg.url}/get/${encodeURIComponent(key)}`, {
-    headers: { Authorization: `Bearer ${cfg.token}` },
-    signal: AbortSignal.timeout(4_000),
-  });
-
-  if (!res.ok) return null;
-
-  const body = await res.json() as { result: string | null };
-  if (!body.result) return null;
-
-  try {
-    return JSON.parse(body.result);
-  } catch {
-    return null;
+function validatePortfolio(body: unknown): { ok: true; data: unknown } | { ok: false; error: string } {
+  if (!body || typeof body !== 'object') {
+    return { ok: false, error: 'Invalid body' };
   }
+  const o = body as Record<string, unknown>;
+  if (typeof o.cash !== 'number' || o.cash < 0) {
+    return { ok: false, error: 'Invalid cash' };
+  }
+  if (!Array.isArray(o.positions)) {
+    return { ok: false, error: 'positions must be array' };
+  }
+  for (const p of o.positions) {
+    if (!p || typeof p !== 'object') continue;
+    const pos = p as Record<string, unknown>;
+    if (typeof pos.symbol !== 'string' || typeof pos.quantity !== 'number') {
+      return { ok: false, error: 'Position missing symbol or quantity' };
+    }
+  }
+  return { ok: true, data: body };
 }
-
-// ── Handler ───────────────────────────────────────────────────────────────────
 
 export default withCors(async (req: Request) => {
-  // ── GET: retrieve saved portfolio ─────────────────────────────────────────
-  if (req.method === 'GET') {
-    if (!getRedisConfig()) {
-      return new Response(JSON.stringify({ error: 'Redis not configured' }), {
-        status: 204,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+  const userOrError = await requireAuth(req);
+  if (userOrError instanceof Response) return userOrError;
+  const user = userOrError;
 
-    const data = await redisGet(REDIS_KEY).catch(() => null);
-
-    return new Response(JSON.stringify({ data, timestamp: Date.now() }), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
-      },
-    });
+  const redis = getRedis();
+  if (!redis) {
+    return jsonResponse({ error: 'Storage unavailable' }, 503);
   }
 
-  // ── POST: save portfolio ──────────────────────────────────────────────────
-  if (req.method === 'POST') {
-    let body: RedisSetRequest;
-    try {
-      body = await req.json() as RedisSetRequest;
-    } catch {
-      return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+  const key = portfolioKey(user.username);
+
+  // ── GET: retrieve portfolio ─────────────────────────────────────────────
+  if (req.method === 'GET') {
+    const raw = await redis.get<string>(key);
+    let data: unknown;
+    if (raw) {
+      try {
+        data = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      } catch {
+        data = null;
+      }
+    } else {
+      data = null;
     }
 
-    if (!getRedisConfig()) {
-      // Redis not configured — acknowledge but don't fail (localStorage is primary)
-      return new Response(JSON.stringify({ saved: false, reason: 'Redis not configured' }), {
-        status: 204,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    if (!data || typeof data !== 'object') {
+      const fresh = defaultPortfolio(Date.now());
+      return jsonResponse({ data: fresh, timestamp: Date.now() }, 200);
+    }
+
+    return jsonResponse({ data, timestamp: Date.now() }, 200);
+  }
+
+  // ── PUT: save portfolio ─────────────────────────────────────────────────
+  if (req.method === 'PUT') {
+    let body: unknown;
+    try {
+      body = await req.json();
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON body' }, 400);
+    }
+
+    const validation = validatePortfolio(body);
+    if (!validation.ok) {
+      return jsonResponse({ error: validation.error }, 400);
     }
 
     const payload = {
-      snapshot: body.snapshot,
-      equityCurve: body.equityCurve,
+      ...(validation.data as object),
       savedAt: Date.now(),
     };
 
-    const ok = await redisSet(REDIS_KEY, payload, REDIS_TTL_SECONDS).catch(() => false);
+    await redis.set(key, payload);
 
-    return new Response(JSON.stringify({ saved: ok, timestamp: Date.now() }), {
-      status: ok ? 200 : 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-store',
-      },
-    });
+    return jsonResponse({ success: true, savedAt: Date.now() }, 200);
   }
 
-  return new Response('Method not allowed', { status: 405 });
+  return jsonResponse({ error: 'Method not allowed' }, 405);
 });

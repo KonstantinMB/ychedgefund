@@ -211,6 +211,173 @@ body {
   transition: background var(--transition-base), border-color var(--transition-base);
 }
 
+.header-spacer { flex: 1; min-width: 0.5rem; }
+.auth-nav-slot { display: flex; align-items: center; margin-left: 0.25rem; }
+
+/* Header nav tabs */
+.header-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.5rem;
+}
+.header-nav-tab {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.header-nav-tab:hover {
+  color: var(--text-secondary);
+  background: var(--bg-input);
+}
+.header-nav-tab.active {
+  color: #4ade80;
+  background: rgba(74, 222, 128, 0.08);
+}
+.header-nav-sep {
+  font-size: 0.6rem;
+  color: var(--border-primary);
+  user-select: none;
+}
+
+/* Auth nav (Sign In / Register / user dropdown) */
+.auth-nav-container {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.auth-nav-btn {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.auth-nav-signin {
+  border: 1px solid var(--border-primary);
+  background: transparent;
+  color: var(--text-secondary);
+}
+.auth-nav-signin:hover {
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+.auth-nav-register {
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  background: rgba(74, 222, 128, 0.08);
+  color: #4ade80;
+}
+.auth-nav-register:hover {
+  background: rgba(74, 222, 128, 0.15);
+  border-color: #4ade80;
+}
+.auth-nav-user-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.4rem;
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  background: var(--bg-input);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.auth-nav-user-wrap:hover {
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.05);
+}
+.auth-nav-dot {
+  font-size: 0.5rem;
+  line-height: 1;
+}
+.auth-nav-dot-green { color: #4ade80; }
+.auth-nav-dot-amber { color: #eab308; }
+.auth-nav-username {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.auth-nav-chevron {
+  padding: 0 0.15rem;
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+}
+
+/* Auth dropdown */
+.auth-nav-dropdown {
+  position: fixed;
+  z-index: 10001;
+  background: rgba(10, 15, 10, 0.95);
+  border: 1px solid rgba(74, 222, 128, 0.25);
+  border-radius: 8px;
+  padding: 0.5rem 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  min-width: 180px;
+}
+.auth-nav-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+}
+.auth-nav-dropdown-dot { color: #4ade80; font-size: 0.5rem; }
+.auth-nav-dropdown-username {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.auth-nav-dropdown-email {
+  padding: 0 0.75rem 0.4rem;
+  font-size: 0.62rem;
+  color: var(--text-muted);
+}
+.auth-nav-dropdown-divider {
+  height: 1px;
+  margin: 0.25rem 0.5rem;
+  background: var(--border-secondary);
+}
+.auth-nav-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 0.4rem 0.75rem;
+  text-align: left;
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.auth-nav-dropdown-item:hover {
+  background: rgba(74, 222, 128, 0.08);
+  color: #4ade80;
+}
+.auth-nav-dropdown-signout {
+  color: var(--text-muted);
+}
+.auth-nav-dropdown-signout:hover {
+  background: rgba(248, 113, 113, 0.1);
+  color: #f87171;
+}
+
 /* ── Left sidebar ─────────────────────────────────────────────────────────── */
 :root {
   --left-panel-width: 280px;
@@ -3230,6 +3397,190 @@ pre {
   transition: all 0.12s;
 }
 .port-reset-btn:hover {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+}
+.port-export-btn {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.6rem;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border-primary);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.port-export-btn:hover {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+}
+
+/* CTA view (unauthenticated) */
+.port-cta-view {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.port-cta-inner {
+  max-width: 280px;
+}
+.port-cta-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+.port-cta-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+.port-cta-sub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+.port-cta-desc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+  line-height: 1.4;
+}
+.port-cta-primary {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  border: 1px solid rgba(74,222,128,0.5);
+  border-radius: 6px;
+  background: rgba(74,222,128,0.12);
+  color: #4ade80;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 0.75rem;
+}
+.port-cta-primary:hover {
+  background: rgba(74,222,128,0.2);
+  border-color: #4ade80;
+}
+.port-cta-login {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+.port-cta-login a {
+  color: #4ade80;
+  text-decoration: none;
+}
+.port-cta-login a:hover {
+  text-decoration: underline;
+}
+.port-cta-divider {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+.port-cta-secondary {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 1rem;
+  font-size: 0.65rem;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.port-cta-secondary:hover {
+  background: var(--bg-input);
+  color: var(--text-secondary);
+}
+
+/* Local-only banner */
+.port-local-banner {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.65rem;
+  color: #eab308;
+  background: rgba(234,179,8,0.08);
+  border-bottom: 1px solid rgba(234,179,8,0.2);
+  text-align: center;
+}
+.port-user-badge {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+/* Migration modal */
+.port-migration-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 9100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.port-migration-modal {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 1.25rem;
+  width: min(340px, 92vw);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+}
+.port-migration-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+.port-migration-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  line-height: 1.4;
+}
+.port-migration-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.port-migration-import {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  border: 1px solid rgba(74,222,128,0.5);
+  border-radius: 6px;
+  background: rgba(74,222,128,0.12);
+  color: #4ade80;
+  cursor: pointer;
+}
+.port-migration-import:hover {
+  background: rgba(74,222,128,0.2);
+}
+.port-migration-fresh {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 0.7rem;
+  font-family: var(--font-mono);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.port-migration-fresh:hover {
   background: var(--bg-input);
   color: var(--text-secondary);
 }

@@ -13,6 +13,7 @@
  */
 
 import { tradingEngine } from './engine';
+import { initServerSync } from './engine/server-sync';
 import type { YahooDetail, CryptoDetail } from '../lib/data-service';
 import { dataService } from '../lib/data-service';
 import { initGeopoliticalStrategy } from './strategies/geopolitical';
@@ -32,6 +33,7 @@ export function initTradingEngine(): void {
   // ── 2. Start the new engine layer ────────────────────────────────────────
   stateSync.start();
   executionLoop.start();
+  initServerSync();
 
   // ── 3. Wire price feeds to all engine components ──────────────────────────
 

@@ -16,6 +16,7 @@
  */
 
 import { initState } from './lib/state';
+import './auth/auth-manager'; // Initialize auth (validates stored token on load)
 import { WebSocketManager } from './lib/websocket';
 import { initTheme, toggleTheme, getTheme } from './lib/theme';
 import { dataService } from './lib/data-service';
@@ -159,6 +160,64 @@ function initWebSockets(): void {
   if (import.meta.env.DEV) (window as any).atlas.wsManager = wsManager;
 }
 
+// ── Auth nav (Sign In / Register or user dropdown) ─────────────────────────────
+
+async function initAuthNav(): Promise<void> {
+  const slot = document.getElementById('auth-nav-slot');
+  if (!slot) return;
+  const { initAuthNav } = await import('./auth/auth-nav');
+  initAuthNav(slot);
+}
+
+// ── Header nav tabs (Globe | Intel | Markets | Trading) ───────────────────────
+
+function initHeaderNavTabs(): void {
+  const tabs = document.querySelectorAll('.header-nav-tab');
+  tabs.forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const nav = (btn as HTMLElement).dataset.nav;
+        if (nav === 'trading') {
+        const { auth } = await import('./auth/auth-manager');
+        const isLocalOnly = sessionStorage.getItem('atlas:local-only') === '1';
+        if (!auth.isAuthenticated() && !isLocalOnly) {
+          const { openAuthModalWithMessage } = await import('./auth/auth-nav');
+          openAuthModalWithMessage('Sign in to start paper trading, or continue in local-only mode');
+          return;
+        }
+      }
+      tabs.forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      switch (nav) {
+        case 'globe':
+          document.getElementById('left-panel')!.style.opacity = '1';
+          document.getElementById('right-panel')!.querySelector('.panel')?.scrollIntoView({ behavior: 'smooth' });
+          break;
+        case 'intel': {
+          document.getElementById('left-panel')!.style.opacity = '0.6';
+          const { forceExpand } = await import('./panels/panel-manager');
+          forceExpand('strategic-risk');
+          document.querySelector('[data-panel-id="strategic-risk"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        }
+        case 'markets': {
+          document.getElementById('left-panel')!.style.opacity = '0.6';
+          const { forceExpand } = await import('./panels/panel-manager');
+          forceExpand('markets');
+          document.querySelector('[data-panel-id="markets"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        }
+        case 'trading': {
+          document.getElementById('left-panel')!.style.opacity = '1';
+          const { forceExpand } = await import('./panels/panel-manager');
+          forceExpand('portfolio');
+          document.querySelector('[data-panel-id="portfolio"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        }
+      }
+    });
+  });
+}
+
 // ── Theme toggle ──────────────────────────────────────────────────────────────
 
 function initThemeToggle(): void {
@@ -218,8 +277,14 @@ async function initPaperTradingToggle(): Promise<void> {
   // Start in AUTO mode
   apply('auto');
 
-  // Click cycles: AUTO → MANUAL → AUTO
-  btn.addEventListener('click', () => {
+  // Click cycles: AUTO → MANUAL → AUTO (auth required for paper trading)
+  btn.addEventListener('click', async () => {
+    const { auth } = await import('./auth/auth-manager');
+    const { openAuthModal } = await import('./auth/auth-modal');
+    if (!auth.isAuthenticated()) {
+      openAuthModal();
+      return;
+    }
     apply(tradingMode === 'auto' ? 'manual' : 'auto');
     showToast(tradingMode === 'auto' ? 'Auto-execute ON' : 'Manual mode — signals queued only');
   });
@@ -679,6 +744,8 @@ async function init(): Promise<void> {
   await initPanels();
 
   initThemeToggle();
+  await initAuthNav();
+  initHeaderNavTabs();
 
   // Intelligence engine
   try {

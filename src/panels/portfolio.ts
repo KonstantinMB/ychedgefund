@@ -17,11 +17,16 @@
  */
 
 import { registerLeftPanel as registerPanel } from './panel-manager';
+import { requireAuthForTrading, openAuthModal } from '../auth/auth-modal';
+import { auth } from '../auth/auth-manager';
 import { showToast } from '../lib/toast';
 import { tradingEngine } from '../trading/engine';
 import { portfolioManager } from '../trading/engine/portfolio-manager';
+import { pushLocalToServer, loadServerPortfolio, resetPortfolioOnServer } from '../trading/engine/server-sync';
 import type { PortfolioSnapshot, ManagedPosition, ClosedTrade } from '../trading/engine/portfolio-manager';
 import type { Fill } from '../trading/engine/paper-broker';
+
+const LOCAL_ONLY_KEY = 'atlas:local-only';
 
 // ── Sector & colour maps ──────────────────────────────────────────────────────
 
@@ -189,6 +194,10 @@ let sectorLegendEl: HTMLElement | null = null;
 let tradesBodyEl: HTMLElement | null = null;
 
 let lastNav = 0;
+let portCtaView: HTMLElement | null = null;
+let portMainView: HTMLElement | null = null;
+let portLocalBanner: HTMLElement | null = null;
+let portUserBadge: HTMLElement | null = null;
 
 // ── Risk status (from trading:riskStatus) ─────────────────────────────────────
 
@@ -451,9 +460,7 @@ function renderPositionsTable(snap: PortfolioSnapshot): void {
     const openBtn = document.createElement('button');
     openBtn.className = 'port-empty-trade-btn';
     openBtn.innerHTML = '＋ Place Your First Trade';
-    openBtn.addEventListener('click', () => {
-      import('./trade-ticket').then(({ openTradeTicket }) => openTradeTicket()).catch(console.error);
-    });
+    openBtn.addEventListener('click', () => openTradeTicketOrAuth());
     emptyWrap.appendChild(openBtn);
     posTableBodyEl.appendChild(emptyWrap);
     return;
@@ -634,9 +641,162 @@ function renderLegacyState(): void {
   }
 }
 
+// ── Auth state helpers ────────────────────────────────────────────────────────
+
+function isOptedLocalOnly(): boolean {
+  return typeof sessionStorage !== 'undefined' && sessionStorage.getItem(LOCAL_ONLY_KEY) === '1';
+}
+
+function setOptedLocalOnly(value: boolean): void {
+  if (value) sessionStorage.setItem(LOCAL_ONLY_KEY, '1');
+  else sessionStorage.removeItem(LOCAL_ONLY_KEY);
+}
+
+function getPortfolioViewState(): 'cta' | 'main' {
+  if (auth.isAuthenticated()) return 'main';
+  if (isOptedLocalOnly()) return 'main';
+  return 'cta';
+}
+
+function updatePortfolioViewState(): void {
+  const state = getPortfolioViewState();
+  if (portCtaView) portCtaView.style.display = state === 'cta' ? 'block' : 'none';
+  if (portMainView) portMainView.style.display = state === 'main' ? 'block' : 'none';
+  if (portLocalBanner) portLocalBanner.style.display = state === 'main' && !auth.isAuthenticated() ? 'block' : 'none';
+  if (portUserBadge) portUserBadge.style.display = state === 'main' && auth.isAuthenticated() ? 'block' : 'none';
+}
+
+function buildPortfolioCTA(root: HTMLElement): void {
+  const wrap = document.createElement('div');
+  wrap.className = 'port-cta-view';
+  wrap.innerHTML = `
+    <div class="port-cta-inner">
+      <div class="port-cta-icon">💰</div>
+      <div class="port-cta-title">Start paper trading with $1M</div>
+      <div class="port-cta-sub">virtual capital.</div>
+      <div class="port-cta-desc">Track your performance against AI-generated signals.</div>
+      <button class="port-cta-primary" id="port-cta-create">▶ CREATE ACCOUNT TO START</button>
+      <div class="port-cta-login">Already have an account? <a href="#" id="port-cta-login">Login</a></div>
+      <div class="port-cta-divider">── or trade locally (no save) ──</div>
+      <button class="port-cta-secondary" id="port-cta-local">▶ TRADE WITHOUT ACCOUNT</button>
+    </div>
+  `;
+  wrap.querySelector('#port-cta-create')?.addEventListener('click', () => openAuthModal());
+  wrap.querySelector('#port-cta-login')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openAuthModal();
+  });
+  wrap.querySelector('#port-cta-local')?.addEventListener('click', () => {
+    setOptedLocalOnly(true);
+    updatePortfolioViewState();
+  });
+  root.appendChild(wrap);
+  portCtaView = wrap;
+}
+
+function showMigrationModal(): void {
+  if (document.querySelector('.port-migration-overlay')) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'port-migration-overlay';
+  overlay.innerHTML = `
+    <div class="port-migration-modal">
+      <div class="port-migration-title">Import local portfolio?</div>
+      <div class="port-migration-desc">You have an existing portfolio. Import it to your account?</div>
+      <div class="port-migration-actions">
+        <button class="port-migration-import" id="port-mig-import">Import to Account</button>
+        <button class="port-migration-fresh" id="port-mig-fresh">Start Fresh ($1M)</button>
+      </div>
+    </div>
+  `;
+  overlay.querySelector('#port-mig-import')?.addEventListener('click', async () => {
+    const ok = await pushLocalToServer();
+    overlay.remove();
+    if (ok) showToast('Portfolio imported to your account');
+    else showToast('Import failed. Try again.');
+  });
+  overlay.querySelector('#port-mig-fresh')?.addEventListener('click', async () => {
+    const ok = await loadServerPortfolio();
+    overlay.remove();
+    if (ok) showToast('Started fresh with $1M');
+    else showToast('Failed to load. Try again.');
+  });
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
+function openTradeTicketOrAuth(): void {
+  if (auth.isAuthenticated() || isOptedLocalOnly()) {
+    import('./trade-ticket').then(({ openTradeTicket }) => openTradeTicket()).catch(console.error);
+  } else {
+    requireAuthForTrading(() => {
+      import('./trade-ticket').then(({ openTradeTicket }) => openTradeTicket()).catch(console.error);
+    });
+  }
+}
+
+function exportTradesCsv(): void {
+  const snap = portfolioManager.getSnapshot();
+  const trades = [...snap.closedTrades].sort((a, b) => a.closedAt - b.closedAt);
+  if (trades.length === 0) {
+    showToast('No trades to export');
+    return;
+  }
+  const headers = ['Symbol', 'Direction', 'Strategy', 'Opened', 'Closed', 'Qty', 'Entry', 'Exit', 'P&L', 'P&L%', 'Reason'];
+  const rows = trades.map(t => [
+    t.symbol,
+    t.direction,
+    t.strategy,
+    new Date(t.openedAt).toISOString(),
+    new Date(t.closedAt).toISOString(),
+    t.quantity,
+    t.avgEntryPrice.toFixed(2),
+    t.avgExitPrice.toFixed(2),
+    t.realizedPnl.toFixed(2),
+    (t.realizedPnlPct * 100).toFixed(2) + '%',
+    t.closeReason,
+  ]);
+  const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','))].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `atlas-trades-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast(`Exported ${trades.length} trades`);
+}
+
 // ── Panel builder ─────────────────────────────────────────────────────────────
 
 function buildPortfolioBody(container: HTMLElement): void {
+  const root = document.createElement('div');
+  root.className = 'port-root';
+  container.appendChild(root);
+
+  // CTA view (State 1)
+  buildPortfolioCTA(root);
+
+  // Main view wrapper (State 2/3)
+  const mainWrap = document.createElement('div');
+  mainWrap.className = 'port-main-view';
+  mainWrap.style.display = 'none';
+
+  // Local-only banner (State 3)
+  const localBanner = document.createElement('div');
+  localBanner.className = 'port-local-banner';
+  localBanner.innerHTML = '⚠ Portfolio not saved to cloud. Sign up to keep your data across devices.';
+  localBanner.style.display = 'none';
+  mainWrap.appendChild(localBanner);
+  portLocalBanner = localBanner;
+
+  // User badge (State 2)
+  const userBadge = document.createElement('div');
+  userBadge.className = 'port-user-badge';
+  userBadge.style.display = 'none';
+  mainWrap.appendChild(userBadge);
+  portUserBadge = userBadge;
+
+  const mainContent = document.createElement('div');
+  mainContent.className = 'port-main-content';
 
   // ── 1. NAV Header ─────────────────────────────────────────────────────────
   const navSection = document.createElement('div');
@@ -660,7 +820,7 @@ function buildPortfolioBody(container: HTMLElement): void {
   navTotalPnlEl = navSection.querySelector('#port-total-pnl');
   cbBadgeEl    = navSection.querySelector('#port-cb-badge');
 
-  container.appendChild(navSection);
+  mainContent.appendChild(navSection);
 
   // ── 2. Positions table ────────────────────────────────────────────────────
   const posSection = document.createElement('div');
@@ -690,7 +850,7 @@ function buildPortfolioBody(container: HTMLElement): void {
   posTable.appendChild(posTableBodyEl);
   posSection.appendChild(posHeaderEl);
   posSection.appendChild(posTable);
-  container.appendChild(posSection);
+  mainContent.appendChild(posSection);
 
   // ── 3. Exposure + Risk ────────────────────────────────────────────────────
   const riskSection = document.createElement('div');
@@ -756,7 +916,7 @@ function buildPortfolioBody(container: HTMLElement): void {
 
   riskSection.appendChild(expCol);
   riskSection.appendChild(riskCol);
-  container.appendChild(riskSection);
+  mainContent.appendChild(riskSection);
 
   // ── 4. Sector donut ───────────────────────────────────────────────────────
   const sectorSection = document.createElement('div');
@@ -781,7 +941,7 @@ function buildPortfolioBody(container: HTMLElement): void {
   sectorBody.appendChild(sectorLegendEl);
   sectorSection.appendChild(sectorHdr);
   sectorSection.appendChild(sectorBody);
-  container.appendChild(sectorSection);
+  mainContent.appendChild(sectorSection);
 
   // ── 5. Closed trades ──────────────────────────────────────────────────────
   const tradesSection = document.createElement('div');
@@ -797,7 +957,7 @@ function buildPortfolioBody(container: HTMLElement): void {
 
   tradesSection.appendChild(tradesHdr);
   tradesSection.appendChild(tradesBodyEl);
-  container.appendChild(tradesSection);
+  mainContent.appendChild(tradesSection);
 
   // ── 6. Floating "New Trade" action button ────────────────────────────────
   const fabRow = document.createElement('div');
@@ -806,11 +966,9 @@ function buildPortfolioBody(container: HTMLElement): void {
   const fab = document.createElement('button');
   fab.className = 'port-fab-btn';
   fab.innerHTML = `<span class="port-fab-plus">＋</span> NEW TRADE`;
-  fab.addEventListener('click', () => {
-    import('./trade-ticket').then(({ openTradeTicket }) => openTradeTicket()).catch(console.error);
-  });
+  fab.addEventListener('click', () => openTradeTicketOrAuth());
   fabRow.appendChild(fab);
-  container.appendChild(fabRow);
+  mainContent.appendChild(fabRow);
 
   // ── 7. Emergency controls ─────────────────────────────────────────────────
   const emergencyRow = document.createElement('div');
@@ -830,19 +988,60 @@ function buildPortfolioBody(container: HTMLElement): void {
   const resetBtn = document.createElement('button');
   resetBtn.className = 'port-reset-btn';
   resetBtn.textContent = 'Reset Portfolio';
-  resetBtn.addEventListener('click', () => {
+  resetBtn.addEventListener('click', async () => {
     if (!confirm('Reset portfolio to $1,000,000? All positions and trades will be lost.')) return;
-    tradingEngine.resetPortfolio();
-    portfolioManager.reset();
-    lastNav = 0;
-    showToast('Portfolio reset to $1,000,000');
+    if (auth.isAuthenticated()) {
+      const ok = await resetPortfolioOnServer();
+      if (ok) {
+        tradingEngine.resetPortfolio();
+        lastNav = 0;
+        showToast('Portfolio reset to $1,000,000');
+      } else {
+        showToast('Reset failed. Try again.');
+      }
+    } else {
+      tradingEngine.resetPortfolio();
+      portfolioManager.reset();
+      lastNav = 0;
+      showToast('Portfolio reset to $1,000,000');
+    }
   });
+
+  const exportBtn = document.createElement('button');
+  exportBtn.className = 'port-export-btn';
+  exportBtn.textContent = 'Export Trades';
+  exportBtn.addEventListener('click', () => exportTradesCsv());
 
   emergencyRow.appendChild(flattenAllBtn);
   emergencyRow.appendChild(resetBtn);
-  container.appendChild(emergencyRow);
+  emergencyRow.appendChild(exportBtn);
+  mainContent.appendChild(emergencyRow);
+
+  mainWrap.appendChild(mainContent);
+  root.appendChild(mainWrap);
+  portMainView = mainWrap;
 
   // ── 8. Event subscriptions ────────────────────────────────────────────────
+
+  // Auth state changes
+  window.addEventListener('auth:authenticated', () => {
+    updatePortfolioViewState();
+    if (auth.isAuthenticated() && portUserBadge) {
+      const u = auth.getUser();
+      const since = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      portUserBadge.textContent = u ? `${u.username} · since ${since}` : '';
+    }
+  });
+  window.addEventListener('auth:user', () => {
+    if (portUserBadge && auth.isAuthenticated()) {
+      const u = auth.getUser();
+      const since = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      portUserBadge.textContent = u ? `${u.username} · since ${since}` : '';
+    }
+  });
+
+  // Migration prompt (local portfolio + new login)
+  window.addEventListener('portfolio:migration-prompt', () => showMigrationModal());
 
   // Primary: new engine PortfolioSnapshot
   window.addEventListener('trading:portfolio', (e: Event) => {
@@ -906,7 +1105,13 @@ function buildPortfolioBody(container: HTMLElement): void {
     }
   });
 
-  // ── 9. Initial render ─────────────────────────────────────────────────────
+  // ── 9. Initial view state & render ──────────────────────────────────────────
+  updatePortfolioViewState();
+  if (portUserBadge && auth.isAuthenticated()) {
+    const u = auth.getUser();
+    const since = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    portUserBadge.textContent = u ? `${u.username} · since ${since}` : '';
+  }
   const initSnap = portfolioManager.getSnapshot();
   if (initSnap.totalValue > 0) {
     renderSnapshot(initSnap);
@@ -935,9 +1140,7 @@ export function initPortfolioPanel(): void {
     defaultCollapsed: false,
     headerAction: {
       label: '＋ Trade',
-      onClick: () => {
-        import('./trade-ticket').then(({ openTradeTicket }) => openTradeTicket()).catch(console.error);
-      },
+      onClick: () => openTradeTicketOrAuth(),
     },
     init: buildPortfolioBody,
   });

@@ -419,6 +419,77 @@ export class PortfolioManager {
     this.emitUpdate();
   }
 
+  /**
+   * Load state from server (after fetch from /api/trading/portfolio).
+   * Replaces local state. Call when server has newer data or on login.
+   */
+  loadFromServer(data: Partial<StoredPortfolio> & { savedAt?: number }): void {
+    if (data.cash != null) this.cash = data.cash;
+    if (data.positions) {
+      this.positions = new Map(
+        data.positions
+          .filter(
+            (p): p is ManagedPosition =>
+              !!p &&
+              typeof (p as ManagedPosition).direction === 'string' &&
+              typeof (p as ManagedPosition).symbol === 'string' &&
+              typeof (p as ManagedPosition).quantity === 'number'
+          )
+          .map(p => [(p as ManagedPosition).symbol, p as ManagedPosition])
+      );
+    }
+    if (data.closedTrades) this.closedTrades = data.closedTrades;
+    if (data.realizedPnl != null) this.realizedPnl = data.realizedPnl;
+    if (data.highWaterMark != null) this.highWaterMark = data.highWaterMark;
+    if (data.maxDrawdown != null) this.maxDrawdown = data.maxDrawdown;
+    if (data.dailyStartValue != null) this.dailyStartValue = data.dailyStartValue;
+    if (data.equityCurve) this.equityCurve = data.equityCurve;
+    if (data.savedAt) {
+      try {
+        const stored: StoredPortfolio = {
+          cash: this.cash,
+          positions: Array.from(this.positions.values()),
+          closedTrades: this.closedTrades,
+          realizedPnl: this.realizedPnl,
+          highWaterMark: this.highWaterMark,
+          maxDrawdown: this.maxDrawdown,
+          dailyStartValue: this.dailyStartValue,
+          equityCurve: this.equityCurve,
+          savedAt: data.savedAt,
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+      } catch { /* ignore */ }
+    }
+    this.emitUpdate();
+  }
+
+  /**
+   * Whether local portfolio has meaningful data (positions, trades, or non-default cash).
+   * Used for migration prompt when user logs in with existing local portfolio.
+   */
+  hasLocalData(): boolean {
+    if (this.positions.size > 0) return true;
+    if (this.closedTrades.length > 0) return true;
+    if (this.cash !== PAPER_CONFIG.startingCapital) return true;
+    if (this.realizedPnl !== 0) return true;
+    return false;
+  }
+
+  /** Build payload for server PUT (matches StoredPortfolio shape) */
+  getStoredPayload(): StoredPortfolio {
+    return {
+      cash: this.cash,
+      positions: Array.from(this.positions.values()),
+      closedTrades: this.closedTrades,
+      realizedPnl: this.realizedPnl,
+      highWaterMark: this.highWaterMark,
+      maxDrawdown: this.maxDrawdown,
+      dailyStartValue: this.dailyStartValue,
+      equityCurve: this.equityCurve.slice(-MAX_EQUITY_POINTS),
+      savedAt: Date.now(),
+    };
+  }
+
   // ── Persistence ──────────────────────────────────────────────────────────────
 
   persistNow(): void {
@@ -444,9 +515,7 @@ export class PortfolioManager {
         } catch { /* give up */ }
       }
     }
-
-    // Fire-and-forget Redis sync
-    void this.syncToRedis();
+    // Server sync is handled by server-sync.ts (debounced PUT on portfolio-updated)
   }
 
   // ── Private ──────────────────────────────────────────────────────────────────
@@ -504,23 +573,6 @@ export class PortfolioManager {
   private emitUpdate(): void {
     const snapshot = this.getSnapshot();
     window.dispatchEvent(new CustomEvent('portfolio-updated', { detail: snapshot }));
-  }
-
-  private async syncToRedis(): Promise<void> {
-    try {
-      const snapshot = this.getSnapshot();
-      await fetch('/api/trading/portfolio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          snapshot,
-          equityCurve: this.equityCurve.slice(-100),
-        }),
-        signal: AbortSignal.timeout(5_000),
-      });
-    } catch {
-      // Redis sync is best-effort — localStorage is the primary store
-    }
   }
 }
 

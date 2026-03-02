@@ -446,17 +446,21 @@ function renderConsensusBar(): void {
 // ── Action handlers ───────────────────────────────────────────────────────────
 
 function handleTrade(sig: Signal, btn: HTMLButtonElement): void {
-  window.dispatchEvent(new CustomEvent('execute-signal', { detail: { signal: sig } }));
-  tradingEngine.acceptSignal(sig);
-  btn.textContent = 'Submitted ✓';
-  btn.disabled = true;
-  btn.classList.add('submitted');
-  showToast(`Paper trade: ${sig.direction} ${sig.symbol} @ mkt`);
-  setTimeout(() => {
-    btn.textContent = 'Paper Trade';
-    btn.disabled = false;
-    btn.classList.remove('submitted');
-  }, 4000);
+  import('../auth/auth-modal').then(({ requireAuthForTrading }) => {
+    requireAuthForTrading(() => {
+      window.dispatchEvent(new CustomEvent('execute-signal', { detail: { signal: sig } }));
+      tradingEngine.acceptSignal(sig);
+      btn.textContent = 'Submitted ✓';
+      btn.disabled = true;
+      btn.classList.add('submitted');
+      showToast(`Paper trade: ${sig.direction} ${sig.symbol} @ mkt`);
+      setTimeout(() => {
+        btn.textContent = 'Paper Trade';
+        btn.disabled = false;
+        btn.classList.remove('submitted');
+      }, 4000);
+    });
+  });
 }
 
 function handleFlyTo(sig: Signal): void {

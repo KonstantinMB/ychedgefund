@@ -37,12 +37,31 @@ function saveCollapsedState(state: Record<string, boolean>): void {
 const collapsedState: Record<string, boolean> = loadCollapsedState();
 
 /**
- * Create and register a collapsible panel in the right sidebar.
- * The panel body is populated by calling config.init(bodyEl).
+ * Expand a panel by ID (updates persisted state and DOM if panel exists).
  */
 export function forceExpand(panelId: string): void {
   collapsedState[panelId] = false;
   saveCollapsedState(collapsedState);
+
+  const panel = document.querySelector(`[data-panel-id="${panelId}"]`);
+  if (!panel) return;
+  const body = panel.querySelector('.panel-body') as HTMLElement | null;
+  const collapseBtn = panel.querySelector('.panel-collapse-btn') as HTMLElement | null;
+  if (!body || !collapseBtn) return;
+  if (!body.classList.contains('collapsed')) return;
+
+  body.classList.remove('collapsed');
+  body.style.maxHeight = body.scrollHeight + 'px';
+  collapseBtn.textContent = '▲';
+  collapseBtn.setAttribute('aria-expanded', 'true');
+  collapseBtn.setAttribute('title', 'Collapse');
+  body.addEventListener(
+    'transitionend',
+    () => {
+      if (!body.classList.contains('collapsed')) body.style.maxHeight = 'none';
+    },
+    { once: true }
+  );
 }
 
 export function createPanel(config: PanelConfig): HTMLElement {

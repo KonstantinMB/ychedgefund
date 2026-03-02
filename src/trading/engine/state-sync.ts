@@ -1,19 +1,19 @@
 /**
  * StateSync — Trading ↔ UI Bridge
  *
- * Listens to engine events and publishes them to:
- *   1. The global reactive AppState store (for non-panel consumers)
- *   2. Named CustomEvents on `window` (for panels that subscribe directly)
+ * Two storage layers:
+ *   Layer 1: localStorage (instant, offline-capable)
+ *   Layer 2: Redis via API (persistent, cross-device) — see server-sync.ts
  *
- * Published events / state keys:
- *   'trading:signals'     → Signal[]             (latest 50 signals)
- *   'trading:portfolio'   → PortfolioSnapshot     (full portfolio state)
- *   'trading:performance' → PerformanceMetrics    (computed metrics)
- *   'trading:riskStatus'  → CircuitBreakerMetrics (CB state + levels)
- *   'trading:trades'      → ClosedTrade[]         (last 100 trades)
+ * WRITE: portfolio-updated → server-sync debounces 5s → PUT /api/trading/portfolio
+ * READ: On auth, server-sync fetches GET, latest timestamp wins
  *
- * Also syncs to the legacy AppState 'trading' key so the header bar NAV
- * display keeps working.
+ * Published events:
+ *   'trading:signals'     → Signal[]
+ *   'trading:portfolio'   → PortfolioSnapshot
+ *   'trading:performance' → PerformanceMetrics
+ *   'trading:riskStatus'  → CircuitBreakerMetrics
+ *   'trading:trades'      → ClosedTrade[]
  */
 
 import { signalBus } from '../signals/signal-bus';

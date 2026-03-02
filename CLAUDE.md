@@ -37,6 +37,39 @@ When building a specific component, fetch the relevant WorldMonitor source file 
 5. Edge functions are thin proxies: fetch upstream → normalize schema → cache in Redis → return JSON.
 6. Every data source is a public API with a free tier. No paid data dependencies in MVP.
 
+## Authentication System
+
+Simple email/username/password auth stored in Upstash Redis.
+
+- **Password hashing**: PBKDF2 via Web Crypto API (Edge Runtime compatible)
+- **Sessions**: Opaque random tokens in Redis with 30-day TTL
+- **No email verification, no OAuth, no magic links**
+- **Auth required ONLY for paper trading portfolio** — dashboard is fully public
+- **Two trading modes**: authenticated (server-persisted) and local-only (localStorage)
+
+### Redis Auth Keys
+
+| Key | Value | TTL |
+|-----|-------|-----|
+| `user:{username}` | User object with passwordHash | none |
+| `email:{email}` | Username (uniqueness + login) | none |
+| `session:{token}` | Session data | 30 days |
+| `ratelimit:login:{ip}` | Failed attempt count | 15 min |
+| `portfolio:{username}` | User's paper portfolio | — |
+| `trades:{username}` | User's trade history (last 5000) | — |
+| `performance:{username}` | Cached performance metrics | 5 min |
+
+### Auth Files
+
+- **API**: `/api/auth/register.ts`, `login.ts`, `me.ts`, `session.ts`, `logout.ts`
+- **API**: `/api/auth/_middleware.ts` (requireAuth helper)
+- **API**: `/api/auth/_crypto.ts` (PBKDF2 hash/verify)
+- **API**: `/api/auth/_redis.ts` (Auth Redis client)
+- **Frontend**: `/src/auth/auth-manager.ts` (client-side auth state)
+- **Frontend**: `/src/auth/auth-modal.ts` (login/register modal UI)
+- **Frontend**: `/src/auth/auth-nav.ts` (nav bar auth controls)
+- **Styles**: `/src/styles/auth.css`
+
 ## File Structure
 ```
 yc-hedge-fund/
@@ -70,10 +103,22 @@ yc-hedge-fund/
 │   │   ├── summarize.ts         ← LLM brief generation (Groq free tier)
 │   │   ├── classify.ts          ← Threat classification
 │   │   └── sentiment.ts         ← News sentiment scoring
+│   ├── auth/                     ← User authentication (email + username + password)
+│   │   ├── _crypto.ts           ← PBKDF2 password hashing (Web Crypto, Edge-compatible)
+│   │   ├── _middleware.ts       ← requireAuth helper for protected endpoints
+│   │   ├── _redis.ts            ← Auth Redis client
+│   │   ├── register.ts          ← POST /api/auth/register
+│   │   ├── login.ts             ← POST /api/auth/login
+│   │   ├── me.ts                ← GET /api/auth/me (session lookup)
+│   │   ├── session.ts           ← GET /api/auth/session (user + expiresAt)
+│   │   └── logout.ts            ← POST /api/auth/logout
 │   └── trading/                 ← Paper trading state API
-│       ├── portfolio.ts         ← Portfolio state (Redis-backed)
-│       ├── signals.ts           ← Generated signals endpoint
-│       └── performance.ts       ← Strategy metrics
+│       ├── portfolio.ts         ← GET/PUT portfolio (Redis-backed)
+│       ├── portfolio/
+│       │   └── reset.ts         ← POST /api/trading/portfolio/reset
+│       ├── trades.ts            ← GET/POST trade history
+│       ├── performance.ts       ← Strategy metrics (5-min cache)
+│       └── signals.ts           ← Generated signals endpoint
 ├── relay/                       ← Railway WebSocket relay server
 │   ├── index.ts                 ← Express + WebSocket server
 │   ├── ais-stream.ts            ← AISStream.io multiplexer
@@ -83,7 +128,13 @@ yc-hedge-fund/
 ├── src/                         ← Frontend (Vite + vanilla TS)
 │   ├── index.html
 │   ├── main.ts
+│   ├── auth/                    ← Auth UI + state
+│   │   ├── auth-manager.ts     ← Client-side auth state singleton
+│   │   ├── auth-modal.ts       ← Login/register modal UI
+│   │   └── auth-nav.ts         ← Nav bar auth controls (Sign In / user dropdown)
 │   ├── styles/
+│   │   ├── base.css
+│   │   └── auth.css            ← Auth modal + nav styles
 │   ├── globe/                   ← deck.gl globe + layers
 │   │   ├── globe.ts             ← Globe init (deck.gl + MapLibre)
 │   │   ├── layers/              ← One file per toggleable layer
@@ -174,6 +225,17 @@ yc-hedge-fund/
 | Cache + State | Upstash Redis | Pay-per-request | ~$0-10/mo |
 | AI Inference | Groq | Free tier | $0 |
 | **Total** | | | **$5-15/mo** |
+
+## Redis Key Schema (Auth + Trading)
+
+See **Authentication System** section above for auth keys. Trading keys:
+
+| Key | Value | TTL |
+|-----|-------|-----|
+| `portfolio:{username}` | JSON `{ ... full portfolio state ... }` | — |
+| `portfolio:{username}:archived:{ts}` | Archived portfolio (on reset) | 90 days |
+| `trades:{username}` | JSON array `[ ... trade history, last 5000 ... ]` | — |
+| `performance:{username}` | JSON `{ ... cached metrics ... }` | 5 min |
 
 ## Paper Trading Configuration
 ```typescript
