@@ -43,7 +43,10 @@ export function openAuthModal(options?: AuthModalOptions): void {
 
   modal.innerHTML = `
     <div class="auth-header">
-      <span class="auth-logo">ATLAS</span>
+      <div class="auth-logo">
+        <img src="/icon-192.png" alt="YC Hedge Fund" width="28" height="28" />
+        <span>YC Hedge Fund</span>
+      </div>
       <button class="auth-close" type="button" aria-label="Close">✕</button>
     </div>
     <div class="auth-title-wrap">

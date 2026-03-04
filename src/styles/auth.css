@@ -73,10 +73,17 @@
 }
 
 .auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 14px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.1em;
   color: #2ECC71;
   font-weight: 600;
+}
+.auth-logo img {
+  display: block;
+  border-radius: 4px;
 }
 
 .auth-close {

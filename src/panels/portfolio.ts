@@ -759,7 +759,7 @@ function exportTradesCsv(): void {
   const blob = new Blob([csv], { type: 'text/csv' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `atlas-trades-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `yc-hedge-fund-trades-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(a.href);
   showToast(`Exported ${trades.length} trades`);
