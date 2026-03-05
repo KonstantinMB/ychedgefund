@@ -108,36 +108,42 @@ export async function updateLeaderboardEntries(
 
   const periods: LeaderboardPeriod[] = ['weekly', 'monthly', 'quarterly', 'yearly'];
 
-  for (const period of periods) {
-    let returnPct = computeReturn(portfolio, PERIOD_DAYS[period]);
-    // Fallback to inception return if period has no data (e.g. new user) — ensures user appears on all periods
-    if (returnPct === null) {
-      const curve = (portfolio.equityCurve ?? []) as EquityPoint[];
-      let valueNow: number;
-      if (curve.length > 0) {
-        valueNow = curve[curve.length - 1]!.totalValue;
-      } else {
-        const positions = (portfolio.positions ?? []) as Array<{ marketValue?: number }>;
-        const marketValue = positions.reduce((s, p) => s + (p.marketValue ?? 0), 0);
-        valueNow = (portfolio.cash ?? STARTING_CAPITAL) + marketValue;
-      }
-      if (STARTING_CAPITAL <= 0) continue;
-      returnPct = (valueNow - STARTING_CAPITAL) / STARTING_CAPITAL;
-    }
-
-    const key = `leaderboard:${period}`;
-    const prevRankKey = `leaderboard:prev_rank:${period}:${username}`;
-
-    // Store current rank as prev_rank for next request (before we update)
-    const currentRank = await redis.zrevrank(key, username);
-    if (currentRank !== null) {
-      await redis.set(prevRankKey, String(currentRank + 1), {
-        ex: PREV_RANK_TTL_SECONDS,
-      });
-    }
-
-    // Score: returnPct * 10000 (higher = better, ZREVRANGE returns desc)
-    const score = returnPct * SCORE_MULTIPLIER;
-    await redis.zadd(key, { score, member: username });
+  // Compute inception return once (fallback when period has no historical data)
+  const curve = (portfolio.equityCurve ?? []) as EquityPoint[];
+  let valueNow: number;
+  if (curve.length > 0) {
+    valueNow = curve[curve.length - 1]!.totalValue;
+  } else {
+    const positions = (portfolio.positions ?? []) as Array<{ marketValue?: number }>;
+    const marketValue = positions.reduce((s, p) => s + (p.marketValue ?? 0), 0);
+    valueNow = (portfolio.cash ?? STARTING_CAPITAL) + marketValue;
   }
+  const inceptionReturn = STARTING_CAPITAL > 0
+    ? (valueNow - STARTING_CAPITAL) / STARTING_CAPITAL
+    : 0;
+
+  // Update all 4 periods in parallel — ensures user appears on weekly, monthly, quarterly, yearly
+  await Promise.all(
+    periods.map(async (period) => {
+      try {
+        let returnPct = computeReturn(portfolio, PERIOD_DAYS[period]);
+        if (returnPct === null) returnPct = inceptionReturn;
+
+        const key = `leaderboard:${period}`;
+        const prevRankKey = `leaderboard:prev_rank:${period}:${username}`;
+
+        const currentRank = await redis.zrevrank(key, username);
+        if (currentRank !== null) {
+          await redis.set(prevRankKey, String(currentRank + 1), {
+            ex: PREV_RANK_TTL_SECONDS,
+          });
+        }
+
+        const score = returnPct * SCORE_MULTIPLIER;
+        await redis.zadd(key, { score, member: username });
+      } catch (err) {
+        console.error(`[Leaderboard] Update failed for ${period}:`, err);
+      }
+    })
+  );
 }
