@@ -5,7 +5,7 @@
  * LOGGED IN: ● username [▼] with dropdown
  *
  * Session indicator: green dot (healthy), amber dot (<1 day) with tooltip
- * Dropdown: My Portfolio, Trade History, Export Data, Reset Portfolio, Sign Out
+ * Dropdown: My Portfolio, Trade History, Export Data, Sign Out
  */
 
 import { auth } from './auth-manager';
@@ -155,8 +155,6 @@ function toggleDropdown(user: User, anchor: HTMLElement): void {
     <button class="auth-nav-dropdown-item" data-action="trades">Trade History</button>
     <button class="auth-nav-dropdown-item" data-action="export">Export Data</button>
     <div class="auth-nav-dropdown-divider"></div>
-    <button class="auth-nav-dropdown-item" data-action="reset">Reset Portfolio</button>
-    <div class="auth-nav-dropdown-divider"></div>
     <button class="auth-nav-dropdown-item auth-nav-dropdown-signout" data-action="logout">Sign Out</button>
   `;
 
@@ -240,28 +238,6 @@ async function handleDropdownAction(action: string): Promise<void> {
       URL.revokeObjectURL(a.href);
       const { showToast } = await import('../lib/toast');
       showToast(`Exported ${trades.length} trades`);
-      break;
-    }
-    case 'reset': {
-      if (!confirm('Reset portfolio to $1,000,000? All positions and trades will be lost.')) return;
-      const { auth } = await import('./auth-manager');
-      const { resetPortfolioOnServer } = await import('../trading/engine/server-sync');
-      const { tradingEngine } = await import('../trading/engine');
-      const { portfolioManager } = await import('../trading/engine/portfolio-manager');
-      const { showToast } = await import('../lib/toast');
-      if (auth.isAuthenticated()) {
-        const ok = await resetPortfolioOnServer();
-        if (ok) {
-          tradingEngine.resetPortfolio();
-          showToast('Portfolio reset to $1,000,000');
-        } else {
-          showToast('Reset failed. Try again.');
-        }
-      } else {
-        tradingEngine.resetPortfolio();
-        portfolioManager.reset();
-        showToast('Portfolio reset to $1,000,000');
-      }
       break;
     }
     case 'logout': {

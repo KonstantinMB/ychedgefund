@@ -405,19 +405,6 @@ export class CommandPalette {
 
     const tradingCommands: Command[] = [
       {
-        id: 'reset-portfolio',
-        label: 'Reset Portfolio',
-        description: 'Reset paper trading portfolio to initial state',
-        category: 'Trading',
-        icon: '↺',
-        action: () => {
-          if (confirm('Reset paper trading portfolio? This cannot be undone.')) {
-            localStorage.removeItem('atlas-portfolio');
-            window.location.reload();
-          }
-        },
-      },
-      {
         id: 'view-signals',
         label: 'View Signals',
         description: 'Scroll to the signals panel',

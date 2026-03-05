@@ -620,7 +620,7 @@ body {
 }
 
 .left-trading-divider span {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--text-muted);
@@ -648,11 +648,11 @@ body {
 }
 
 .left-trading-panel .panel-title {
-  font-size: 0.68rem;
+  font-size: 0.8rem;
 }
 
 .left-trading-panel .panel-body {
-  font-size: 0.75rem;
+  font-size: 0.88rem;
 }
 
 /* Drag handle on the RIGHT edge of left panel */
@@ -2449,7 +2449,7 @@ pre {
 }
 
 .signals-count {
-  font-size: 0.65rem;
+  font-size: 0.78rem;
   font-weight: 700;
   font-family: var(--font-mono);
   color: var(--text-secondary);
@@ -2457,7 +2457,7 @@ pre {
 }
 
 .signals-status {
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
   font-family: var(--font-mono);
 }
@@ -2537,7 +2537,7 @@ pre {
 }
 
 .signal-strategy {
-  font-size: 0.55rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   padding: 0.1rem 0.35rem;
@@ -2587,7 +2587,7 @@ pre {
 
 .signals-empty {
   padding: 1rem;
-  font-size: 0.7rem;
+  font-size: 0.84rem;
   color: var(--text-muted);
   font-style: italic;
   text-align: center;
@@ -3138,7 +3138,7 @@ pre {
 .port-nav-right { flex-shrink: 0; padding-top: 0.15rem; }
 
 .port-nav-label {
-  font-size: 0.55rem;
+  font-size: 0.65rem;
   font-weight: 700;
   color: var(--text-muted);
   font-family: var(--font-mono);
@@ -3158,13 +3158,13 @@ pre {
 .port-nav-value.flash-down { color: #f87171; }
 
 .port-daily-pnl {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 600;
   font-family: var(--font-mono);
   margin-top: 0.2rem;
 }
 .port-total-pnl {
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   font-family: var(--font-mono);
   color: var(--text-muted);
   margin-top: 0.1rem;
@@ -3190,7 +3190,7 @@ pre {
 
 /* Shared section header */
 .port-section-header {
-  font-size: 0.55rem;
+  font-size: 0.68rem;
   font-weight: 700;
   font-family: var(--font-mono);
   letter-spacing: 0.08em;
@@ -3238,18 +3238,18 @@ pre {
 .port-pos-row:last-child { border-bottom: none; }
 
 .port-pos-sym {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-weight: 700;
   font-family: var(--font-mono);
   color: var(--text-primary);
 }
 .port-pos-qty {
-  font-size: 0.62rem;
+  font-size: 0.74rem;
   font-family: var(--font-mono);
   color: var(--text-secondary);
 }
 .port-pos-pnl {
-  font-size: 0.65rem;
+  font-size: 0.78rem;
   font-weight: 600;
   font-family: var(--font-mono);
   text-align: right;
@@ -3311,7 +3311,7 @@ pre {
 .port-empty {
   padding: 1.5rem 1rem;
   text-align: center;
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   line-height: 1.6;
 }
@@ -3322,7 +3322,7 @@ pre {
 }
 
 .port-empty-title {
-  font-size: 0.8rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 0.3rem;
@@ -3330,7 +3330,7 @@ pre {
 }
 
 .port-empty-sub {
-  font-size: 0.68rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
   margin-bottom: 1rem;
 }
@@ -3343,11 +3343,11 @@ pre {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--accent-primary);
-  color: #000;
+  background: var(--text-accent);
+  color: #0a0f0a;
   border: none;
   border-radius: 8px;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   padding: 0.65rem 1.4rem;
@@ -3359,6 +3359,11 @@ pre {
   opacity: 0.9;
   transform: translateY(-1px);
   box-shadow: 0 0 24px rgba(74,222,128,0.5);
+}
+
+/* Light theme: white text on blue accent for contrast */
+:root[data-theme="light"] .port-empty-trade-btn {
+  color: #fff;
 }
 
 /* ── Portfolio FAB (floating action button) ──────────────────────────────── */
@@ -3968,7 +3973,7 @@ pre {
 }
 
 .perf-period-btn {
-  font-size: 0.58rem;
+  font-size: 0.7rem;
   font-weight: 700;
   font-family: var(--font-mono);
   padding: 0.18rem 0.45rem;
@@ -3987,7 +3992,7 @@ pre {
 }
 
 .perf-live-tag {
-  font-size: 0.55rem;
+  font-size: 0.68rem;
   font-weight: 700;
   font-family: var(--font-mono);
   padding: 0.15rem 0.4rem;
@@ -4004,7 +4009,7 @@ pre {
 }
 
 .perf-export-btn {
-  font-size: 0.58rem;
+  font-size: 0.7rem;
   font-weight: 700;
   font-family: var(--font-mono);
   padding: 0.18rem 0.5rem;
@@ -4039,7 +4044,7 @@ pre {
 
 /* Section header */
 .perf-section-header {
-  font-size: 0.54rem;
+  font-size: 0.68rem;
   font-weight: 700;
   font-family: var(--font-mono);
   letter-spacing: 0.08em;
@@ -4171,7 +4176,7 @@ pre {
 }
 .perf-metric-row:hover { background: var(--bg-input); }
 .perf-metric-row:last-child { border-bottom: none; }
-.perf-metric-label { color: var(--text-muted); font-size: 0.6rem; }
+.perf-metric-label { color: var(--text-muted); font-size: 0.72rem; }
 .perf-metric-val {
   text-align: right;
   color: var(--text-secondary);
@@ -4229,7 +4234,7 @@ pre {
   align-items: center;
 }
 .perf-strat-header {
-  font-size: 0.54rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--text-muted);
   letter-spacing: 0.05em;

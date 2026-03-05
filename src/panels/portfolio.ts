@@ -22,7 +22,7 @@ import { auth } from '../auth/auth-manager';
 import { showToast } from '../lib/toast';
 import { tradingEngine } from '../trading/engine';
 import { portfolioManager } from '../trading/engine/portfolio-manager';
-import { pushLocalToServer, loadServerPortfolio, resetPortfolioOnServer } from '../trading/engine/server-sync';
+import { pushLocalToServer, loadServerPortfolio } from '../trading/engine/server-sync';
 import type { PortfolioSnapshot, ManagedPosition, ClosedTrade } from '../trading/engine/portfolio-manager';
 import type { Fill } from '../trading/engine/paper-broker';
 
@@ -985,35 +985,12 @@ function buildPortfolioBody(container: HTMLElement): void {
     flattenAll();
   });
 
-  const resetBtn = document.createElement('button');
-  resetBtn.className = 'port-reset-btn';
-  resetBtn.textContent = 'Reset Portfolio';
-  resetBtn.addEventListener('click', async () => {
-    if (!confirm('Reset portfolio to $1,000,000? All positions and trades will be lost.')) return;
-    if (auth.isAuthenticated()) {
-      const ok = await resetPortfolioOnServer();
-      if (ok) {
-        tradingEngine.resetPortfolio();
-        lastNav = 0;
-        showToast('Portfolio reset to $1,000,000');
-      } else {
-        showToast('Reset failed. Try again.');
-      }
-    } else {
-      tradingEngine.resetPortfolio();
-      portfolioManager.reset();
-      lastNav = 0;
-      showToast('Portfolio reset to $1,000,000');
-    }
-  });
-
   const exportBtn = document.createElement('button');
   exportBtn.className = 'port-export-btn';
   exportBtn.textContent = 'Export Trades';
   exportBtn.addEventListener('click', () => exportTradesCsv());
 
   emergencyRow.appendChild(flattenAllBtn);
-  emergencyRow.appendChild(resetBtn);
   emergencyRow.appendChild(exportBtn);
   mainContent.appendChild(emergencyRow);
 
