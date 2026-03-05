@@ -54,7 +54,7 @@ const SECTOR_COLORS: Record<string, string> = {
   Transport: '#64748b',
   Industry:  '#94a3b8',
   Commodity: '#a78bfa',
-  Other:     '#475569',
+  Other:     '#94a3b8',
 };
 
 function getSector(symbol: string): string {
@@ -143,7 +143,7 @@ function buildSectorSvg(sectors: Map<string, number>): SVGSVGElement {
 
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     path.setAttribute('d', d);
-    path.setAttribute('fill', SECTOR_COLORS[name] ?? '#475569');
+    path.setAttribute('fill', SECTOR_COLORS[name] ?? '#94a3b8');
     path.setAttribute('stroke', '#0a0f0a');
     path.setAttribute('stroke-width', '1.5');
 
@@ -583,7 +583,7 @@ function renderSectorLegend(el: HTMLElement, sectors: Map<string, number>, gross
     const item = document.createElement('div');
     item.className = 'port-sector-item';
     item.innerHTML = `
-      <span class="port-sector-dot" style="background:${SECTOR_COLORS[name] ?? '#475569'}"></span>
+      <span class="port-sector-dot" style="background:${SECTOR_COLORS[name] ?? '#94a3b8'}"></span>
       <span class="port-sector-name">${name}</span>
       <span class="port-sector-pct">${p.toFixed(0)}%</span>
     `;

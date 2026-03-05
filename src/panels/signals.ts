@@ -16,8 +16,9 @@
  */
 
 import { registerLeftPanel as registerPanel } from './panel-manager';
+import { showToast } from '../lib/toast';
 import type { Signal } from '../trading/engine';
-import { tradingEngine } from '../trading/engine';
+import { executionLoop } from '../trading/engine/execution-loop';
 
 // ── Strategy config ──────────────────────────────────────────────────────────
 
@@ -323,25 +324,20 @@ function buildDetailPopup(sig: Signal): HTMLElement {
   overlay.querySelector('.sig-detail-close')!.addEventListener('click', () => overlay.remove());
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 
-  overlay.querySelector('#sig-detail-trade')!.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('execute-signal', { detail: { signal: sig } }));
-    tradingEngine.acceptSignal(sig);
+  overlay.querySelector('#sig-detail-trade')!.addEventListener('click', async () => {
+    const btn = overlay.querySelector('#sig-detail-trade') as HTMLButtonElement;
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+    const result = await executionLoop.executeSignal(sig);
     overlay.remove();
-    showToast(`Paper trade submitted: ${sig.direction} ${sig.symbol}`);
+    if (result.approved && result.fill) {
+      showToast(`✓ ${sig.direction} ${sig.symbol} — ${result.fill.fillQuantity} shares @ $${result.fill.fillPrice.toFixed(2)}`);
+    } else {
+      showToast(result.reason ?? 'Order rejected', 'error');
+    }
   });
 
   return overlay;
-}
-
-// ── Toast ─────────────────────────────────────────────────────────────────────
-
-function showToast(msg: string): void {
-  const t = document.createElement('div');
-  t.className = 'sig-toast';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  requestAnimationFrame(() => t.classList.add('visible'));
-  setTimeout(() => { t.classList.remove('visible'); setTimeout(() => t.remove(), 300); }, 2800);
 }
 
 // ── Panel state ───────────────────────────────────────────────────────────────
@@ -447,13 +443,20 @@ function renderConsensusBar(): void {
 
 function handleTrade(sig: Signal, btn: HTMLButtonElement): void {
   import('../auth/auth-modal').then(({ requireAuthForTrading }) => {
-    requireAuthForTrading(() => {
-      window.dispatchEvent(new CustomEvent('execute-signal', { detail: { signal: sig } }));
-      tradingEngine.acceptSignal(sig);
-      btn.textContent = 'Submitted ✓';
+    requireAuthForTrading(async () => {
+      btn.textContent = 'Submitting…';
       btn.disabled = true;
-      btn.classList.add('submitted');
-      showToast(`Paper trade: ${sig.direction} ${sig.symbol} @ mkt`);
+      const result = await executionLoop.executeSignal(sig);
+      if (result.approved && result.fill) {
+        btn.textContent = 'Submitted ✓';
+        btn.classList.add('submitted');
+        showToast(`✓ ${sig.direction} ${sig.symbol} — ${result.fill.fillQuantity} shares @ $${result.fill.fillPrice.toFixed(2)}`);
+      } else {
+        btn.textContent = 'Paper Trade';
+        btn.disabled = false;
+        showToast(result.reason ?? 'Order rejected', 'error');
+        return;
+      }
       setTimeout(() => {
         btn.textContent = 'Paper Trade';
         btn.disabled = false;
@@ -501,14 +504,8 @@ function onNewSignals(signals: Signal[]): void {
   if (liveDot) liveDot.classList.add('live');
   applyFilter();
 
-  // Auto-execute approved signals
-  if (autoExecute) {
-    for (const sig of signals.slice(0, 3)) {
-      if (sig.expiresAt > Date.now() && sig.confidence >= 0.70) {
-        tradingEngine.acceptSignal(sig);
-      }
-    }
-  }
+  // Auto-execute is handled by executionLoop (subscribed to signal bus).
+  // The signals panel checkbox syncs with setAutoExecute in execution-loop.
 }
 
 // ── Panel builder ─────────────────────────────────────────────────────────────
@@ -538,9 +535,17 @@ function buildBody(container: HTMLElement): void {
   countBadge = controlsRow.querySelector('.sig-count-badge');
   autoToggleEl = controlsRow.querySelector('.sig-auto-checkbox');
 
-  autoToggleEl?.addEventListener('change', () => {
+  autoToggleEl?.addEventListener('change', async () => {
     autoExecute = autoToggleEl!.checked;
+    const { setAutoExecute } = await import('../trading/engine/execution-loop');
+    setAutoExecute(autoExecute);
     showToast(autoExecute ? 'Auto-trade ON — signals ≥70% will execute' : 'Auto-trade OFF');
+  });
+
+  // Sync checkbox with execution loop's auto-execute state
+  import('../trading/engine/execution-loop').then(({ getAutoExecute }) => {
+    autoExecute = getAutoExecute();
+    if (autoToggleEl) autoToggleEl.checked = autoExecute;
   });
 
   container.appendChild(controlsRow);

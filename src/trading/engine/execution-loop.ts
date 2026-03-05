@@ -130,6 +130,22 @@ export class ExecutionLoop {
     return { ...this.stats };
   }
 
+  /**
+   * Execute a signal manually (e.g. from Signals panel "Paper Trade" button).
+   * Uses the same flow as auto-execute: risk check → broker → portfolio.
+   * Returns result; on success, trading:trade-opened fires and portfolio updates.
+   */
+  async executeSignal(signal: Signal): Promise<ExecutionResult> {
+    const price = this.priceCache.get(signal.symbol);
+    if (price == null) {
+      const fetched = await this.fetchPrice(signal.symbol);
+      if (fetched == null) {
+        return { signalId: signal.id, symbol: signal.symbol, approved: false, reason: `No price for ${signal.symbol}` };
+      }
+    }
+    return this.processSignal(signal);
+  }
+
   /** Externally update price cache (also called from trading/index.ts) */
   updatePrices(prices: Record<string, number>): void {
     for (const [sym, price] of Object.entries(prices)) {
