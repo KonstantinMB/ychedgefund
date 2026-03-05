@@ -12,6 +12,7 @@ const POLL_INTERVAL_MS = 90_000;
 interface LeaderboardEntry {
   rank: number;
   username: string;
+  displayName?: string;
   returnPct: number;
   prevRank: number | null;
   rankChange: number | null;
@@ -189,7 +190,7 @@ function renderTable(data: LeaderboardResponse): void {
     return `
       <tr class="${rowClass}" data-username="${escapeAttr(e.username)}" data-tooltip="${escapeAttr(tooltip)}" title="${escapeAttr(tooltip)}">
         <td class="leaderboard-td-rank">${rankCell}</td>
-        <td class="leaderboard-td-username">${escapeHtml(e.username)}</td>
+        <td class="leaderboard-td-username">${escapeHtml(e.displayName || e.username)}</td>
         <td class="leaderboard-td-return">${returnHtml}</td>
         <td class="leaderboard-td-nav">${formatNav(e.nav)}</td>
       </tr>

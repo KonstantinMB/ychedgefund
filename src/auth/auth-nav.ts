@@ -10,6 +10,7 @@
 
 import { auth } from './auth-manager';
 import { openAuthModal } from './auth-modal';
+import { openProfileModal } from './profile-modal';
 import type { User } from './auth-manager';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
@@ -82,7 +83,7 @@ function renderLoggedIn(): void {
 
   const label = document.createElement('span');
   label.className = 'auth-nav-username';
-  label.textContent = user.username;
+  label.textContent = user.displayName || user.username;
 
   const chevron = document.createElement('button');
   chevron.className = 'auth-nav-chevron';
@@ -144,13 +145,15 @@ function toggleDropdown(user: User, anchor: HTMLElement): void {
   dropdownEl = document.createElement('div');
   dropdownEl.className = 'auth-nav-dropdown';
 
+  const displayLabel = user.displayName || user.username;
   dropdownEl.innerHTML = `
     <div class="auth-nav-dropdown-header">
       <span class="auth-nav-dropdown-dot">●</span>
-      <span class="auth-nav-dropdown-username">${escapeHtml(user.username)}</span>
+      <span class="auth-nav-dropdown-username">${escapeHtml(displayLabel)}</span>
     </div>
     <div class="auth-nav-dropdown-email">${escapeHtml(user.email)}</div>
     <div class="auth-nav-dropdown-divider"></div>
+    <button class="auth-nav-dropdown-item" data-action="profile">My Profile</button>
     <button class="auth-nav-dropdown-item" data-action="portfolio">My Portfolio</button>
     <button class="auth-nav-dropdown-item" data-action="trades">Trade History</button>
     <button class="auth-nav-dropdown-item" data-action="export">Export Data</button>
@@ -193,6 +196,10 @@ function escapeHtml(s: string): string {
 
 async function handleDropdownAction(action: string): Promise<void> {
   switch (action) {
+    case 'profile': {
+      openProfileModal();
+      break;
+    }
     case 'portfolio': {
       const leftPanel = document.getElementById('left-panel');
       if (leftPanel) leftPanel.style.opacity = '1';

@@ -27,6 +27,7 @@ interface StoredUser {
   username: string;
   passwordHash: string;
   createdAt: number;
+  displayName?: string;
 }
 
 function validate(body: RegisterBody): { ok: true } | { ok: false; status: number; error: string } {
@@ -134,6 +135,7 @@ export default withCors(async (req: Request) => {
     userId: id,
     username,
     email,
+    displayName: undefined,
     createdAt,
     expiresAt,
   };
@@ -143,7 +145,7 @@ export default withCors(async (req: Request) => {
     {
       success: true,
       token,
-      user: { id, username, email },
+      user: { id, username, email, displayName: undefined },
     },
     200
   );

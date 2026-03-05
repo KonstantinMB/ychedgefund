@@ -12,6 +12,7 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  displayName?: string;
 }
 
 class AuthManager {
@@ -137,6 +138,35 @@ class AuthManager {
         error: data.error ?? (res.status === 429 ? 'Too many attempts. Try again later.' : 'Invalid credentials'),
       };
     } catch (err) {
+      return { success: false, error: 'Network error' };
+    }
+  }
+
+  async updateProfile(displayName: string | undefined): Promise<{ success: boolean; error?: string }> {
+    if (!this.token) {
+      return { success: false, error: 'Not authenticated' };
+    }
+    try {
+      const res = await fetch('/api/auth/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.token}`,
+        },
+        body: JSON.stringify({ displayName: displayName || undefined }),
+      });
+      const data = (await res.json()) as { success?: boolean; user?: User; error?: string };
+
+      if (res.ok && data.success && data.user) {
+        this.user = data.user;
+        this.publish();
+        return { success: true };
+      }
+      return {
+        success: false,
+        error: data.error ?? 'Failed to update profile',
+      };
+    } catch {
       return { success: false, error: 'Network error' };
     }
   }

@@ -1006,14 +1006,14 @@ function buildPortfolioBody(container: HTMLElement): void {
     if (auth.isAuthenticated() && portUserBadge) {
       const u = auth.getUser();
       const since = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      portUserBadge.textContent = u ? `${u.username} · since ${since}` : '';
+      portUserBadge.textContent = u ? `${u.displayName || u.username} · since ${since}` : '';
     }
   });
   window.addEventListener('auth:user', () => {
     if (portUserBadge && auth.isAuthenticated()) {
       const u = auth.getUser();
       const since = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      portUserBadge.textContent = u ? `${u.username} · since ${since}` : '';
+      portUserBadge.textContent = u ? `${u.displayName || u.username} · since ${since}` : '';
     }
   });
 
@@ -1087,7 +1087,7 @@ function buildPortfolioBody(container: HTMLElement): void {
   if (portUserBadge && auth.isAuthenticated()) {
     const u = auth.getUser();
     const since = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-    portUserBadge.textContent = u ? `${u.username} · since ${since}` : '';
+    portUserBadge.textContent = u ? `${u.displayName || u.username} · since ${since}` : '';
   }
   const initSnap = portfolioManager.getSnapshot();
   if (initSnap.totalValue > 0) {

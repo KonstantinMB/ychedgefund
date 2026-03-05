@@ -12,12 +12,14 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  displayName?: string;
 }
 
 interface SessionData {
   userId: string;
   username: string;
   email: string;
+  displayName?: string;
   createdAt: number;
   expiresAt: number;
 }
@@ -89,6 +91,7 @@ export async function requireAuth(req: Request): Promise<User | Response> {
     id: session.userId,
     username: session.username,
     email: session.email,
+    displayName: session.displayName,
   };
 }
 
@@ -145,6 +148,7 @@ export async function requireAuthWithSession(req: Request): Promise<{ user: User
       id: session.userId,
       username: session.username,
       email: session.email,
+      displayName: session.displayName,
     },
     expiresAt: session.expiresAt,
   };

@@ -26,6 +26,7 @@ interface StoredUser {
   username: string;
   passwordHash: string;
   createdAt: number;
+  displayName?: string;
 }
 
 function getClientIp(req: Request): string {
@@ -116,6 +117,7 @@ export default withCors(async (req: Request) => {
     userId: user.id,
     username: user.username,
     email: user.email,
+    displayName: user.displayName,
     createdAt,
     expiresAt,
   };
@@ -125,7 +127,7 @@ export default withCors(async (req: Request) => {
     {
       success: true,
       token,
-      user: { id: user.id, username: user.username, email: user.email },
+      user: { id: user.id, username: user.username, email: user.email, displayName: user.displayName },
     },
     200
   );

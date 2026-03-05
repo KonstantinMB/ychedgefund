@@ -32,6 +32,7 @@ const MAX_LIMIT = 200;
 interface LeaderboardEntry {
   rank: number;
   username: string;
+  displayName?: string;
   returnPct: number;
   prevRank: number | null;
   rankChange: number | null;
@@ -118,16 +119,30 @@ export default withCors(async (req: Request) => {
 
   const entries: LeaderboardEntry[] = [];
 
-  // Fetch prev_rank and portfolio for each user (parallel)
+  // Fetch prev_rank, portfolio, and user (for displayName) for each user (parallel)
   const fetchPromises = usernames.map(async (username, index) => {
     const rank = index + 1;
     const prevRankKey = `leaderboard:prev_rank:${period}:${username}`;
     const portfolioKey = `portfolio:${username}`;
+    const userKey = `user:${username}`;
 
-    const [prevRankRaw, portfolioRaw] = await Promise.all([
+    const [prevRankRaw, portfolioRaw, userRaw] = await Promise.all([
       redis.get<string>(prevRankKey),
       redis.get<string>(portfolioKey),
+      redis.get<string>(userKey),
     ]);
+
+    let displayName: string | undefined;
+    if (userRaw) {
+      try {
+        const user = typeof userRaw === 'string' ? JSON.parse(userRaw) : userRaw;
+        if (user?.displayName && typeof user.displayName === 'string') {
+          displayName = user.displayName;
+        }
+      } catch {
+        // ignore
+      }
+    }
 
     const prevRank =
       prevRankRaw !== null
@@ -172,6 +187,7 @@ export default withCors(async (req: Request) => {
     return {
       rank,
       username,
+      displayName,
       returnPct,
       prevRank: prevRank !== null && !Number.isNaN(prevRank) ? prevRank : null,
       rankChange,
@@ -244,6 +260,7 @@ export default withCors(async (req: Request) => {
       response.currentUserEntry = {
         rank: userRank + 1,
         username: user.username,
+        displayName: user.displayName,
         returnPct:
           userScore !== null ? Number(userScore) / SCORE_MULTIPLIER : 0,
         prevRank: null,
