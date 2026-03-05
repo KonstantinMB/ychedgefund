@@ -21,34 +21,32 @@ interface MarketQuote {
   timestamp: number;
 }
 
+/** Default symbols for markets panel (expanded for paper trading) */
 const SYMBOLS = [
-  'SPY',
-  'QQQ',
-  'IWM',
-  'EEM',
-  'GLD',
-  'TLT',
-  'SHY',
-  'USO',
-  'XLP',
-  'EURUSD=X',
+  'SPY', 'QQQ', 'DIA', 'IWM',
+  'XLF', 'XLE', 'XLK', 'XLV', 'XLI', 'XLP', 'XLU', 'XLB', 'XLRE', 'XLC',
+  'GLD', 'SLV', 'USO', 'UNG',
+  'TLT', 'IEF', 'SHY', 'HYG', 'LQD',
+  'EEM', 'EFA', 'VWO',
+  'JETS', 'SMH', 'XBI', 'ARKK', 'LIT',
+  'NVDA', 'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA',
+  'EURUSD=X', 'GBPUSD=X', 'USDJPY=X',
   '%5EVIX',
-  'BTC-USD',
+  'BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD', 'DOGE-USD',
 ];
 
 const DISPLAY_NAMES: Record<string, string> = {
-  SPY: 'S&P 500 ETF',
-  QQQ: 'Nasdaq 100 ETF',
-  IWM: 'Russell 2000 ETF',
-  EEM: 'Emerging Markets ETF',
-  GLD: 'Gold ETF',
-  TLT: '20Y Treasury ETF',
-  SHY: '2Y Treasury ETF',
-  USO: 'Oil ETF',
-  XLP: 'Consumer Staples ETF',
-  'EURUSD=X': 'EUR/USD',
+  SPY: 'S&P 500 ETF', QQQ: 'Nasdaq 100 ETF', DIA: 'Dow Jones ETF', IWM: 'Russell 2000 ETF',
+  XLF: 'Financials', XLE: 'Energy', XLK: 'Technology', XLV: 'Healthcare', XLI: 'Industrials',
+  XLP: 'Consumer Staples', XLU: 'Utilities', XLB: 'Materials', XLRE: 'Real Estate', XLC: 'Communications',
+  GLD: 'Gold ETF', SLV: 'Silver ETF', USO: 'Oil ETF', UNG: 'Natural Gas ETF',
+  TLT: '20Y Treasury', IEF: '7-10Y Treasury', SHY: '2Y Treasury', HYG: 'High Yield', LQD: 'Investment Grade',
+  EEM: 'Emerging Markets', EFA: 'Developed ex-US', VWO: 'FTSE Emerging',
+  JETS: 'Airlines', SMH: 'Semiconductors', XBI: 'Biotech', ARKK: 'Innovation', LIT: 'Lithium',
+  NVDA: 'NVIDIA', AAPL: 'Apple', MSFT: 'Microsoft', GOOGL: 'Alphabet', AMZN: 'Amazon', META: 'Meta', TSLA: 'Tesla',
+  'EURUSD=X': 'EUR/USD', 'GBPUSD=X': 'GBP/USD', 'USDJPY=X': 'USD/JPY',
   '%5EVIX': 'VIX',
-  'BTC-USD': 'Bitcoin',
+  'BTC-USD': 'Bitcoin', 'ETH-USD': 'Ethereum', 'SOL-USD': 'Solana', 'XRP-USD': 'XRP', 'DOGE-USD': 'Dogecoin',
 };
 
 const DISPLAY_SYMBOLS: Record<string, string> = {

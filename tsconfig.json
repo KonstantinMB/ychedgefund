@@ -43,7 +43,8 @@
   },
   "include": [
     "src/**/*",
-    "api/**/*"
+    "api/**/*",
+    "shared/**/*"
   ],
   "exclude": [
     "node_modules",

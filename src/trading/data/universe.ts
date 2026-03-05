@@ -10,7 +10,7 @@ export interface UniverseAsset {
   symbol: string;
   name: string;
   sector: string;
-  assetClass: 'equity' | 'commodity' | 'fixed-income' | 'crypto' | 'international' | 'thematic' | 'stock';
+  assetClass: 'equity' | 'commodity' | 'fixed-income' | 'crypto' | 'international' | 'thematic' | 'stock' | 'forex';
   avgDailyVolume: number; // Average daily volume (shares)
   beta: number; // Beta vs SPY (1.0 = market, >1.0 = more volatile, <1.0 = less volatile)
   expense: number; // Expense ratio (annual %)
@@ -524,6 +524,18 @@ export const TRADEABLE_UNIVERSE: UniverseAsset[] = [
   { symbol: 'C98-USD',   name: 'Coin98',           sector: 'Cryptocurrency', assetClass: 'crypto', avgDailyVolume: 5_000_000,   beta: 2.70, expense: 0 },
   { symbol: 'LRC-USD',   name: 'Loopring',         sector: 'Cryptocurrency', assetClass: 'crypto', avgDailyVolume: 8_000_000,   beta: 2.60, expense: 0 },
   { symbol: 'API3-USD',  name: 'API3',             sector: 'Cryptocurrency', assetClass: 'crypto', avgDailyVolume: 3_000_000,   beta: 2.70, expense: 0 },
+
+  // ── Forex (Yahoo format: XXXYYY=X) ───────────────────────────────────────────
+  { symbol: 'EURUSD=X',  name: 'Euro / US Dollar',     sector: 'Forex', assetClass: 'forex', avgDailyVolume: 0, beta: 0, expense: 0 },
+  { symbol: 'GBPUSD=X',  name: 'British Pound / USD',  sector: 'Forex', assetClass: 'forex', avgDailyVolume: 0, beta: 0, expense: 0 },
+  { symbol: 'USDJPY=X',  name: 'US Dollar / Japanese Yen', sector: 'Forex', assetClass: 'forex', avgDailyVolume: 0, beta: 0, expense: 0 },
+  { symbol: 'AUDUSD=X',  name: 'Australian Dollar / USD', sector: 'Forex', assetClass: 'forex', avgDailyVolume: 0, beta: 0, expense: 0 },
+  { symbol: 'USDCAD=X',  name: 'US Dollar / Canadian Dollar', sector: 'Forex', assetClass: 'forex', avgDailyVolume: 0, beta: 0, expense: 0 },
+  { symbol: 'USDCHF=X',  name: 'US Dollar / Swiss Franc', sector: 'Forex', assetClass: 'forex', avgDailyVolume: 0, beta: 0, expense: 0 },
+  { symbol: 'NZDUSD=X',  name: 'New Zealand Dollar / USD', sector: 'Forex', assetClass: 'forex', avgDailyVolume: 0, beta: 0, expense: 0 },
+  { symbol: 'EURGBP=X',  name: 'Euro / British Pound', sector: 'Forex', assetClass: 'forex', avgDailyVolume: 0, beta: 0, expense: 0 },
+  { symbol: 'EURJPY=X',  name: 'Euro / Japanese Yen', sector: 'Forex', assetClass: 'forex', avgDailyVolume: 0, beta: 0, expense: 0 },
+  { symbol: 'GBPJPY=X',  name: 'British Pound / Japanese Yen', sector: 'Forex', assetClass: 'forex', avgDailyVolume: 0, beta: 0, expense: 0 },
 ];
 
 /**
@@ -609,4 +621,5 @@ export const SECTOR_TO_SYMBOLS: Record<string, string[]> = {
   'Cryptocurrency': ['BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD', 'DOGE-USD', 'ADA-USD', 'AVAX-USD'],
   'Consumer Discretionary': ['AMZN', 'TSLA', 'HD'],
   'Consumer Staples Stock': ['WMT', 'COST'],
+  'Forex': ['EURUSD=X', 'GBPUSD=X', 'USDJPY=X', 'AUDUSD=X', 'USDCAD=X', 'USDCHF=X', 'NZDUSD=X'],
 };

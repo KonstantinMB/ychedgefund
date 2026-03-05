@@ -15,6 +15,7 @@ const metadata: LayerMetadata = {
   category: 'infrastructure',
   color: '#06b6d4',
   defaultActive: true,
+  order: 20,
 };
 
 function createUnderseaCablesLayer() {

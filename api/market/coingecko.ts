@@ -25,22 +25,53 @@ interface CryptoPrice {
   marketCapRank: number;
 }
 
-const COIN_IDS = ['bitcoin', 'ethereum', 'solana', 'ripple', 'binancecoin'];
+/** Top 50+ crypto by market cap (CoinGecko IDs) */
+const COIN_IDS = [
+  'bitcoin', 'ethereum', 'tether', 'binancecoin', 'solana', 'ripple', 'usd-coin',
+  'staked-ether', 'cardano', 'dogecoin', 'tron', 'avalanche-2', 'chainlink',
+  'shiba-inu', 'polkadot', 'bitcoin-cash', 'polygon-ecosystem-token', 'litecoin',
+  'uniswap', 'near', 'internet-computer', 'aptos', 'arbitrum',
+  'optimism', 'injective-protocol', 'sui', 'render-token', 'fetch-ai',
+  'pepe', 'the-open-network', 'hedera-hashgraph', 'filecoin', 'maker',
+  'vechain', 'the-graph', 'algorand', 'ethereum-classic', 'stellar',
+  'thorchain', 'floki', 'bonk', 'the-sandbox', 'axie-infinity',
+  'decentraland', 'celestia', 'sei-network', 'jupiter-exchange-solana',
+  'worldcoin-wld', 'arweave', 'curve-dao-token', 'lido-dao', 'pendle',
+];
 
 const SYMBOL_MAP: Record<string, string> = {
-  bitcoin: 'BTC',
-  ethereum: 'ETH',
-  solana: 'SOL',
-  ripple: 'XRP',
-  binancecoin: 'BNB',
+  bitcoin: 'BTC', ethereum: 'ETH', tether: 'USDT', binancecoin: 'BNB',
+  solana: 'SOL', ripple: 'XRP', 'usd-coin': 'USDC', 'staked-ether': 'stETH',
+  cardano: 'ADA', dogecoin: 'DOGE', tron: 'TRX', 'avalanche-2': 'AVAX',
+  chainlink: 'LINK', 'shiba-inu': 'SHIB', polkadot: 'DOT', 'bitcoin-cash': 'BCH',
+  'polygon-ecosystem-token': 'POL', litecoin: 'LTC', uniswap: 'UNI',
+  near: 'NEAR', 'internet-computer': 'ICP', aptos: 'APT', arbitrum: 'ARB',
+  optimism: 'OP', 'injective-protocol': 'INJ', sui: 'SUI', 'render-token': 'RENDER',
+  'fetch-ai': 'FET', pepe: 'PEPE', 'the-open-network': 'TON', 'hedera-hashgraph': 'HBAR',
+  filecoin: 'FIL', maker: 'MKR', vechain: 'VET', 'the-graph': 'GRT', algorand: 'ALGO',
+  'ethereum-classic': 'ETC', stellar: 'XLM', thorchain: 'RUNE', floki: 'FLOKI',
+  bonk: 'BONK', 'the-sandbox': 'SAND', 'axie-infinity': 'AXS', decentraland: 'MANA',
+  celestia: 'TIA', 'sei-network': 'SEI', 'jupiter-exchange-solana': 'JUP',
+  'worldcoin-wld': 'WLD', arweave: 'AR', 'curve-dao-token': 'CRV', 'lido-dao': 'LDO',
+  pendle: 'PENDLE',
 };
 
 const NAME_MAP: Record<string, string> = {
-  bitcoin: 'Bitcoin',
-  ethereum: 'Ethereum',
-  solana: 'Solana',
-  ripple: 'XRP',
-  binancecoin: 'BNB',
+  bitcoin: 'Bitcoin', ethereum: 'Ethereum', tether: 'Tether', binancecoin: 'BNB',
+  solana: 'Solana', ripple: 'XRP', 'usd-coin': 'USDC', 'staked-ether': 'stETH',
+  cardano: 'Cardano', dogecoin: 'Dogecoin', tron: 'TRON', 'avalanche-2': 'Avalanche',
+  chainlink: 'Chainlink', 'shiba-inu': 'Shiba Inu', polkadot: 'Polkadot',
+  'bitcoin-cash': 'Bitcoin Cash', 'polygon-ecosystem-token': 'Polygon', litecoin: 'Litecoin',
+  uniswap: 'Uniswap', near: 'NEAR', 'internet-computer': 'Internet Computer', aptos: 'Aptos',
+  arbitrum: 'Arbitrum', optimism: 'Optimism', 'injective-protocol': 'Injective', sui: 'Sui',
+  'render-token': 'Render', 'fetch-ai': 'Fetch.ai', pepe: 'Pepe', 'the-open-network': 'Toncoin',
+  'hedera-hashgraph': 'Hedera', filecoin: 'Filecoin', maker: 'Maker', vechain: 'VeChain',
+  'the-graph': 'The Graph', algorand: 'Algorand', 'ethereum-classic': 'Ethereum Classic',
+  stellar: 'Stellar', thorchain: 'THORChain', floki: 'Floki', bonk: 'Bonk',
+  'the-sandbox': 'The Sandbox', 'axie-infinity': 'Axie Infinity', decentraland: 'Decentraland',
+  celestia: 'Celestia', 'sei-network': 'Sei', 'jupiter-exchange-solana': 'Jupiter',
+  'worldcoin-wld': 'Worldcoin', arweave: 'Arweave', 'curve-dao-token': 'Curve DAO',
+  'lido-dao': 'Lido DAO', pendle: 'Pendle',
 };
 
 // ── /coins/markets (full data, requires demo key on pro endpoint) ─────────────
@@ -66,7 +97,7 @@ async function fetchMarkets(apiKey: string | undefined): Promise<CryptoPrice[] |
     vs_currency: 'usd',
     ids: COIN_IDS.join(','),
     order: 'market_cap_desc',
-    per_page: '10',
+    per_page: '250',
     page: '1',
     sparkline: 'false',
     price_change_percentage: '24h,7d',

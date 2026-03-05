@@ -27,6 +27,8 @@ const metadata: LayerMetadata = {
   category: 'economic',
   color: '#10b981',
   defaultActive: true,
+  order: 30,
+  minZoom: 4, // Progressive disclosure: point layer benefits from zoom
 };
 
 function createFinancialCentersLayer() {

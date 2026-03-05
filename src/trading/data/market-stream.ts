@@ -91,8 +91,7 @@ export class MarketDataStream {
   private finnhubWs: WebSocket | null = null;
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
-  private yahooPollInterval: number | null = null;
-  private coinGeckoPollInterval: number | null = null;
+  private streamPollInterval: number | null = null;
   private stalenessCheckInterval: number | null = null;
 
   private finnhubApiKey: string | null = null;
@@ -112,16 +111,13 @@ export class MarketDataStream {
 
     // Start Finnhub WebSocket for equities (if API key provided)
     if (this.finnhubApiKey) {
-      this.connectFinnhub(symbols.filter(s => !isCrypto(s)));
+      this.connectFinnhub(symbols.filter(s => !isCrypto(s) && !s.includes('=X')));
     } else {
       console.warn('[MarketStream] No Finnhub API key - WebSocket disabled');
     }
 
-    // Start Yahoo Finance REST polling (fallback)
-    this.startYahooPoll(symbols.filter(s => !isCrypto(s)));
-
-    // Start CoinGecko REST polling (crypto)
-    this.startCoinGeckoPoll(symbols.filter(s => isCrypto(s)));
+    // Unified stream: /api/market/stream returns stocks, ETFs, crypto, forex
+    this.startStreamPoll(symbols);
 
     // Start staleness checker (every 10 seconds)
     this.startStalenessCheck();
@@ -207,116 +203,43 @@ export class MarketDataStream {
   }
 
   /**
-   * Start Yahoo Finance REST polling (15-second intervals)
+   * Start unified stream polling (15-second intervals).
+   * /api/market/stream returns stocks, ETFs, crypto, forex from full universe.
    */
-  private startYahooPoll(symbols: string[]): void {
+  private startStreamPoll(_symbols: string[]): void {
     const poll = async () => {
       try {
-        // Call our edge function (batched quotes)
         const response = await fetch('/api/market/stream');
         if (!response.ok) {
-          console.error('[MarketStream] Yahoo poll failed:', response.status);
+          console.error('[MarketStream] Stream poll failed:', response.status);
           return;
         }
 
         const data = await response.json();
         const quotes = data.quotes || {};
 
-        // Update ticks
         for (const [symbol, quote] of Object.entries(quotes)) {
-          const q = quote as any;
-
+          const q = quote as Record<string, unknown>;
           const tick: MarketTick = {
             symbol,
-            price: q.price,
-            bid: q.bid,
-            ask: q.ask,
-            volume: q.volume || 0,
-            timestamp: q.timestamp || Date.now(),
+            price: (q.price as number) ?? 0,
+            bid: (q.bid as number) ?? (q.price as number) ?? 0,
+            ask: (q.ask as number) ?? (q.price as number) ?? 0,
+            volume: (q.volume as number) ?? 0,
+            timestamp: (q.timestamp as number) ?? Date.now(),
             source: 'yahoo',
             isDelayed: true,
             isStale: false,
           };
-
           this.updateTick(tick);
         }
       } catch (error) {
-        console.error('[MarketStream] Yahoo poll error:', error);
+        console.error('[MarketStream] Stream poll error:', error);
       }
     };
 
-    // Poll immediately
     poll();
-
-    // Then every 15 seconds
-    this.yahooPollInterval = window.setInterval(poll, 15_000);
-  }
-
-  /**
-   * Start CoinGecko REST polling (30-second intervals)
-   */
-  private startCoinGeckoPoll(symbols: string[]): void {
-    if (symbols.length === 0) return;
-
-    const poll = async () => {
-      try {
-        // CoinGecko IDs: BTC-USD → bitcoin, ETH-USD → ethereum, SOL-USD → solana
-        const idMap: Record<string, string> = {
-          'BTC-USD': 'bitcoin',
-          'ETH-USD': 'ethereum',
-          'SOL-USD': 'solana',
-        };
-
-        const ids = symbols.map(s => idMap[s]).filter(Boolean);
-
-        if (ids.length === 0) return;
-
-        const url = `https://api.coingecko.com/api/v3/simple/price?ids=${ids.join(',')}&vs_currencies=usd&include_24h_vol=true`;
-
-        const response = await fetch(url, {
-          headers: {
-            Accept: 'application/json',
-          },
-        });
-
-        if (!response.ok) {
-          console.error('[MarketStream] CoinGecko poll failed:', response.status);
-          return;
-        }
-
-        const data = await response.json();
-
-        // Update ticks
-        for (const [id, priceData] of Object.entries(data)) {
-          const symbol = Object.keys(idMap).find(k => idMap[k] === id);
-          if (!symbol) continue;
-
-          const pd = priceData as any;
-
-          const tick: MarketTick = {
-            symbol,
-            price: pd.usd || 0,
-            bid: pd.usd || 0,
-            ask: pd.usd || 0,
-            volume: pd.usd_24h_vol || 0,
-            timestamp: Date.now(),
-            source: 'coingecko',
-            isDelayed: true,
-            isStale: false,
-          };
-
-          this.updateTick(tick);
-        }
-      } catch (error) {
-        console.error('[MarketStream] CoinGecko poll error:', error);
-      }
-    };
-
-    // Poll immediately
-    poll();
-
-    // Then every 30 seconds
-    this.coinGeckoPollInterval = window.setInterval(poll, 30_000);
+    this.streamPollInterval = window.setInterval(poll, 15_000);
   }
 
   /**
@@ -431,15 +354,9 @@ export class MarketDataStream {
       this.finnhubWs = null;
     }
 
-    // Clear polling intervals
-    if (this.yahooPollInterval) {
-      clearInterval(this.yahooPollInterval);
-      this.yahooPollInterval = null;
-    }
-
-    if (this.coinGeckoPollInterval) {
-      clearInterval(this.coinGeckoPollInterval);
-      this.coinGeckoPollInterval = null;
+    if (this.streamPollInterval) {
+      clearInterval(this.streamPollInterval);
+      this.streamPollInterval = null;
     }
 
     if (this.stalenessCheckInterval) {

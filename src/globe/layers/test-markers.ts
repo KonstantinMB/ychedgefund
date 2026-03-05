@@ -34,6 +34,7 @@ const metadata: LayerMetadata = {
   category: 'intelligence',
   color: '#4ade80',
   defaultActive: true,
+  order: 99,
 };
 
 /**

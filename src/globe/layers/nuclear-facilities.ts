@@ -27,6 +27,8 @@ const metadata: LayerMetadata = {
   category: 'military',
   color: '#fbbf24',
   defaultActive: false,
+  order: 11,
+  minZoom: 4, // Progressive disclosure: detail layer
 };
 
 function createNuclearFacilitiesLayer() {

@@ -26,6 +26,7 @@ const metadata: LayerMetadata = {
   category: 'infrastructure',
   color: '#facc15',
   defaultActive: true,
+  order: 22,
 };
 
 function createChokepointsLayer() {

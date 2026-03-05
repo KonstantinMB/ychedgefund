@@ -14,6 +14,7 @@ const metadata: LayerMetadata = {
   category: 'environmental',
   color: '#ef4444',
   defaultActive: false,
+  order: 41,
 };
 
 interface FirePoint {

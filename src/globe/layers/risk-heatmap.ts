@@ -456,6 +456,7 @@ const metadata: LayerMetadata = {
   icon:         '🔴',
   color:        '#ef4444',
   defaultActive: true,
+  order:        0, // Base layer — drawn first (behind others)
 };
 
 // Register in the controls panel (factory creates base layer for initial render)

@@ -15,6 +15,7 @@ const metadata: LayerMetadata = {
   category: 'intelligence',
   color: '#ef4444',
   defaultActive: true,
+  order: 1,
 };
 
 function createConflictZonesLayer() {

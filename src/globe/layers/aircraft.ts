@@ -14,6 +14,7 @@ const metadata: LayerMetadata = {
   category: 'intelligence',
   color: '#93c5fd',
   defaultActive: false,
+  order: 50,
 };
 
 interface AircraftPoint {

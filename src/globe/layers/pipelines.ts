@@ -15,6 +15,7 @@ const metadata: LayerMetadata = {
   category: 'infrastructure',
   color: '#f97316',
   defaultActive: false,
+  order: 21,
 };
 
 function createPipelinesLayer() {

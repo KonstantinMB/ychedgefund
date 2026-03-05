@@ -40,6 +40,8 @@ const metadata: LayerMetadata = {
   category: 'military',
   color: '#3b82f6',
   defaultActive: false,
+  order: 10,
+  minZoom: 4, // Progressive disclosure: detail layer, show when zoomed in
 };
 
 function createMilitaryBasesLayer() {

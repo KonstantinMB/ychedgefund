@@ -2,6 +2,9 @@
  * Layer Registry
  * Central registry for all globe layers
  * Each layer can be toggled on/off independently
+ *
+ * WorldMonitor-inspired: explicit layer ordering, progressive disclosure (minZoom),
+ * and category-based grouping for optimal map rendering.
  */
 
 import type { Layer } from '@deck.gl/core';
@@ -17,7 +20,41 @@ export interface LayerMetadata {
   icon?: string;
   color: string;
   defaultActive: boolean;
+  /** Render order (lower = drawn first, behind higher-order layers). Default: 100. */
+  order?: number;
+  /** Progressive disclosure: only show when zoom >= minZoom. Omit = visible at all zooms. */
+  minZoom?: number;
 }
+
+/**
+ * Explicit layer order for consistent stacking (WorldMonitor-style).
+ * Lower index = drawn first (background). Higher index = drawn last (foreground).
+ */
+export const LAYER_ORDER: string[] = [
+  'risk-heatmap',      // portfolio exposure (base layer)
+  'conflict-zones',     // polygons
+  'undersea-cables',    // lines
+  'pipelines',          // lines
+  'chokepoints',        // points
+  'military-bases',     // points (detail)
+  'nuclear-facilities', // points (detail)
+  'financial-centers',  // points
+  'earthquakes',        // live points
+  'fires',              // live points
+  'aircraft',           // live points
+  'test-markers',      // dev/debug
+];
+
+/**
+ * Category display order for the layer panel
+ */
+export const CATEGORY_ORDER: LayerMetadata['category'][] = [
+  'intelligence',
+  'military',
+  'infrastructure',
+  'economic',
+  'environmental',
+];
 
 /**
  * Layer factory function
@@ -70,10 +107,11 @@ class LayerRegistry {
   }
 
   /**
-   * Get all layer metadata
+   * Get all layer metadata, sorted by category order then layer order
    */
   getAllMetadata(): LayerMetadata[] {
-    return Array.from(this.layers.values()).map(l => l.metadata);
+    const meta = Array.from(this.layers.values()).map(l => l.metadata);
+    return this.sortMetadata(meta);
   }
 
   /**
@@ -83,6 +121,50 @@ class LayerRegistry {
     return Array.from(this.layers.values())
       .filter(l => l.metadata.category === category)
       .map(l => l.metadata);
+  }
+
+  /**
+   * Sort metadata by category order, then LAYER_ORDER, then order field
+   */
+  private sortMetadata(meta: LayerMetadata[]): LayerMetadata[] {
+    const orderIdx = (id: string) => {
+      const i = LAYER_ORDER.indexOf(id);
+      return i >= 0 ? i : LAYER_ORDER.length + (meta.find(m => m.id === id)?.order ?? 100);
+    };
+    const catIdx = (c: LayerMetadata['category']) => CATEGORY_ORDER.indexOf(c);
+    return [...meta].sort((a, b) => {
+      const ca = catIdx(a.category);
+      const cb = catIdx(b.category);
+      if (ca !== cb) return ca - cb;
+      const oa = orderIdx(a.id);
+      const ob = orderIdx(b.id);
+      if (oa !== ob) return oa - ob;
+      return (a.order ?? 100) - (b.order ?? 100);
+    });
+  }
+
+  /**
+   * Get ordered, zoom-filtered layer IDs for rendering.
+   * Respects minZoom (progressive disclosure) and LAYER_ORDER.
+   */
+  getOrderedIdsForView(activeIds: Set<string>, zoom: number): string[] {
+    const ordered: string[] = [];
+    for (const id of LAYER_ORDER) {
+      if (!activeIds.has(id)) continue;
+      const meta = this.getMetadata(id);
+      if (!meta) continue;
+      if (meta.minZoom != null && zoom < meta.minZoom) continue;
+      ordered.push(id);
+    }
+    // Include any active IDs not in LAYER_ORDER (e.g. sub-layers like risk-heatmap-base)
+    for (const id of activeIds) {
+      if (ordered.includes(id)) continue;
+      const meta = this.getMetadata(id);
+      if (meta && (meta.minZoom == null || zoom >= meta.minZoom)) {
+        ordered.push(id);
+      }
+    }
+    return ordered;
   }
 
   /**

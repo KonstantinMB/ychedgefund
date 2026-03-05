@@ -14,6 +14,7 @@ const metadata: LayerMetadata = {
   category: 'environmental',
   color: '#f97316',
   defaultActive: true,
+  order: 40,
 };
 
 interface EarthquakePoint {

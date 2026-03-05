@@ -2,8 +2,8 @@
  * Market Data Stream Edge Function
  *
  * Proxies Finnhub REST quotes for the full tradeable universe.
- * Batches requests: 5 symbols per Finnhub call (free tier limit).
- * Falls back to Yahoo Finance if Finnhub unavailable.
+ * Uses Yahoo Finance as primary (no API key, supports stocks, ETFs, crypto, forex).
+ * Finnhub optional when API key provided (batched, 5 symbols/call).
  * Caches 15 seconds.
  *
  * Returns: { [symbol]: MarketTick }
@@ -11,6 +11,7 @@
 
 import { withCors } from '../_cors';
 import { withCache } from '../_cache';
+import { getAllSymbols } from '../../shared/universe-symbols';
 
 export const config = { runtime: 'edge' };
 
@@ -23,51 +24,11 @@ interface MarketTick {
   timestamp: number;
 }
 
-// Tradeable universe (40 symbols)
-const SYMBOLS = [
-  // Broad Market (4)
-  'SPY',
-  'QQQ',
-  'DIA',
-  'IWM',
+/** Max symbols to fetch per request (avoid timeout/rate limits) */
+const MAX_SYMBOLS = 500;
 
-  // Sectors (10)
-  'XLF',
-  'XLE',
-  'XLK',
-  'XLV',
-  'XLI',
-  'XLP',
-  'XLU',
-  'XLB',
-  'XLRE',
-  'XLC',
-
-  // Commodities (4)
-  'GLD',
-  'SLV',
-  'USO',
-  'UNG',
-
-  // Fixed Income (5)
-  'TLT',
-  'IEF',
-  'SHY',
-  'HYG',
-  'LQD',
-
-  // International (3)
-  'EEM',
-  'EFA',
-  'VWO',
-
-  // Thematic (5)
-  'JETS',
-  'SMH',
-  'XBI',
-  'ARKK',
-  'LIT',
-];
+/** Concurrency limit for Yahoo fetches */
+const YAHOO_CONCURRENCY = 10;
 
 /**
  * Fetch quote from Finnhub REST API
@@ -153,64 +114,73 @@ async function fetchFromYahoo(symbol: string): Promise<MarketTick | null> {
   }
 }
 
+/** Run async tasks with max concurrency */
+async function runWithConcurrency(
+  symbols: string[],
+  concurrency: number,
+  fn: (symbol: string) => Promise<MarketTick | null>
+): Promise<Record<string, MarketTick>> {
+  const results: Record<string, MarketTick> = {};
+  let index = 0;
+
+  async function worker(): Promise<void> {
+    while (index < symbols.length) {
+      const i = index++;
+      const symbol = symbols[i];
+      try {
+        const tick = await fn(symbol);
+        if (tick) results[symbol] = tick;
+      } catch {
+        // Skip failed symbols
+      }
+    }
+  }
+
+  const workers = Array.from({ length: Math.min(concurrency, symbols.length) }, () => worker());
+  await Promise.all(workers);
+  return results;
+}
+
 /**
- * Fetch quotes for all symbols
+ * Fetch quotes for all symbols in universe
  */
 async function fetchAllQuotes(): Promise<Record<string, MarketTick>> {
   const apiKey = process.env.FINNHUB_API_KEY;
+  const allSymbols = getAllSymbols().slice(0, MAX_SYMBOLS);
   const quotes: Record<string, MarketTick> = {};
 
-  if (apiKey) {
-    // Use Finnhub (batched to respect rate limits)
-    console.log('[MarketStream] Fetching from Finnhub...');
+  // Finnhub: only for first 50 non-crypto symbols (rate limit: 60/min)
+  const finnhubSymbols = allSymbols.filter(s => !s.includes('-USD') && !s.includes('=X')).slice(0, 50);
 
-    // Fetch in batches of 5 (Finnhub free tier: 60 req/min = 1 req/sec)
+  if (apiKey && finnhubSymbols.length > 0) {
     const batchSize = 5;
-    for (let i = 0; i < SYMBOLS.length; i += batchSize) {
-      const batch = SYMBOLS.slice(i, i + batchSize);
-
-      const results = await Promise.allSettled(
-        batch.map(symbol => fetchFromFinnhub(symbol, apiKey))
-      );
-
-      results.forEach((result, index) => {
-        if (result.status === 'fulfilled' && result.value) {
-          quotes[batch[index]] = result.value;
-        }
+    for (let i = 0; i < finnhubSymbols.length; i += batchSize) {
+      const batch = finnhubSymbols.slice(i, i + batchSize);
+      const results = await Promise.allSettled(batch.map(s => fetchFromFinnhub(s, apiKey)));
+      results.forEach((r, idx) => {
+        if (r.status === 'fulfilled' && r.value) quotes[batch[idx]] = r.value;
       });
-
-      // Small delay between batches to respect rate limit
-      if (i + batchSize < SYMBOLS.length) {
-        await new Promise(resolve => setTimeout(resolve, 200));
+      if (i + batchSize < finnhubSymbols.length) {
+        await new Promise(r => setTimeout(r, 250));
       }
     }
-
-    console.log(`[MarketStream] Finnhub returned ${Object.keys(quotes).length} quotes`);
   }
 
-  // Fallback to Yahoo for missing symbols
-  const missingSymbols = SYMBOLS.filter(s => !quotes[s]);
+  // Yahoo: primary for all symbols (stocks, ETFs, crypto, forex)
+  const missingSymbols = allSymbols.filter(s => !quotes[s]);
 
   if (missingSymbols.length > 0) {
-    console.log(`[MarketStream] Fetching ${missingSymbols.length} missing symbols from Yahoo...`);
-
-    const results = await Promise.allSettled(
-      missingSymbols.map(symbol => fetchFromYahoo(symbol))
+    const yahooQuotes = await runWithConcurrency(
+      missingSymbols,
+      YAHOO_CONCURRENCY,
+      fetchFromYahoo
     );
-
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled' && result.value) {
-        quotes[missingSymbols[index]] = result.value;
-      }
-    });
-
-    console.log(`[MarketStream] Yahoo returned ${Object.keys(quotes).length} total quotes`);
+    Object.assign(quotes, yahooQuotes);
   }
 
-  // If still missing quotes, log warning
-  const finalMissing = SYMBOLS.filter(s => !quotes[s]);
-  if (finalMissing.length > 0) {
-    console.warn(`[MarketStream] Missing quotes for: ${finalMissing.join(', ')}`);
+  const missing = allSymbols.filter(s => !quotes[s]);
+  if (missing.length > 0) {
+    console.warn(`[MarketStream] Missing quotes for ${missing.length} symbols`);
   }
 
   return quotes;

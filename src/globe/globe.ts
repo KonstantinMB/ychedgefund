@@ -10,6 +10,7 @@ import type { MapViewState } from '@deck.gl/core';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { getStore } from '../lib/state';
+import { getLayerRegistry } from './layer-registry';
 import { showEntityPopup, hideEntityPopup, initEntityPopup } from './entity-popup';
 import type { EntityInfo } from './entity-popup';
 
@@ -48,6 +49,7 @@ class GlobeManager {
   private currentTheme: 'dark' | 'light' = 'dark';
   private layerRegistry: Map<string, Layer> = new Map();
   private activeLayerIds: Set<string> = new Set();
+  private lastZoomFloor: number = -1;
 
   /**
    * Initialize the globe
@@ -140,11 +142,19 @@ class GlobeManager {
     // Initialize entity popup DOM
     initEntityPopup();
 
-    // Subscribe to active layer changes
+    // Subscribe to active layer and zoom changes (progressive disclosure)
     store.subscribe('globe', (globeState) => {
       const newActiveLayerIds = new Set(globeState.activeLayers);
-      if (!this.setsEqual(newActiveLayerIds, this.activeLayerIds)) {
-        this.activeLayerIds = newActiveLayerIds;
+      const zoom = globeState.viewState?.zoom ?? INITIAL_VIEW_STATE.zoom ?? 2.5;
+      const zoomFloor = Math.floor(zoom);
+
+      const activeChanged = !this.setsEqual(newActiveLayerIds, this.activeLayerIds);
+      const zoomCrossedThreshold = zoomFloor !== this.lastZoomFloor;
+
+      if (activeChanged) this.activeLayerIds = newActiveLayerIds;
+      if (zoomCrossedThreshold) this.lastZoomFloor = zoomFloor;
+
+      if (activeChanged || zoomCrossedThreshold) {
         this.updateLayers();
       }
     });
@@ -169,7 +179,8 @@ class GlobeManager {
   }
 
   /**
-   * Update deck.gl with currently active layers
+   * Update deck.gl with currently active layers.
+   * Uses WorldMonitor-style ordering and progressive disclosure (minZoom).
    */
   updateLayers(layers?: Layer[]): void {
     if (!this.deck) {
@@ -183,24 +194,31 @@ class GlobeManager {
       return;
     }
 
-    // Otherwise, filter from registry based on active layer IDs.
-    // A sub-layer with id "parent-suffix" is shown when either "parent-suffix"
-    // or its parent "parent" is in activeLayerIds (supports risk-heatmap-base etc.)
+    const store = getStore();
+    const globeState = store.get('globe');
+    const zoom = globeState.viewState?.zoom ?? INITIAL_VIEW_STATE.zoom ?? 2.5;
+    const registry = getLayerRegistry();
+
+    // Ordered, zoom-filtered IDs (progressive disclosure)
+    const orderedIds = registry.getOrderedIdsForView(this.activeLayerIds, zoom);
+
     const activeLayers: Layer[] = [];
-    this.layerRegistry.forEach((layer, id) => {
-      if (this.activeLayerIds.has(id)) {
-        activeLayers.push(layer);
-        return;
-      }
-      // Parent-prefix check: "risk-heatmap-base" → parent "risk-heatmap"
-      const dashIdx = id.lastIndexOf('-');
-      if (dashIdx > 0) {
-        const parentId = id.slice(0, dashIdx);
-        if (this.activeLayerIds.has(parentId)) {
+    for (const id of orderedIds) {
+      const layer = this.layerRegistry.get(id);
+      if (layer) activeLayers.push(layer);
+    }
+
+    // Fallback: include any active layers not in orderedIds (e.g. not in LAYER_ORDER)
+    for (const [id, layer] of this.layerRegistry) {
+      if (activeLayers.includes(layer)) continue;
+      if (this.activeLayerIds.has(id)) activeLayers.push(layer);
+      else {
+        const dashIdx = id.lastIndexOf('-');
+        if (dashIdx > 0 && this.activeLayerIds.has(id.slice(0, dashIdx))) {
           activeLayers.push(layer);
         }
       }
-    });
+    }
 
     this.deck.setProps({ layers: activeLayers });
   }

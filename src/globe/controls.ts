@@ -4,9 +4,11 @@
  */
 
 import { getStore } from '../lib/state';
-import { getLayerRegistry } from './layer-registry';
+import { getLayerRegistry, CATEGORY_ORDER } from './layer-registry';
+import type { LayerMetadata } from './layer-registry';
 import { getGlobe } from './globe';
 
+/** Layer icons (WorldMonitor-style). Fallback: meta.icon or ● */
 const LAYER_ICONS: Record<string, string> = {
   'military-bases':      '⚔',
   'nuclear-facilities':  '☢',
@@ -19,6 +21,7 @@ const LAYER_ICONS: Record<string, string> = {
   'fires':               '🔥',
   'aircraft':            '✈',
   'test-markers':        '◉',
+  'risk-heatmap':        '🔴',
 };
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -28,6 +31,10 @@ const CATEGORY_LABELS: Record<string, string> = {
   intelligence:   'Intelligence',
   environmental:  'Environmental',
 };
+
+function getLayerIcon(meta: LayerMetadata): string {
+  return meta.icon ?? LAYER_ICONS[meta.id] ?? '●';
+}
 
 /**
  * Initialize layer controls — called once at startup
@@ -63,8 +70,8 @@ function renderLayerControls(container: HTMLElement): void {
   const registry = getLayerRegistry();
   const allMetadata = registry.getAllMetadata();
 
-  // Group by category
-  const categories = new Map<string, typeof allMetadata>();
+  // Group by category (preserve registry order)
+  const categories = new Map<string, LayerMetadata[]>();
   allMetadata.forEach(meta => {
     if (!categories.has(meta.category)) {
       categories.set(meta.category, []);
@@ -74,8 +81,10 @@ function renderLayerControls(container: HTMLElement): void {
 
   const activeLayers = store.get('globe').activeLayers;
 
-  // Render each category + its layers
-  categories.forEach((layers, category) => {
+  // Render each category in explicit order (WorldMonitor-style)
+  for (const category of CATEGORY_ORDER) {
+    const layers = categories.get(category);
+    if (!layers?.length) continue;
     const catSection = document.createElement('div');
     catSection.className = 'layer-category';
 
@@ -85,12 +94,18 @@ function renderLayerControls(container: HTMLElement): void {
     catSection.appendChild(catLabel);
 
     layers.forEach(meta => {
-      const row = buildLayerRow(meta.id, meta.name, meta.color, activeLayers.has(meta.id));
+      const row = buildLayerRow(
+        meta.id,
+        meta.name,
+        meta.color,
+        getLayerIcon(meta),
+        activeLayers.has(meta.id),
+      );
       catSection.appendChild(row);
     });
 
     container.appendChild(catSection);
-  });
+  }
 
   // Sync active state when store changes (no full re-render)
   store.subscribe('globe', (globeState) => {
@@ -109,6 +124,7 @@ function buildLayerRow(
   id: string,
   name: string,
   color: string,
+  icon: string,
   isActive: boolean,
 ): HTMLElement {
   const row = document.createElement('div');
@@ -133,9 +149,9 @@ function buildLayerRow(
   dot.style.boxShadow = `0 0 6px ${color}`;
 
   // Icon
-  const icon = document.createElement('span');
-  icon.className = 'layer-icon';
-  icon.textContent = LAYER_ICONS[id] ?? '●';
+  const iconEl = document.createElement('span');
+  iconEl.className = 'layer-icon';
+  iconEl.textContent = icon;
 
   // Name
   const label = document.createElement('span');
@@ -144,7 +160,7 @@ function buildLayerRow(
 
   row.appendChild(switchWrap);
   row.appendChild(dot);
-  row.appendChild(icon);
+  row.appendChild(iconEl);
   row.appendChild(label);
 
   // Click anywhere on the row toggles the layer
