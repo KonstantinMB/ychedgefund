@@ -128,7 +128,7 @@ function renderTable(data: LeaderboardResponse): void {
   const rankCallout = containerEl.querySelector('.leaderboard-rank-callout');
   if (!tableWrap || !subheader) return;
 
-  subheader.textContent = `Ranked by portfolio return • Last updated: ${formatTime(data.updatedAt)}`;
+  subheader.textContent = `Ranked by portfolio return • You appear on all time periods when you trade • Last updated: ${formatTime(data.updatedAt)}`;
 
   // Your rank callout: show when logged in and user not in top 10
   const userRank = data.currentUserRank ?? (data.currentUserEntry?.rank);
@@ -229,9 +229,9 @@ function renderBanner(): void {
   banner.classList.remove('leaderboard-banner-hidden');
   const text = banner.querySelector('.leaderboard-banner-text');
   const btn = banner.querySelector('.leaderboard-banner-btn') as HTMLButtonElement | null;
-  if (text) text.textContent = 'Compete with other traders. Sign up to start paper trading.';
+  if (text) text.textContent = 'Join the competition! Sign up and start paper trading to climb the ranks.';
   if (btn) {
-    btn.textContent = 'Sign Up';
+    btn.textContent = 'Sign Up & Trade';
     btn.onclick = () => openAuthModal({ tab: 'register' });
   }
 }
@@ -270,18 +270,37 @@ function createView(): HTMLElement {
 
   wrap.innerHTML = `
     <div class="leaderboard-banner leaderboard-banner-hidden" role="banner">
-      <span class="leaderboard-banner-text">Compete with other traders. Sign up to start paper trading.</span>
-      <button type="button" class="leaderboard-banner-btn">Sign Up</button>
+      <span class="leaderboard-banner-text">Join the competition! Sign up and start paper trading to climb the ranks.</span>
+      <button type="button" class="leaderboard-banner-btn">Sign Up & Trade</button>
     </div>
     <div class="leaderboard-content">
-      <h1 class="leaderboard-title">LEADERBOARD</h1>
+      <div class="leaderboard-hero">
+        <h1 class="leaderboard-logo">🏆 PAPER TRADING CHAMPIONS</h1>
+        <p class="leaderboard-tagline">Who's crushing it? Real competition, zero real money. Trade stocks, ETFs, crypto & forex on a $1M paper account — climb the ranks and flex those returns.</p>
+      </div>
+      <div class="leaderboard-rewards-teaser">
+        <div class="leaderboard-rewards-card">
+          <span class="leaderboard-rewards-icon">🎁</span>
+          <div>
+            <strong>Rewards & Giveaways Coming Soon</strong>
+            <p>Top performers will be rewarded. Stay tuned for exclusive prizes for monthly & quarterly champions!</p>
+          </div>
+        </div>
+        <div class="leaderboard-rewards-card">
+          <span class="leaderboard-rewards-icon">🥇</span>
+          <div>
+            <strong>Podium Perks</strong>
+            <p>#1, #2, #3 — the best get the glory. Future giveaways reserved for our chart-toppers.</p>
+          </div>
+        </div>
+      </div>
       <div class="leaderboard-pills">
         <button type="button" class="leaderboard-pill" data-period="weekly">Weekly</button>
         <button type="button" class="leaderboard-pill" data-period="monthly">Monthly</button>
         <button type="button" class="leaderboard-pill" data-period="quarterly">Quarterly</button>
         <button type="button" class="leaderboard-pill" data-period="yearly">Yearly</button>
       </div>
-      <p class="leaderboard-subheader">Ranked by portfolio return • Last updated: —</p>
+      <p class="leaderboard-subheader">Ranked by portfolio return • You appear on all time periods when you trade • Last updated: —</p>
       <div class="leaderboard-rank-callout leaderboard-rank-callout-hidden" role="button" tabindex="0">
         <span class="leaderboard-rank-callout-text">Your rank: #—</span>
         <span class="leaderboard-rank-callout-hint">Click to scroll to your row</span>
