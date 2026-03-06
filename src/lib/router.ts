@@ -9,7 +9,7 @@ export function getViewFromPath(): ViewState {
   return window.location.pathname === '/leaderboard' ? 'leaderboard' : 'dashboard';
 }
 
-function updateNavForView(view: ViewState): void {
+export function updateNavForView(view: ViewState): void {
   const navTabs = document.querySelector('.header-nav-tabs');
   const backBtn = document.getElementById('dashboard-back');
   if (!navTabs || !backBtn) return;

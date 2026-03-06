@@ -854,6 +854,84 @@ body {
   text-shadow: 0 0 8px currentColor;
 }
 
+/* Mobile leaderboard — responsive scaling */
+@media (max-width: 768px) {
+  .leaderboard-view {
+    padding: var(--spacing-md);
+    padding-top: 4.5rem;
+    padding-bottom: 2rem;
+  }
+  .leaderboard-content {
+    padding: 0 var(--spacing-sm);
+  }
+  .leaderboard-logo-trophy-big {
+    font-size: 2.5rem;
+  }
+  .leaderboard-logo {
+    font-size: 1.2rem;
+    letter-spacing: 0.05em;
+  }
+  .leaderboard-tagline {
+    font-size: 0.8rem;
+    max-width: 100%;
+  }
+  .leaderboard-banner {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    text-align: center;
+  }
+  .leaderboard-banner-btn {
+    width: 100%;
+  }
+  .leaderboard-controls {
+    gap: var(--spacing-sm);
+  }
+  .leaderboard-pills {
+    gap: 0.35rem;
+  }
+  .leaderboard-pill {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.65rem;
+  }
+  .leaderboard-subheader {
+    flex-direction: column;
+    gap: 0.5rem;
+    text-align: center;
+  }
+  .leaderboard-subheader-text {
+    font-size: 0.65rem;
+  }
+  .leaderboard-table {
+    font-size: 0.68rem;
+  }
+  .leaderboard-table th,
+  .leaderboard-table td {
+    padding: 0.4rem 0.5rem;
+  }
+  .leaderboard-th-username,
+  .leaderboard-td-username {
+    max-width: 6rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Mobile leaderboard mode — compact header */
+body.mobile-leaderboard .header-bar {
+  padding: 0.3rem 0.5rem;
+  top: 0.5rem;
+}
+body.mobile-leaderboard .header-logo img {
+  width: 24px;
+  height: 24px;
+}
+body.mobile-leaderboard .pt-toggle,
+body.mobile-leaderboard .header-tour-btn,
+body.mobile-leaderboard .header-hint {
+  display: none !important;
+}
+
 /* Auth nav (Sign In / Register / user dropdown) */
 .auth-nav-container {
   display: flex;
@@ -4930,8 +5008,25 @@ pre {
 .mobile-block-hint {
   font-size: 0.8rem;
   color: var(--text-muted);
-  margin: 0;
+  margin: 0 0 1.25rem;
   opacity: 0.9;
+}
+
+.mobile-block-leaderboard-link {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-accent);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  border-radius: 8px;
+  background: rgba(74, 222, 128, 0.08);
+  transition: opacity 0.15s, transform 0.15s;
+}
+.mobile-block-leaderboard-link:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
 }
 
 /* ============================================

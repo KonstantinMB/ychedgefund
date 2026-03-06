@@ -1,6 +1,7 @@
 /**
  * YC Hedge Fund - Mobile block screen
- * Full-screen overlay when accessed from mobile — platform is desktop-only
+ * Full-screen overlay when accessed from mobile — platform is desktop-only.
+ * Exception: /leaderboard is allowed on mobile (mobile-friendly view).
  */
 
 const MOBILE_BREAKPOINT = 768;
@@ -12,7 +13,7 @@ const MOBILE_MESSAGES = [
   "We're not being difficult — we're being honest. This thing was built for the big screen. See you on desktop! ✨",
 ];
 
-function isMobileViewport(): boolean {
+export function isMobileViewport(): boolean {
   return window.innerWidth <= MOBILE_BREAKPOINT;
 }
 
@@ -22,10 +23,12 @@ function pickMessage(): string {
 }
 
 /**
- * If mobile, show block screen and return true. Caller should abort init.
+ * If mobile and not on leaderboard, show block screen and return true. Caller should abort init.
+ * On /leaderboard, mobile is allowed — returns false.
  */
 export function showMobileBlockIfNeeded(): boolean {
   if (!isMobileViewport()) return false;
+  if (window.location.pathname === '/leaderboard') return false;
 
   const block = document.createElement('div');
   block.className = 'mobile-block';
@@ -40,6 +43,7 @@ export function showMobileBlockIfNeeded(): boolean {
       <p class="mobile-block-subtitle">YC Hedge Fund</p>
       <p class="mobile-block-message">${pickMessage()}</p>
       <p class="mobile-block-hint">Open this page on a laptop or desktop to use the platform.</p>
+      <a href="/leaderboard" class="mobile-block-leaderboard-link">View Leaderboard on mobile →</a>
     </div>
   `;
 

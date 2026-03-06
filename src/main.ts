@@ -171,10 +171,54 @@ async function initAuthNav(): Promise<void> {
 
 // ── Routing (dashboard | leaderboard) ─────────────────────────────────────────
 
-import { getViewFromPath, navigateToLeaderboard, initRouter, setupInitialView } from './lib/router';
+import { getViewFromPath, navigateToLeaderboard, initRouter, setupInitialView, updateNavForView } from './lib/router';
 
 function initRouting(): void {
   initRouter(document.getElementById('dashboard-back'));
+}
+
+// ── Mobile leaderboard only (minimal init, no globe/panels) ────────────────────
+
+async function initMobileLeaderboard(): Promise<void> {
+  console.log('[YC Hedge Fund] Mobile leaderboard mode');
+
+  document.body.classList.add('mobile-leaderboard');
+
+  // Vercel Analytics
+  try {
+    const { inject } = await import('@vercel/analytics');
+    inject();
+  } catch { /* no-op in dev */ }
+
+  // Simplify header: hide heavy controls, show back button
+  const ptToggle = document.getElementById('paper-trading-toggle');
+  const tourBtn = document.getElementById('onboarding-tour-btn');
+  const cmdHint = document.getElementById('cmd-palette-hint');
+  if (ptToggle) (ptToggle as HTMLElement).style.display = 'none';
+  if (tourBtn) (tourBtn as HTMLElement).style.display = 'none';
+  if (cmdHint) (cmdHint as HTMLElement).style.display = 'none';
+
+  await initAuthNav();
+  updateNavForView('leaderboard');
+
+  const backBtn = document.getElementById('dashboard-back');
+  backBtn?.addEventListener('click', () => {
+    window.location.href = '/';
+  });
+
+  const app = document.getElementById('app');
+  if (app) {
+    const { initLeaderboardView } = await import('./views/leaderboard');
+    const leaderboardEl = initLeaderboardView(app);
+    leaderboardEl.style.display = '';
+  }
+
+  const { showLeaderboard } = await import('./views/leaderboard');
+  showLeaderboard();
+
+  initThemeToggle();
+
+  console.log('[YC Hedge Fund] Mobile leaderboard ready');
 }
 
 // ── Header nav tabs (Globe | Intel | Markets | Trading | Leaderboard) ─────────
@@ -732,10 +776,16 @@ async function init(): Promise<void> {
 
   initTheme();
 
-  // Mobile block — platform is desktop-only
-  const { showMobileBlockIfNeeded } = await import('./lib/mobile-block');
+  // Mobile block — platform is desktop-only (except /leaderboard)
+  const { showMobileBlockIfNeeded, isMobileViewport } = await import('./lib/mobile-block');
   if (showMobileBlockIfNeeded()) {
     console.log('[YC Hedge Fund] Mobile detected — showing desktop-only message');
+    return;
+  }
+
+  // Mobile leaderboard — minimal init (no globe, no panels)
+  if (isMobileViewport() && window.location.pathname === '/leaderboard') {
+    await initMobileLeaderboard();
     return;
   }
 
