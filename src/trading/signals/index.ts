@@ -1,7 +1,7 @@
 /**
  * Signal Generation Engine - Master Initialization
  *
- * Initializes all 5 trading strategies and the signal aggregator.
+ * Initializes all 6 trading strategies and the signal aggregator.
  * Strategies run autonomously and publish signals to the signal bus.
  */
 
@@ -10,6 +10,7 @@ import { initSentimentStrategy } from './strategies/sentiment';
 import { initGeopoliticalStrategy } from './strategies/geopolitical';
 import { initMacroStrategy } from './strategies/macro';
 import { initCrossAssetStrategy } from './strategies/cross-asset';
+import { initPredictionMarketStrategy } from './strategies/prediction-markets';
 import { initSignalAggregator } from './signal-aggregator';
 import { signalBus } from './signal-bus';
 
@@ -35,7 +36,10 @@ export async function initAllStrategies(): Promise<void> {
     // 5. Cross-asset (divergence detection, runs every 30 min)
     initCrossAssetStrategy();
 
-    // 6. Signal aggregator (consensus detection)
+    // 6. Prediction Markets (Polymarket momentum + multi-source confirmation, runs every 15 min)
+    initPredictionMarketStrategy();
+
+    // 7. Signal aggregator (consensus detection)
     initSignalAggregator();
 
     console.log('[SignalEngine] All strategies initialized successfully');

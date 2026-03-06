@@ -23,8 +23,8 @@ function getAuthHeaders(): Record<string, string> {
   return headers;
 }
 
-async function putToServer(): Promise<boolean> {
-  if (!auth.isAuthenticated()) return false;
+async function putToServer(): Promise<{ ok: boolean; error?: string }> {
+  if (!auth.isAuthenticated()) return { ok: false, error: 'Not signed in' };
 
   const payload = portfolioManager.getStoredPayload();
 
@@ -37,12 +37,18 @@ async function putToServer(): Promise<boolean> {
     });
     if (!res.ok) {
       pendingRetry = true;
-      return false;
+      let errMsg = `Sync failed (${res.status})`;
+      try {
+        const json = (await res.json()) as { error?: string };
+        if (json?.error) errMsg = json.error;
+      } catch { /* ignore */ }
+      return { ok: false, error: errMsg };
     }
-    return true;
-  } catch {
+    return { ok: true };
+  } catch (err) {
     pendingRetry = true;
-    return false;
+    const msg = err instanceof Error ? err.message : 'Network error';
+    return { ok: false, error: msg };
   }
 }
 
@@ -63,13 +69,8 @@ function isServerDefault(data: Record<string, unknown>): boolean {
   return positions.length === 0 && closedTrades.length === 0 && cash === STARTING_CAPITAL;
 }
 
-export async function pushLocalToServer(): Promise<boolean> {
-  if (!auth.isAuthenticated()) return false;
-  try {
-    return await putToServer();
-  } catch {
-    return false;
-  }
+export async function pushLocalToServer(): Promise<{ ok: boolean; error?: string }> {
+  return putToServer();
 }
 
 export async function resetPortfolioOnServer(): Promise<boolean> {
@@ -171,8 +172,8 @@ export async function fetchFromServer(): Promise<boolean> {
     }
 
     // Local is newer — push to server
-    await putToServer();
-    return true;
+    const pushResult = await putToServer();
+    return pushResult.ok;
   } catch {
     return false;
   }

@@ -139,6 +139,7 @@ async function initPanels(): Promise<void> {
       category: m.category || 'Global Events',
       sentimentMomentum: m.sentimentMomentum,
       probability: m.probability,
+      volume24h: m.volume24h || 0,
       lastUpdated: m.lastUpdated,
     }));
 

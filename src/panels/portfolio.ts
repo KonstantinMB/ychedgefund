@@ -709,10 +709,10 @@ function showMigrationModal(): void {
     </div>
   `;
   overlay.querySelector('#port-mig-import')?.addEventListener('click', async () => {
-    const ok = await pushLocalToServer();
+    const result = await pushLocalToServer();
     overlay.remove();
-    if (ok) showToast('Portfolio imported to your account');
-    else showToast('Import failed. Try again.');
+    if (result.ok) showToast('Portfolio imported to your account');
+    else showToast(result.error ?? 'Import failed. Try again.');
   });
   overlay.querySelector('#port-mig-fresh')?.addEventListener('click', async () => {
     const ok = await loadServerPortfolio();

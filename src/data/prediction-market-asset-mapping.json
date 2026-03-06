@@ -1,0 +1,148 @@
+{
+  "Politics": {
+    "keywords": [
+      "election",
+      "president",
+      "congress",
+      "senate",
+      "democrat",
+      "republican",
+      "trump",
+      "biden",
+      "vote",
+      "campaign",
+      "policy"
+    ],
+    "bullish_assets": ["XLF", "XLE", "ITA", "XLI"],
+    "bearish_assets": ["TLT", "GLD", "VIX"],
+    "confidence_base": 0.65,
+    "rationale": "Political uncertainty → volatility in financials, defense, and energy sectors based on policy expectations"
+  },
+  "Geopolitics": {
+    "keywords": [
+      "war",
+      "conflict",
+      "military",
+      "sanctions",
+      "tensions",
+      "invasion",
+      "strike",
+      "attack",
+      "iran",
+      "russia",
+      "china",
+      "ukraine",
+      "taiwan",
+      "israel",
+      "palestine"
+    ],
+    "bullish_assets": ["GLD", "XLE", "ITA", "VIX", "USO", "UNG"],
+    "bearish_assets": ["EEM", "SPY", "QQQ", "EWU"],
+    "confidence_base": 0.70,
+    "rationale": "Geopolitical risk → flight to safety (gold, volatility), energy supply concerns, defense spending"
+  },
+  "Finance": {
+    "keywords": [
+      "fed",
+      "rate",
+      "inflation",
+      "recession",
+      "bank",
+      "monetary",
+      "interest",
+      "economy",
+      "gdp",
+      "unemployment",
+      "treasury",
+      "yield"
+    ],
+    "bullish_assets": ["TLT", "GLD", "XLU", "XLP"],
+    "bearish_assets": ["XLF", "SPY", "QQQ", "IWM"],
+    "confidence_base": 0.68,
+    "rationale": "Fed policy shifts → bonds, utilities benefit from rate expectations; financials suffer from tightening"
+  },
+  "Crypto": {
+    "keywords": [
+      "bitcoin",
+      "crypto",
+      "ethereum",
+      "btc",
+      "eth",
+      "blockchain",
+      "defi",
+      "regulation",
+      "sec"
+    ],
+    "bullish_assets": ["BTC-USD", "ETH-USD", "COIN"],
+    "bearish_assets": ["USD", "TLT"],
+    "confidence_base": 0.72,
+    "rationale": "Crypto sentiment → direct impact on BTC/ETH and crypto-related equities like Coinbase"
+  },
+  "Climate": {
+    "keywords": [
+      "climate",
+      "weather",
+      "hurricane",
+      "flood",
+      "drought",
+      "disaster",
+      "temperature",
+      "emissions"
+    ],
+    "bullish_assets": ["XLE", "UNG", "XLU", "WEAT"],
+    "bearish_assets": ["XLP", "XLY"],
+    "confidence_base": 0.62,
+    "rationale": "Climate events → energy demand volatility, agricultural commodity impacts, consumer spending disruption"
+  },
+  "Technology": {
+    "keywords": [
+      "ai",
+      "tech",
+      "software",
+      "chip",
+      "semiconductor",
+      "apple",
+      "google",
+      "microsoft",
+      "nvidia",
+      "regulation"
+    ],
+    "bullish_assets": ["QQQ", "XLK", "SMH"],
+    "bearish_assets": ["XLE", "XLF"],
+    "confidence_base": 0.66,
+    "rationale": "Tech sentiment → growth sector leadership, semiconductor supply chain, AI hype cycles"
+  },
+  "Energy": {
+    "keywords": [
+      "oil",
+      "energy",
+      "opec",
+      "crude",
+      "gas",
+      "pipeline",
+      "refinery",
+      "lng",
+      "renewable"
+    ],
+    "bullish_assets": ["XLE", "USO", "UNG", "XOP"],
+    "bearish_assets": ["XLY", "XLI", "JETS"],
+    "confidence_base": 0.69,
+    "rationale": "Energy price expectations → sector rotation, consumer discretionary pressure from input costs"
+  },
+  "Healthcare": {
+    "keywords": [
+      "health",
+      "medical",
+      "pharma",
+      "drug",
+      "vaccine",
+      "fda",
+      "pandemic",
+      "disease"
+    ],
+    "bullish_assets": ["XLV", "XBI", "IBB"],
+    "bearish_assets": ["XLY", "SPY"],
+    "confidence_base": 0.63,
+    "rationale": "Healthcare policy/crisis → biotech, pharma sector impacts, defensive rotation"
+  }
+}

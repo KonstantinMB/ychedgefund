@@ -73,6 +73,7 @@ export interface PredictionMarketMomentum {
   category: string;
   sentimentMomentum: number; // -1 to +1
   probability: number; // 0 to 1
+  volume24h: number; // 24h trading volume in USD
   lastUpdated: number;
 }
 
