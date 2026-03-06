@@ -313,12 +313,9 @@ function createView(): HTMLElement {
     </div>
     <div class="leaderboard-content">
       <div class="leaderboard-hero">
-        <h1 class="leaderboard-logo">
-          <span class="leaderboard-logo-trophy">🏆</span>
-          <span class="leaderboard-logo-text">PAPER TRADING CHAMPIONS</span>
-          <span class="leaderboard-logo-shine"></span>
-        </h1>
-        <p class="leaderboard-tagline">Who's crushing it? Real competition, zero real money. Trade stocks, ETFs, crypto & forex on a $1M paper account — climb the ranks and flex those returns.</p>
+        <div class="leaderboard-logo-trophy-big">🏆</div>
+        <h1 class="leaderboard-logo">PAPER TRADING CHAMPIONS</h1>
+        <p class="leaderboard-tagline">Compete with traders worldwide • $1M virtual capital • Real rankings, zero risk</p>
       </div>
       <div id="leaderboard-competition-stats-section"></div>
       <div id="leaderboard-rewards-section"></div>
