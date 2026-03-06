@@ -797,6 +797,14 @@ async function init(): Promise<void> {
     console.warn('[YC Hedge Fund] Welcome popup unavailable:', err);
   }
 
+  // Onboarding teaser (every open until user clicks X)
+  try {
+    const { initOnboardingTeaser } = await import('./lib/onboarding-teaser');
+    initOnboardingTeaser();
+  } catch (err) {
+    console.warn('[YC Hedge Fund] Onboarding teaser unavailable:', err);
+  }
+
   // Command palette
   try {
     const { commandPalette } = await import('./lib/command-palette');
