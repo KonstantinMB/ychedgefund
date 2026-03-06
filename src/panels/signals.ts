@@ -25,15 +25,17 @@ import { executionLoop } from '../trading/engine/execution-loop';
 interface StrategyMeta { badge: string; color: string; cssClass: string }
 
 const STRATEGY_META: Record<string, StrategyMeta> = {
-  geopolitical:  { badge: 'GEO',   color: '#f97316', cssClass: 'geo'   },
-  GEOPOLITICAL:  { badge: 'GEO',   color: '#f97316', cssClass: 'geo'   },
-  sentiment:     { badge: 'SENT',  color: '#3b82f6', cssClass: 'sent'  },
-  SENTIMENT:     { badge: 'SENT',  color: '#3b82f6', cssClass: 'sent'  },
-  momentum:      { badge: 'MOM',   color: '#a855f7', cssClass: 'mom'   },
-  MOMENTUM:      { badge: 'MOM',   color: '#a855f7', cssClass: 'mom'   },
-  macro:         { badge: 'MACRO', color: '#22c55e', cssClass: 'macro' },
-  MACRO:         { badge: 'MACRO', color: '#22c55e', cssClass: 'macro' },
-  'cross-asset': { badge: 'CROSS', color: '#14b8a6', cssClass: 'cross' },
+  geopolitical:        { badge: 'GEO',      color: '#f97316', cssClass: 'geo'      },
+  GEOPOLITICAL:        { badge: 'GEO',      color: '#f97316', cssClass: 'geo'      },
+  sentiment:           { badge: 'SENT',     color: '#3b82f6', cssClass: 'sent'     },
+  SENTIMENT:           { badge: 'SENT',     color: '#3b82f6', cssClass: 'sent'     },
+  momentum:            { badge: 'MOM',      color: '#a855f7', cssClass: 'mom'      },
+  MOMENTUM:            { badge: 'MOM',      color: '#a855f7', cssClass: 'mom'      },
+  macro:               { badge: 'MACRO',    color: '#22c55e', cssClass: 'macro'    },
+  MACRO:               { badge: 'MACRO',    color: '#22c55e', cssClass: 'macro'    },
+  'cross-asset':       { badge: 'CROSS',    color: '#14b8a6', cssClass: 'cross'    },
+  'prediction-markets':{ badge: 'PRED-MKT', color: '#06b6d4', cssClass: 'pred-mkt' },
+  'PREDICTION-MARKETS':{ badge: 'PRED-MKT', color: '#06b6d4', cssClass: 'pred-mkt' },
 };
 
 function getMeta(strategy: string): StrategyMeta {
