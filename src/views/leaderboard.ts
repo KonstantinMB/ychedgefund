@@ -311,6 +311,12 @@ function createView(): HTMLElement {
       <span class="leaderboard-banner-text">Join the competition! Sign up and start paper trading to climb the ranks.</span>
       <button type="button" class="leaderboard-banner-btn">Sign Up & Trade</button>
     </div>
+    <div class="leaderboard-mobile-desktop-cta" role="complementary" aria-label="Desktop experience">
+      <img src="/icon-192.png" alt="YC Hedge Fund" class="leaderboard-mobile-desktop-cta-logo" width="48" height="48" />
+      <div class="leaderboard-mobile-desktop-cta-content">
+        <p class="leaderboard-mobile-desktop-cta-text">Want to trade on the map and use all features? Open on desktop for the full experience.</p>
+      </div>
+    </div>
     <div class="leaderboard-content">
       <div class="leaderboard-hero">
         <div class="leaderboard-logo-trophy-big">🏆</div>

@@ -915,6 +915,18 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .leaderboard-mobile-desktop-cta {
+    margin: 0 var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
+    gap: var(--spacing-sm);
+  }
+  .leaderboard-mobile-desktop-cta-logo {
+    width: 40px;
+    height: 40px;
+  }
+  .leaderboard-mobile-desktop-cta-text {
+    font-size: 0.8rem;
+  }
 }
 
 /* Mobile leaderboard mode — compact header */
@@ -930,6 +942,43 @@ body.mobile-leaderboard .pt-toggle,
 body.mobile-leaderboard .header-tour-btn,
 body.mobile-leaderboard .header-hint {
   display: none !important;
+}
+
+/* Mobile leaderboard — desktop CTA banner (only visible on mobile) */
+.leaderboard-mobile-desktop-cta {
+  display: none;
+}
+body.mobile-leaderboard .leaderboard-mobile-desktop-cta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin: 0 var(--spacing-md) var(--spacing-lg);
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.06) 0%, rgba(74, 222, 128, 0.02) 100%);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+.leaderboard-mobile-desktop-cta-logo {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+.leaderboard-mobile-desktop-cta-content {
+  flex: 1;
+  min-width: 0;
+}
+.leaderboard-mobile-desktop-cta-text {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.leaderboard-mobile-desktop-cta-text strong {
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 /* Auth nav (Sign In / Register / user dropdown) */
