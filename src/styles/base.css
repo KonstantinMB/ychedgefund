@@ -858,7 +858,7 @@ body {
 @media (max-width: 768px) {
   .leaderboard-view {
     padding: var(--spacing-md);
-    padding-top: 4.5rem;
+    padding-top: calc(5.5rem + env(safe-area-inset-top, 0px));
     padding-bottom: 2rem;
   }
   .leaderboard-content {
@@ -932,7 +932,7 @@ body {
 /* Mobile leaderboard mode — compact header */
 body.mobile-leaderboard .header-bar {
   padding: 0.3rem 0.5rem;
-  top: 0.5rem;
+  top: max(0.5rem, env(safe-area-inset-top, 0px));
 }
 body.mobile-leaderboard .header-logo img {
   width: 24px;
