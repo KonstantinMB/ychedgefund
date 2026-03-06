@@ -101,47 +101,63 @@ function createSpotlight(rect: DOMRect): HTMLElement {
     border-radius: 6px;
     border: 2px solid var(--text-accent);
     pointer-events: auto;
-    z-index: 10002;
+    z-index: 100000;
     transition: all 0.25s ease;
   `;
   return spotlight;
 }
 
+const TOOLTIP_PADDING = 16;
+const TOOLTIP_EST_HEIGHT = 200;
+const TOOLTIP_EST_WIDTH = 320;
+
 function createTooltip(step: OnboardingStep, rect: DOMRect): HTMLElement {
   const tooltip = document.createElement('div');
   tooltip.className = 'onboarding-tooltip';
 
-  const placement = step.placement ?? 'bottom';
-  const padding = 16;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const padding = TOOLTIP_PADDING;
 
-  let top = 0;
-  let left = rect.left + rect.width / 2;
+  // For very large targets (e.g. globe fills viewport), center tooltip so it's always visible
+  const targetTooLarge = rect.height > vh * 0.6 || rect.width > vw * 0.6;
+  let top: number;
+  let left: number;
+  let transform = '';
 
-  if (placement === 'bottom') {
-    top = rect.bottom + padding;
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-    tooltip.style.transform = 'translateX(-50%)';
-  } else if (placement === 'top') {
-    top = rect.top - padding;
-    tooltip.style.left = `${left}px`;
-    tooltip.style.bottom = 'auto';
-    tooltip.style.top = `${top}px`;
-    tooltip.style.transform = 'translate(-50%, -100%)';
-  } else if (placement === 'right') {
-    left = rect.right + padding;
-    top = rect.top + rect.height / 2;
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-    tooltip.style.transform = 'translateY(-50%)';
+  if (targetTooLarge) {
+    left = vw / 2;
+    top = vh / 2;
+    transform = 'translate(-50%, -50%)';
   } else {
-    left = rect.left - padding;
-    top = rect.top + rect.height / 2;
-    tooltip.style.right = 'auto';
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${top}px`;
-    tooltip.style.transform = 'translate(-100%, -50%)';
+    const placement = step.placement ?? 'bottom';
+    left = rect.left + rect.width / 2;
+
+    if (placement === 'bottom') {
+      top = rect.bottom + padding;
+      transform = 'translateX(-50%)';
+    } else if (placement === 'top') {
+      top = rect.top - padding;
+      transform = 'translate(-50%, -100%)';
+    } else if (placement === 'right') {
+      left = rect.right + padding;
+      top = rect.top + rect.height / 2;
+      transform = 'translateY(-50%)';
+    } else {
+      left = rect.left - padding;
+      top = rect.top + rect.height / 2;
+      transform = 'translate(-100%, -50%)';
+    }
+
+    // Clamp to viewport so Next/Back/Skip are always visible
+    const halfW = TOOLTIP_EST_WIDTH / 2;
+    left = Math.max(padding + halfW, Math.min(vw - padding - halfW, left));
+    top = Math.max(padding + TOOLTIP_EST_HEIGHT / 2, Math.min(vh - padding - TOOLTIP_EST_HEIGHT / 2, top));
   }
+
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
+  tooltip.style.transform = transform;
 
   const totalSteps = STEPS.length;
   const progress = ((currentStepIndex + 1) / totalSteps) * 100;
@@ -165,7 +181,7 @@ function createTooltip(step: OnboardingStep, rect: DOMRect): HTMLElement {
   `;
 
   tooltip.style.position = 'fixed';
-  tooltip.style.zIndex = '10003';
+  tooltip.style.zIndex = '100001';
 
   return tooltip;
 }

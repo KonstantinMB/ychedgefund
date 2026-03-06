@@ -4730,11 +4730,11 @@ pre {
 .onboarding-overlay {
   position: fixed;
   inset: 0;
-  z-index: 10001;
+  z-index: 99999;
   opacity: 0;
   transition: opacity 0.3s ease;
   /* Fallback background so overlay is always visible even if spotlight fails */
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .onboarding-overlay.onboarding-visible {
