@@ -100,6 +100,40 @@ export interface PolymarketMetricsDetail {
   lastFetch: number;
 }
 
+export interface AcledEvent {
+  id: string;
+  date: number;
+  type: string;
+  country: string;
+  lat: number;
+  lon: number;
+  fatalities: number;
+  notes: string;
+}
+
+export interface ConflictZoneFeature {
+  type: 'Feature';
+  geometry: {
+    type: 'Polygon';
+    coordinates: number[][][];
+  };
+  properties: {
+    name: string;
+    since: string;
+    intensity: 'low' | 'medium' | 'high';
+    eventCount: number;
+    totalFatalities: number;
+    countries: string[];
+    recentEvents: number;
+  };
+}
+
+export interface ConflictZonesDetail {
+  type: 'FeatureCollection';
+  features: ConflictZoneFeature[];
+  lastUpdated: number;
+}
+
 // ── Event detail shapes ────────────────────────────────────────────────────────
 
 export interface GdeltDetail {
@@ -133,6 +167,7 @@ class DataService extends EventTarget {
   private crypto: CryptoDetail | null = null;
   private macroRadar: MacroRadarDetail | null = null;
   private polymarketMetrics: PolymarketMetricsDetail | null = null;
+  private conflictZones: ConflictZonesDetail | null = null;
 
   // Accessors for current cached state (panels can call these after events fire)
   getGdelt(): GdeltDetail | null { return this.gdelt; }
@@ -143,6 +178,7 @@ class DataService extends EventTarget {
   getCrypto(): CryptoDetail | null { return this.crypto; }
   getMacroRadar(): MacroRadarDetail | null { return this.macroRadar; }
   getPolymarketMetrics(): PolymarketMetricsDetail | null { return this.polymarketMetrics; }
+  getConflictZones(): ConflictZonesDetail | null { return this.conflictZones; }
 
   async fetchGdelt(): Promise<void> {
     try {
@@ -267,6 +303,40 @@ class DataService extends EventTarget {
     }
   }
 
+  async fetchConflictZones(): Promise<void> {
+    try {
+      const data = await api.fetch<{ events: AcledEvent[] }>(
+        '/api/data/acled',
+        3_600_000 // 1 hour TTL
+      );
+
+      // Import aggregator dynamically to avoid circular dependencies
+      const { aggregateConflictZones, mergeConflictZones } = await import(
+        '../intelligence/conflict-zones'
+      );
+
+      // Aggregate ACLED events into zones
+      const liveZones = aggregateConflictZones(data.events ?? []);
+
+      // Load static zones for fallback
+      const STATIC_ZONES = await import('../data/conflict-zones.json');
+
+      // Merge live + static (prioritize live)
+      this.conflictZones = mergeConflictZones(
+        STATIC_ZONES.default as ConflictZonesDetail,
+        liveZones
+      );
+
+      this.dispatchEvent(
+        new CustomEvent<ConflictZonesDetail>('conflict-zones', {
+          detail: this.conflictZones,
+        })
+      );
+    } catch (err) {
+      console.error('[DataService] Conflict zones fetch failed:', err);
+    }
+  }
+
   /**
    * Start polling all data sources on staggered intervals.
    * Call once after all panels have been initialized.
@@ -283,6 +353,7 @@ class DataService extends EventTarget {
       void this.fetchGdacs();
     }, 3_000);
     setTimeout(() => { void this.fetchPolymarketMetrics(); }, 5_000);
+    setTimeout(() => { void this.fetchConflictZones(); }, 6_000);
 
     // Recurring polls
     setInterval(() => { void this.fetchYahoo(); }, 60_000);
@@ -293,6 +364,7 @@ class DataService extends EventTarget {
     setInterval(() => { void this.fetchCrypto(); }, 60_000);
     setInterval(() => { void this.fetchMacroRadar(); }, 300_000);
     setInterval(() => { void this.fetchPolymarketMetrics(); }, 300_000);
+    setInterval(() => { void this.fetchConflictZones(); }, 3_600_000); // hourly
   }
 }
 
