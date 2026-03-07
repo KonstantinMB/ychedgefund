@@ -28,6 +28,13 @@ export class AISStreamClient {
   connect(): void {
     if (this.stopped) return;
 
+    const apiKey = process.env.AISSTREAM_API_KEY;
+    if (!apiKey || apiKey.trim() === '') {
+      console.error('[AIS] AISSTREAM_API_KEY not set or empty - skipping AIS connection');
+      this.stopped = true;
+      return;
+    }
+
     this.ws = new WebSocket(AISSTREAM_URL);
 
     this.ws.on('open', () => {
@@ -35,7 +42,7 @@ export class AISStreamClient {
       this.reconnectDelay = 5000; // reset on success
 
       this.ws!.send(JSON.stringify({
-        APIKey: process.env.AISSTREAM_API_KEY ?? '',
+        APIKey: apiKey,
         BoundingBoxes: [[[-90, -180], [90, 180]]], // global
         FilterMessageTypes: ['PositionReport'],
       }));
@@ -72,15 +79,30 @@ export class AISStreamClient {
       }
     });
 
-    this.ws.on('close', () => {
+    this.ws.on('close', (code: number) => {
       if (this.stopped) return;
-      console.log(`[AIS] Disconnected, reconnecting in ${this.reconnectDelay}ms`);
+
+      // If authentication failed (503, 401, 403), don't retry
+      if (code === 503 || code === 401 || code === 403 || code === 1008) {
+        console.error(`[AIS] Authentication failed (code ${code}). Check AISSTREAM_API_KEY. Stopping reconnection attempts.`);
+        this.stopped = true;
+        return;
+      }
+
+      console.log(`[AIS] Disconnected (code ${code}), reconnecting in ${this.reconnectDelay}ms`);
       setTimeout(() => this.connect(), this.reconnectDelay);
       this.reconnectDelay = Math.min(this.reconnectDelay * 2, 60_000);
     });
 
     this.ws.on('error', (err: Error) => {
       console.error('[AIS] WebSocket error:', err.message);
+
+      // If error mentions 503 or authentication, stop trying
+      if (err.message.includes('503') || err.message.includes('401') || err.message.includes('403')) {
+        console.error('[AIS] Authentication error detected. Check AISSTREAM_API_KEY. Stopping reconnection attempts.');
+        this.stopped = true;
+        this.ws?.close();
+      }
     });
   }
 

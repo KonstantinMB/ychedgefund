@@ -73,13 +73,28 @@ function normalizeAdsbFi(raw: AdsbFiResponse): Aircraft[] {
 }
 
 async function fetchAdsbFi(): Promise<Aircraft[]> {
-  const res = await fetch('https://api.adsb.fi/v1/flights', {
-    headers: { Accept: 'application/json', 'User-Agent': 'YC-Hedge-Fund/1.0' },
-    signal: AbortSignal.timeout(8_000),
-  });
-  if (!res.ok) throw new Error(`adsb.fi ${res.status}`);
-  const data: AdsbFiResponse = await res.json();
-  return normalizeAdsbFi(data);
+  // Try multiple adsb.fi endpoints (API may have changed)
+  const endpoints = [
+    'https://api.adsb.fi/v1/flights',
+    'https://api.adsb.lol/v2/lat/10/lon/0/dist/10000', // Alternative public ADS-B API
+  ];
+
+  for (const url of endpoints) {
+    try {
+      const res = await fetch(url, {
+        headers: { Accept: 'application/json', 'User-Agent': 'YC-Hedge-Fund/1.0' },
+        signal: AbortSignal.timeout(15_000), // Increased from 8s to 15s
+      });
+      if (!res.ok) continue;
+      const data: AdsbFiResponse = await res.json();
+      const aircraft = normalizeAdsbFi(data);
+      if (aircraft.length > 0) return aircraft;
+    } catch {
+      continue; // Try next endpoint
+    }
+  }
+
+  throw new Error('All adsb endpoints failed');
 }
 
 // ── OpenSky fallback ──────────────────────────────────────────────────────────
@@ -150,12 +165,86 @@ async function fetchOpenSky(): Promise<Aircraft[]> {
 
   const res = await fetch(OPENSKY_URL, {
     headers,
-    signal: AbortSignal.timeout(8_000),
+    signal: AbortSignal.timeout(20_000), // Increased from 8s to 20s for war zone data
   });
   if (res.status === 401 || res.status === 403 || res.status === 429) return [];
   if (!res.ok) throw new Error(`OpenSky ${res.status}`);
   const data: OpenSkyResponse = await res.json();
   return normalizeOpenSky(data.states ?? []);
+}
+
+// ── ADS-B Exchange fallback ──────────────────────────────────────────────────
+// Free crowd-sourced ADS-B data, no auth required
+// Focus on conflict regions: Middle East, Ukraine, Taiwan Strait
+
+interface AdsbExchangeAircraft {
+  hex?: string;
+  flight?: string;
+  lat?: number;
+  lon?: number;
+  alt_baro?: number | string;
+  gs?: number;
+  track?: number;
+  r?: string;
+}
+
+async function fetchAdsbExchange(): Promise<Aircraft[]> {
+  // Multiple regional feeds for war zones
+  const regions = [
+    { lat: 33, lon: 44, radius: 400 },   // Iraq/Syria/Iran
+    { lat: 49, lon: 32, radius: 500 },   // Ukraine
+    { lat: 25, lon: 121, radius: 300 },  // Taiwan Strait
+    { lat: 31, lon: 35, radius: 300 },   // Israel/Palestine
+  ];
+
+  const allAircraft: Aircraft[] = [];
+
+  for (const region of regions) {
+    try {
+      const url = `https://globe.adsbexchange.com/globe_history/${Date.now()}/aircraft.json`;
+      const res = await fetch(url, {
+        headers: { Accept: 'application/json', 'User-Agent': 'YC-Hedge-Fund/1.0' },
+        signal: AbortSignal.timeout(12_000),
+      });
+
+      if (!res.ok) continue;
+
+      const data: { aircraft?: AdsbExchangeAircraft[] } = await res.json();
+      const aircraft = data.aircraft ?? [];
+
+      for (const ac of aircraft) {
+        if (allAircraft.length >= 800) break;
+        if (typeof ac.lat !== 'number' || typeof ac.lon !== 'number') continue;
+
+        // Filter to region
+        const distance = Math.sqrt(
+          Math.pow((ac.lat - region.lat), 2) + Math.pow((ac.lon - region.lon), 2)
+        );
+        if (distance > region.radius / 111) continue; // ~111 km per degree
+
+        allAircraft.push({
+          icao24: String(ac.hex ?? '').trim(),
+          callsign: String(ac.flight ?? ac.r ?? '').trim(),
+          country: '',
+          lat: ac.lat,
+          lon: ac.lon,
+          altitude: typeof ac.alt_baro === 'number' ? ac.alt_baro : 0,
+          velocity: typeof ac.gs === 'number' ? ac.gs : 0,
+          heading: typeof ac.track === 'number' ? ac.track : 0,
+        });
+      }
+
+      if (allAircraft.length > 100) break; // Got enough data
+    } catch {
+      continue; // Try next region
+    }
+  }
+
+  if (allAircraft.length === 0) {
+    throw new Error('No aircraft data from ADS-B Exchange');
+  }
+
+  return allAircraft;
 }
 
 // ── Handler ───────────────────────────────────────────────────────────────────
@@ -168,27 +257,37 @@ export default withCors(async (_req: Request) => {
   let source = 'none';
 
   try {
-    aircraft = await withCache<Aircraft[]>('osint:aircraft:v2', CACHE_TTL, async () => {
-      // Try adsb.fi first — more reliable from datacenter IPs
-      try {
-        const planes = await fetchAdsbFi();
-        if (planes.length > 0) {
-          source = 'adsb.fi';
-          return planes;
+    aircraft = await withCache<Aircraft[]>('osint:aircraft:v3', CACHE_TTL, async () => {
+      // Strategy: Try all sources in parallel, use first successful response
+      const sources = [
+        { name: 'adsb.fi', fetch: fetchAdsbFi },
+        { name: 'opensky', fetch: fetchOpenSky },
+        { name: 'adsbexchange', fetch: fetchAdsbExchange },
+      ];
+
+      // Race all sources with generous timeout
+      const results = await Promise.allSettled(
+        sources.map(async ({ name, fetch: fetchFn }) => {
+          try {
+            const data = await fetchFn();
+            return { name, data };
+          } catch (err) {
+            console.warn(`[Aircraft] ${name} failed:`, err instanceof Error ? err.message : err);
+            throw err;
+          }
+        })
+      );
+
+      // Return first successful result
+      for (const result of results) {
+        if (result.status === 'fulfilled' && result.value.data.length > 0) {
+          source = result.value.name;
+          return result.value.data;
         }
-      } catch (err) {
-        console.warn('[OpenSky] adsb.fi failed, trying OpenSky:', err instanceof Error ? err.message : err);
       }
 
-      // Fallback: OpenSky with strategic bbox
-      try {
-        const planes = await fetchOpenSky();
-        source = 'opensky';
-        return planes;
-      } catch (err) {
-        console.warn('[OpenSky] OpenSky fallback also failed:', err instanceof Error ? err.message : err);
-        return [];
-      }
+      console.warn('[Aircraft] All sources failed, returning empty array');
+      return [];
     });
     // Determine actual source from cached result
     if (aircraft.length > 0 && source === 'none') source = 'cache';
