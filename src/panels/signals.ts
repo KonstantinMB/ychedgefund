@@ -500,11 +500,88 @@ function updateCountBadge(): void {
   if (countBadge) countBadge.textContent = String(active);
 }
 
+// ── Prediction Market Signals Rendering ───────────────────────────────────
+
+function renderPredictionMarketSignals(signals: Signal[]): void {
+  const predListEl = document.querySelector('.sig-pred-market-list');
+  if (!predListEl) return;
+
+  if (signals.length === 0) {
+    predListEl.innerHTML = '<div class="sig-pred-market-empty">No prediction market signals yet</div>';
+    return;
+  }
+
+  // Show only active, non-expired signals
+  const activeSignals = signals.filter(s => s.expiresAt > Date.now()).slice(0, 5); // Max 5
+
+  if (activeSignals.length === 0) {
+    predListEl.innerHTML = '<div class="sig-pred-market-empty">All prediction market signals expired</div>';
+    return;
+  }
+
+  const html = activeSignals.map(sig => {
+    const meta = getMeta(sig.strategy);
+    const conf = Math.round(sig.confidence * 100);
+    const dir = sig.direction;
+    const dirClass = dir === 'LONG' ? 'long' : 'short';
+    const coords = getRegionFor(sig);
+
+    return `
+      <div class="sig-pred-market-row ${dirClass}">
+        <div class="sig-pred-row-top">
+          <span class="sig-badge sig-badge-${meta.cssClass}" style="--badge-color:${meta.color}">${meta.badge}</span>
+          <span class="sig-symbol">${sig.symbol}</span>
+          <span class="sig-direction ${dirClass}">${dir}</span>
+          ${coords ? `<button class="sig-map-btn" data-sig-id="${sig.id}" title="Show on globe">🌍</button>` : ''}
+        </div>
+        <div class="sig-conf-bar">
+          <div class="sig-conf-fill ${dirClass}" style="width: ${conf}%"></div>
+          <span class="sig-conf-text">${conf}% confidence</span>
+        </div>
+        <div class="sig-reasoning">${sig.reasoning}</div>
+        <div class="sig-pred-row-bottom">
+          <button class="sig-detail-btn" data-sig-id="${sig.id}">View Details</button>
+          <span class="sig-external-hint">💡 Trade externally on Polymarket, Kalshi, etc.</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  predListEl.innerHTML = html;
+
+  // Wire up event handlers
+  predListEl.querySelectorAll('.sig-map-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sigId = (btn as HTMLElement).dataset.sigId;
+      const sig = signals.find(s => s.id === sigId);
+      if (sig) handleFlyTo(sig);
+    });
+  });
+
+  predListEl.querySelectorAll('.sig-detail-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const sigId = (btn as HTMLElement).dataset.sigId;
+      const sig = signals.find(s => s.id === sigId);
+      if (sig) handleDetail(sig);
+    });
+  });
+}
+
 function onNewSignals(signals: Signal[]): void {
   allSignals = signals.slice(0, 200); // cap at 200
   isLive = true;
   if (liveDot) liveDot.classList.add('live');
+
+  // Separate prediction market signals from regular signals
+  const predMarketSignals = allSignals.filter(s => s.strategy === 'prediction-markets' || s.strategy === 'PREDICTION-MARKETS');
+  const regularSignals = allSignals.filter(s => s.strategy !== 'prediction-markets' && s.strategy !== 'PREDICTION-MARKETS');
+
+  // Update regular signals list
+  allSignals = regularSignals;
   applyFilter();
+
+  // Render prediction market signals separately
+  renderPredictionMarketSignals(predMarketSignals);
 
   // Auto-execute is handled by executionLoop (subscribed to signal bus).
   // The signals panel checkbox syncs with setAutoExecute in execution-loop.
@@ -514,6 +591,27 @@ function onNewSignals(signals: Signal[]): void {
 
 function buildBody(container: HTMLElement): void {
   container.className += ' sig-panel-body';
+
+  // ── Prediction Market Signals Section (Read-Only) ────────────────────────
+  const predMarketSection = document.createElement('div');
+  predMarketSection.className = 'sig-pred-market-section';
+  predMarketSection.innerHTML = `
+    <div class="sig-pred-market-header">
+      <span class="sig-pred-market-title">📊 Prediction Market Signals</span>
+      <span class="sig-pred-market-badge">INFO ONLY</span>
+    </div>
+    <div class="sig-pred-market-disclaimer">
+      ⓘ These signals are based on Polymarket prediction markets. Use this intelligence for trading on external platforms—paper trading for prediction markets is not yet supported on this platform.
+    </div>
+    <div class="sig-pred-market-list"></div>
+  `;
+  container.appendChild(predMarketSection);
+
+  // ── Divider ──────────────────────────────────────────────────────────────
+  const divider = document.createElement('div');
+  divider.className = 'sig-section-divider';
+  divider.innerHTML = '<span>PAPER TRADING SIGNALS</span>';
+  container.appendChild(divider);
 
   // ── Top controls ─────────────────────────────────────────────────────────
   const controlsRow = document.createElement('div');
@@ -563,6 +661,7 @@ function buildBody(container: HTMLElement): void {
     { key: 'mom',  label: 'MOM'   },
     { key: 'macro',label: 'MACRO' },
     { key: 'cross',label: 'CROSS' },
+    // PRED-MKT signals shown separately above, not in filters
   ];
 
   for (const s of strategies) {
