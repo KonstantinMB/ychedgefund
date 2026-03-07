@@ -109,7 +109,6 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
-// List all keys matching a pattern (use SCAN for production)
 async function keys(pattern: string): Promise<string[]> {
   const allKeys: string[] = [];
   let cursor: number | string = 0;
