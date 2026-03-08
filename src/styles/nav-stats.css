@@ -23,21 +23,20 @@
   box-shadow: var(--border-glow);
 }
 
-.atlas-symbol {
-  font-size: 24px;
-  color: var(--text-accent);
-  font-weight: var(--font-bold);
+.atlas-logo-img {
+  display: block;
+  object-fit: contain;
   transition: all 0.3s ease;
 }
 
 /* Pulse animations synchronized with data health */
-.atlas-symbol.pulse-healthy {
+.atlas-logo.pulse-healthy .atlas-logo-img {
   animation: atlas-pulse-healthy 3s ease-in-out infinite;
 }
 
-.atlas-symbol.pulse-warning {
+.atlas-logo.pulse-warning .atlas-logo-img {
   animation: atlas-pulse-warning 1.5s ease-in-out infinite;
-  color: #FFB300; /* Amber */
+  filter: drop-shadow(0 0 6px #FFB300);
 }
 
 @keyframes atlas-pulse-healthy {

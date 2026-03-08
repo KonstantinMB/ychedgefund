@@ -7,7 +7,7 @@
 
 .data-ticker {
   position: fixed;
-  bottom: 0;
+  bottom: 32px; /* Above status bar to prevent overlap */
   left: 0;
   right: 0;
   height: 32px;

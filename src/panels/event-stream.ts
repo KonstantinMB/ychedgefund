@@ -222,6 +222,7 @@ function addEvent(eventData: Partial<StreamEvent>): void {
           id: event.id,
           severity: event.severity,
           title: event.title,
+          details: event.details,
           source: event.source,
           layer: event.layer,
           signalsGenerated: event.signalsGenerated,
@@ -509,15 +510,40 @@ function generateMockEvents(): void {
     const price = 100 + Math.random() * 500;
     const change = (Math.random() - 0.5) * 0.1;
 
+    const eventTitles: Record<string, string[]> = {
+      EVENT: [
+        '8-K Filing: Major earnings release',
+        'Protest activity: CII elevated',
+        'Regulatory update: Sector impact',
+        'Geopolitical development: Region watch',
+      ],
+      PHYSICAL: [
+        'Earthquake detected: M5.2 — Pacific region',
+        'Fire detected: Industrial zone',
+        'Storm system: Shipping lanes affected',
+        'Infrastructure alert: Critical facility',
+      ],
+      REF: [
+        'Data refresh: Market indices updated',
+        'Reference update: New sanctions list',
+        'Benchmark revision: Sector weights',
+      ],
+    };
+    const titles = eventTitles[layer] || ['Event update'];
+    const title =
+      layer === 'PRICE'
+        ? `${symbol} $${price.toFixed(2)} ${change >= 0 ? '+' : ''}${(change * 100).toFixed(2)}%`
+        : titles[Math.floor(Math.random() * titles.length)];
     const event: Partial<StreamEvent> = {
       layer,
       severity: Math.random() > 0.8 ? 'high' : 'low',
-      title:
-        layer === 'PRICE'
-          ? `${symbol} $${price.toFixed(2)} ${change >= 0 ? '+' : ''}${(change * 100).toFixed(
-              2
-            )}%`
-          : `${layer} event — ${Date.now()}`,
+      title,
+      details:
+        layer === 'PHYSICAL'
+          ? 'Infrastructure and supply chain impact assessed. Check Live Feed for details.'
+          : layer === 'EVENT'
+            ? 'Convergence with existing signals. Review Intel panels.'
+            : '',
       source: layer === 'PRICE' ? 'finnhub' : 'mock',
     };
 

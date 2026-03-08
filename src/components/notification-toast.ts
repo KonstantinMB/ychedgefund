@@ -13,6 +13,7 @@ interface ToastData {
   id: string;
   severity: 'high' | 'critical';
   title: string;
+  details?: string;
   source: string;
   layer: 'PRICE' | 'EVENT' | 'PHYSICAL' | 'REF';
   signalsGenerated?: number;
@@ -98,15 +99,22 @@ function buildToast(data: ToastData): HTMLElement {
   const icon = getSeverityIcon(data.severity);
   const layerColor = getLayerColor(data.layer);
 
+  const sourceLabel = getSourceLabel(data.source);
   toast.innerHTML = `
     <div class="toast-header">
       <span class="toast-icon">${icon}</span>
       <span class="toast-layer" style="color: ${layerColor};">${data.layer}</span>
-      <span class="toast-source">${data.source}</span>
+      <span class="toast-source">${sourceLabel}</span>
       <button class="toast-close" data-toast-id="${data.id}">✕</button>
     </div>
 
-    <div class="toast-title">${data.title}</div>
+    <div class="toast-title">${escapeHtml(data.title)}</div>
+
+    ${
+      data.details
+        ? `<div class="toast-details">${escapeHtml(data.details).replace(/\n/g, '<br>')}</div>`
+        : ''
+    }
 
     ${
       data.signalsGenerated && data.signalsGenerated > 0
@@ -219,6 +227,29 @@ function getSeverityIcon(severity: 'high' | 'critical'): string {
     case 'high':
       return '⚠️';
   }
+}
+
+function getSourceLabel(source: string): string {
+  const labels: Record<string, string> = {
+    mock: 'Demo',
+    gdelt: 'GDELT News',
+    usgs: 'USGS Earthquakes',
+    gdacs: 'GDACS Disasters',
+    nasa_firms: 'NASA FIRMS',
+    acled: 'ACLED Conflict',
+    finnhub: 'Finnhub',
+    coingecko: 'CoinGecko',
+    sec_edgar: 'SEC EDGAR',
+  };
+  return labels[source] || source.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function getLayerColor(layer: ToastData['layer']): string {

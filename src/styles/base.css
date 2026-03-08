@@ -1130,7 +1130,7 @@ body.mobile-leaderboard .leaderboard-mobile-desktop-cta {
   top: 0;
   left: 0;
   width: var(--left-panel-width);
-  height: calc(100vh - 32px); /* leave room for bottom status bar */
+  height: calc(100vh - 64px); /* leave room for status bar + data ticker */
   background: var(--bg-panel);
   border-right: 1px solid var(--border-primary);
   backdrop-filter: blur(12px);
@@ -1234,7 +1234,7 @@ body.mobile-leaderboard .leaderboard-mobile-desktop-cta {
   top: var(--spacing-md);
   right: 0;
   width: var(--right-panel-width);
-  height: calc(100vh - var(--spacing-xl) - 32px); /* minus status bar */
+  height: calc(100vh - var(--spacing-xl) - 64px); /* minus status bar + data ticker */
   background: var(--bg-panel);
   border: 1px solid var(--border-primary);
   border-right: none;
@@ -6476,6 +6476,7 @@ kbd {
   left: 0;
   right: 0;
   height: 32px;
+  z-index: 301; /* Above data ticker so shortcuts remain visible */
   display: flex;
   align-items: center;
   gap: 0;
@@ -6557,7 +6558,7 @@ kbd {
 
 .atlas-toast {
   position: fixed;
-  bottom: 44px;
+  bottom: 76px; /* Above status bar + data ticker */
   left: 50%;
   transform: translateX(-50%) translateY(8px);
   background: var(--bg-panel);

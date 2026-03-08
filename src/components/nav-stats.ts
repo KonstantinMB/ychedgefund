@@ -62,31 +62,28 @@ export function initNavStats(): void {
 function enhanceLogo(): void {
   if (!headerLogo) return;
 
-  // Replace img with ATLAS symbol (◈)
+  // Replace with ATLAS logo (preserve img for logo.svg)
   headerLogo.innerHTML = `
     <div class="atlas-logo">
-      <span class="atlas-symbol">◈</span>
+      <img src="/logo.svg" alt="ATLAS" class="atlas-logo-img" width="32" height="32" />
     </div>
   `;
 
-  // Add pulse class that will be controlled by data ticker health
-  const atlasSymbol = headerLogo.querySelector('.atlas-symbol') as HTMLElement;
-
-  // Listen for data ticker health changes
-  window.addEventListener('data:health-change', (e) => {
-    const { healthy } = (e as CustomEvent).detail;
-
-    if (healthy) {
-      atlasSymbol.classList.add('pulse-healthy');
-      atlasSymbol.classList.remove('pulse-warning');
-    } else {
-      atlasSymbol.classList.remove('pulse-healthy');
-      atlasSymbol.classList.add('pulse-warning');
-    }
-  });
-
-  // Default: healthy pulse
-  atlasSymbol.classList.add('pulse-healthy');
+  // Listen for data ticker health changes (apply pulse to logo container)
+  const logoContainer = headerLogo.querySelector('.atlas-logo') as HTMLElement;
+  if (logoContainer) {
+    window.addEventListener('data:health-change', (e) => {
+      const { healthy } = (e as CustomEvent).detail;
+      if (healthy) {
+        logoContainer.classList.add('pulse-healthy');
+        logoContainer.classList.remove('pulse-warning');
+      } else {
+        logoContainer.classList.remove('pulse-healthy');
+        logoContainer.classList.add('pulse-warning');
+      }
+    });
+    logoContainer.classList.add('pulse-healthy');
+  }
 }
 
 // ── Subscribe to Events ───────────────────────────────────────────────────
