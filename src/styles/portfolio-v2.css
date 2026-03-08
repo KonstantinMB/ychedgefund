@@ -1,0 +1,798 @@
+/**
+ * Portfolio Panel V2 — Bloomberg Terminal Redesign
+ *
+ * 3-tab mini Bloomberg terminal with:
+ * - Playfair Display 28px NAV with smooth counting
+ * - SVG mini equity curve with gradient fill
+ * - Position cards with flash animations
+ * - Circuit breaker RED pulsing border
+ * - Sector exposure bars with 30% cap visualization
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   PANEL CONTAINER
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.port-v2-panel-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--surface-base);
+  font-family: var(--font-sans);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Circuit breaker pulsing border */
+.port-v2-panel-body.circuit-breaker-active {
+  border: 2px solid var(--signal-critical);
+  animation: pulse-border 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: var(--signal-critical);
+    box-shadow: 0 0 0 0 rgba(255, 23, 68, 0.7);
+  }
+  50% {
+    border-color: var(--signal-critical);
+    box-shadow: 0 0 0 8px rgba(255, 23, 68, 0);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.port-v2-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
+}
+
+.port-v2-title {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.1em;
+  color: var(--text-accent);
+  text-transform: uppercase;
+}
+
+.port-v2-user-badge {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  background: rgba(212, 168, 67, 0.1);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TABS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.port-v2-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 0 var(--spacing-md);
+  background: var(--surface-base);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.port-v2-tab {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  letter-spacing: 0.05em;
+}
+
+.port-v2-tab:hover {
+  color: var(--text-primary);
+  background: var(--surface-elevated);
+}
+
+.port-v2-tab.active {
+  color: var(--text-accent);
+  border-bottom-color: var(--text-accent);
+  background: var(--surface-raised);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TAB CONTENT
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.port-v2-tab-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TAB 1: OVERVIEW
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.port-v2-overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* ── NAV Section ─────────────────────────────────────────────────────────── */
+
+.port-v2-nav-section {
+  text-align: center;
+  padding: var(--spacing-lg) 0;
+}
+
+.port-v2-nav-value {
+  font-family: var(--font-display); /* Playfair Display */
+  font-size: 28px;
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  transition: color 0.3s ease;
+}
+
+.port-v2-nav-value.profit {
+  color: var(--signal-positive);
+}
+
+.port-v2-nav-value.loss {
+  color: var(--signal-negative);
+}
+
+.port-v2-nav-label {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.port-v2-nav-change {
+  display: inline-block;
+  margin-left: 8px;
+  font-weight: var(--font-semibold);
+}
+
+.port-v2-nav-change.profit {
+  color: var(--signal-positive);
+}
+
+.port-v2-nav-change.loss {
+  color: var(--signal-negative);
+}
+
+/* ── Metrics Grid ─────────────────────────────────────────────────────────── */
+
+.port-v2-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-sm);
+}
+
+.port-v2-metric-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  text-align: center;
+}
+
+.metric-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.metric-value.profit {
+  color: var(--signal-positive);
+}
+
+.metric-value.loss {
+  color: var(--signal-negative);
+}
+
+.metric-label {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.metric-sublabel {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* Heat bar mini */
+.heat-bar-mini {
+  display: flex;
+  gap: 2px;
+  margin-top: 4px;
+  justify-content: center;
+}
+
+.heat-cell {
+  width: 12px;
+  height: 6px;
+  background: var(--surface-elevated);
+  border-radius: 1px;
+}
+
+.heat-cell.filled {
+  background: var(--signal-warning);
+}
+
+/* ── Risk Status ─────────────────────────────────────────────────────────── */
+
+.port-v2-risk-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+}
+
+.port-v2-risk-status.critical {
+  border-color: var(--signal-critical);
+  background: var(--signal-critical-bg);
+}
+
+.risk-status-label {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.risk-status-badge {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.risk-status-badge.green {
+  color: var(--signal-positive);
+  background: var(--signal-positive-bg);
+}
+
+.risk-status-badge.red {
+  color: var(--signal-critical);
+  background: var(--signal-critical-bg);
+  animation: flash-critical 1s ease-in-out infinite;
+}
+
+@keyframes flash-critical {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* ── Drawdown Bar ─────────────────────────────────────────────────────────── */
+
+.port-v2-drawdown-bar {
+  padding: var(--spacing-sm) 0;
+}
+
+.dd-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.dd-bar-track {
+  height: 6px;
+  background: var(--surface-elevated);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.dd-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--signal-positive), var(--signal-warning), var(--signal-negative));
+  transition: width 0.5s ease;
+}
+
+/* ── Equity Curve ─────────────────────────────────────────────────────────── */
+
+.port-v2-equity-curve {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.equity-curve-title {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-sm);
+}
+
+.equity-curve-svg {
+  width: 100%;
+  height: 80px;
+  margin-bottom: var(--spacing-xs);
+}
+
+.equity-curve-legend {
+  display: flex;
+  gap: var(--spacing-md);
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.equity-curve-placeholder {
+  text-align: center;
+  padding: var(--spacing-lg);
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
+/* ── Summary ─────────────────────────────────────────────────────────────── */
+
+.port-v2-summary {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-align: center;
+  padding: var(--spacing-sm) 0;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TAB 2: POSITIONS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.port-v2-positions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.port-v2-positions-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.positions-section-header {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-xs);
+}
+
+.positions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+/* ── Position Card ─────────────────────────────────────────────────────────── */
+
+.port-v2-position-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-left: 3px solid var(--text-accent);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  transition: all var(--transition-base);
+}
+
+.port-v2-position-card:hover {
+  background: var(--surface-elevated);
+  border-color: var(--border-emphasis);
+  box-shadow: var(--shadow-md);
+}
+
+.port-v2-position-card.profit {
+  border-left-color: var(--signal-positive);
+}
+
+.port-v2-position-card.loss {
+  border-left-color: var(--signal-negative);
+}
+
+.pos-card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.pos-symbol {
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+.pos-qty {
+  color: var(--text-secondary);
+}
+
+.pos-prices {
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.pos-pnl {
+  font-weight: var(--font-bold);
+}
+
+.pos-pnl.profit {
+  color: var(--signal-positive);
+}
+
+.pos-pnl.loss {
+  color: var(--signal-negative);
+}
+
+.pos-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.pos-sep {
+  color: var(--text-tertiary);
+}
+
+/* ── Size Bar ─────────────────────────────────────────────────────────────── */
+
+.pos-card-size-bar {
+  margin-bottom: var(--spacing-sm);
+}
+
+.size-bar-track {
+  height: 4px;
+  background: var(--surface-elevated);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.size-bar-fill {
+  height: 100%;
+  background: var(--text-accent);
+  transition: width 0.5s ease;
+}
+
+.size-bar-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* ── Actions ─────────────────────────────────────────────────────────────── */
+
+.pos-card-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.pos-action-btn {
+  flex: 1;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-accent);
+  background: transparent;
+  border: 1px solid var(--text-accent);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  letter-spacing: 0.05em;
+}
+
+.pos-action-btn:hover {
+  background: var(--text-accent);
+  color: var(--surface-base);
+}
+
+.pos-action-btn.secondary {
+  color: var(--text-secondary);
+  border-color: var(--border-default);
+}
+
+.pos-action-btn.secondary:hover {
+  background: var(--surface-elevated);
+  border-color: var(--border-emphasis);
+  color: var(--text-primary);
+}
+
+/* ── Flatten All ─────────────────────────────────────────────────────────── */
+
+.port-v2-flatten-all-section {
+  margin-top: var(--spacing-md);
+}
+
+.port-v2-flatten-all-btn {
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--signal-negative);
+  background: transparent;
+  border: 2px solid var(--signal-negative);
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  letter-spacing: 0.05em;
+}
+
+.port-v2-flatten-all-btn:hover {
+  background: var(--signal-negative);
+  color: var(--surface-base);
+  box-shadow: 0 0 16px rgba(255, 61, 61, 0.5);
+}
+
+/* ── Empty State ─────────────────────────────────────────────────────────── */
+
+.port-v2-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2xl);
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.empty-title {
+  font-size: var(--text-base);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.empty-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TAB 3: ANALYTICS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.port-v2-analytics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.analytics-section {
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+}
+
+.analytics-section-header {
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-md);
+}
+
+/* ── Sector Exposure ─────────────────────────────────────────────────────── */
+
+.sector-exposure-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.sector-bar-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.sector-label {
+  min-width: 80px;
+  color: var(--text-secondary);
+}
+
+.sector-bar-track {
+  position: relative;
+  flex: 1;
+  height: 20px;
+  background: var(--surface-elevated);
+  border-radius: var(--radius-sm);
+  overflow: visible;
+}
+
+.sector-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width 0.5s ease;
+}
+
+.sector-bar-overflow {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
+  opacity: 0.4;
+}
+
+.sector-pct {
+  min-width: 40px;
+  text-align: right;
+  color: var(--text-primary);
+  font-weight: var(--font-semibold);
+}
+
+.sector-cap-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* ── Strategy Attribution ─────────────────────────────────────────────────── */
+
+.strategy-table {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  border-collapse: collapse;
+}
+
+.strategy-table thead {
+  border-bottom: 1px solid var(--border-default);
+}
+
+.strategy-table th {
+  text-align: left;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.05em;
+}
+
+.strategy-table td {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  color: var(--text-primary);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.strategy-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.strategy-table .profit {
+  color: var(--signal-positive);
+}
+
+.strategy-table .loss {
+  color: var(--signal-negative);
+}
+
+/* ── Risk Metrics ─────────────────────────────────────────────────────────── */
+
+.risk-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xs);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.risk-metric {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.risk-metric:last-child {
+  border-bottom: none;
+}
+
+.risk-metric-label {
+  color: var(--text-secondary);
+}
+
+.risk-metric-value {
+  color: var(--text-primary);
+  font-weight: var(--font-semibold);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ANIMATIONS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes flash-green {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(0, 230, 118, 0.2);
+  }
+}
+
+@keyframes flash-red {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(255, 61, 61, 0.2);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .port-v2-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .port-v2-nav-value {
+    font-size: 24px;
+  }
+
+  .pos-card-header {
+    flex-wrap: wrap;
+  }
+
+  .pos-prices {
+    margin-left: 0;
+    width: 100%;
+  }
+}

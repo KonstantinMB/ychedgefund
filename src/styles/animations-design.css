@@ -1,0 +1,578 @@
+/**
+ * ATLAS DESIGN SYSTEM — Animations
+ *
+ * Tactical motion system:
+ * - Live indicators (pulsing)
+ * - Panel transitions (sliding, fading)
+ * - Data updates (flashing, ticking)
+ * - Scanning effects (radar, sweeps)
+ * - Glows and pulses
+ *
+ * ALL animations respect prefers-reduced-motion.
+ * Motion reinforces intelligence, not decoration.
+ */
+
+/* ═══════════════════════════════════════════════════════════════
+   LIVE INDICATORS — Pulsing for real-time data
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes pulse-live {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: var(--border-glow);
+  }
+  50% {
+    box-shadow: var(--border-glow-strong);
+  }
+}
+
+@keyframes blink-critical {
+  0%, 49% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes flash-critical {
+  0%, 50%, 100% {
+    opacity: 1;
+  }
+  25%, 75% {
+    opacity: 0.5;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PANEL TRANSITIONS — Entering/exiting
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-down {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-out {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA FLASHES — Trade execution, P&L updates
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes flash-green {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(0, 230, 118, 0.15);
+    box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
+  }
+}
+
+@keyframes flash-red {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(255, 61, 61, 0.15);
+    box-shadow: 0 0 20px rgba(255, 61, 61, 0.3);
+  }
+}
+
+@keyframes flash-gold {
+  0%, 100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(212, 168, 67, 0.15);
+    box-shadow: 0 0 20px rgba(212, 168, 67, 0.3);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   NUMBER TICKING — Counter animations for big metrics
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes number-tick-up {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(-5px);
+    opacity: 0.5;
+    color: var(--signal-positive);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes number-tick-down {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(5px);
+    opacity: 0.5;
+    color: var(--signal-negative);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TYPEWRITER — AI insights appearing character by character
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes cursor-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.typewriter-text {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--text-accent);
+  animation: typewriter 3s steps(40) 1s forwards,
+             cursor-blink 0.75s step-end infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCANNING EFFECTS — Tactical UI elements
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes scan-line {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10%, 90% {
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+
+.scan-line {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--text-accent),
+    transparent
+  );
+  pointer-events: none;
+  z-index: var(--z-max);
+  animation: scan-line 8s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RADAR SWEEP — For strategic risk gauge
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-line {
+  transform-origin: center;
+  animation: radar-sweep 4s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DATA STREAM — Events sliding in from top
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes stream-in {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes stream-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+    max-height: 200px;
+  }
+  to {
+    transform: translateY(-20px);
+    opacity: 0;
+    max-height: 0;
+  }
+}
+
+.stream-item {
+  animation: stream-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stream-item-exit {
+  animation: stream-out 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SHIMMER — Loading skeleton states
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-raised) 0%,
+    var(--surface-elevated) 50%,
+    var(--surface-raised) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+  border-radius: var(--radius-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PROGRESS BAR — Loading states
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+.progress-bar-indeterminate {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-elevated);
+  height: 2px;
+  border-radius: var(--radius-full);
+}
+
+.progress-bar-indeterminate::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 25%;
+  height: 100%;
+  background: var(--text-accent);
+  animation: progress-indeterminate 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RIPPLE EFFECT — Button press feedback
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes ripple {
+  from {
+    transform: scale(0);
+    opacity: 0.6;
+  }
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(212, 168, 67, 0.3);
+  width: 20px;
+  height: 20px;
+  animation: ripple 0.6s ease-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SHAKE — Error/invalid states
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+.shake {
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BOUNCE — Attention grabbers
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.bounce {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SPIN — Loading spinners
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   HEARTBEAT — Critical alerts
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes heartbeat {
+  0%, 100% {
+    transform: scale(1);
+  }
+  10%, 30% {
+    transform: scale(1.1);
+  }
+  20%, 40% {
+    transform: scale(1);
+  }
+}
+
+.heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   GLITCH — Data corruption effect (rare use)
+   ═══════════════════════════════════════════════════════════════ */
+
+@keyframes glitch {
+  0%, 100% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+    filter: hue-rotate(90deg);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+    filter: hue-rotate(180deg);
+  }
+  60% {
+    transform: translate(2px, 2px);
+    filter: hue-rotate(270deg);
+  }
+  80% {
+    transform: translate(2px, -2px);
+    filter: hue-rotate(360deg);
+  }
+}
+
+.glitch {
+  animation: glitch 0.3s ease-in-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITY ANIMATION CLASSES — Apply via JavaScript
+   ═══════════════════════════════════════════════════════════════ */
+
+.animate-fade-in {
+  animation: fade-in var(--transition-base) ease-out;
+}
+
+.animate-slide-up {
+  animation: slide-up var(--transition-base) ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in var(--transition-base) ease-out;
+}
+
+.animate-flash-green {
+  animation: flash-green 0.5s ease-out;
+}
+
+.animate-flash-red {
+  animation: flash-red 0.5s ease-out;
+}
+
+.animate-number-tick-up {
+  animation: number-tick-up 0.3s ease-out;
+}
+
+.animate-number-tick-down {
+  animation: number-tick-down 0.3s ease-out;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ACCESSIBILITY — Respect user preferences
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .scan-line,
+  .radar-line,
+  .skeleton,
+  .progress-bar-indeterminate::after {
+    animation: none !important;
+  }
+
+  .typewriter-text {
+    border-right: none;
+    white-space: normal;
+    animation: none;
+  }
+}

@@ -109,6 +109,7 @@ async function initPanels(): Promise<void> {
     { name: 'markets',             loader: () => import('./panels/markets'),              fn: 'initMarketsPanel' },
     { name: 'prediction-markets',  loader: () => import('./panels/prediction-markets'),   fn: 'initPredictionMarketsPanel' },
     { name: 'country-instability', loader: () => import('./panels/country-instability'), fn: 'initInstabilityPanel' },
+    { name: 'event-stream',        loader: () => import('./panels/event-stream'),         fn: 'initEventStreamPanel' },
   ];
 
   for (const panel of panels) {
@@ -795,6 +796,14 @@ async function initKeyboardShortcuts(): Promise<void> {
 async function init(): Promise<void> {
   console.log('[YC Hedge Fund] Initialising Global Intelligence Platform…');
 
+  // Cinematic loading sequence (first visit only)
+  const { playLoadingSequence, shouldShowLoadingSequence } = await import('./components/loading-sequence');
+  const showLoading = shouldShowLoadingSequence();
+  if (showLoading) {
+    // Start loading sequence immediately
+    void playLoadingSequence();
+  }
+
   initTheme();
 
   // Mobile block — platform is desktop-only (except /leaderboard)
@@ -884,6 +893,60 @@ async function init(): Promise<void> {
     if (cmdHint) cmdHint.addEventListener('click', () => commandPalette.open());
   } catch (err) {
     console.warn('[YC Hedge Fund] Command palette unavailable:', err);
+  }
+
+  // Data ticker (bottom bar showing all data source health)
+  try {
+    const { initDataTicker } = await import('./components/data-ticker');
+    initDataTicker();
+    console.log('[YC Hedge Fund] Data ticker initialised');
+  } catch (err) {
+    console.warn('[YC Hedge Fund] Data ticker unavailable:', err);
+  }
+
+  // Notification toasts (high-severity event alerts)
+  try {
+    const { initNotificationToasts } = await import('./components/notification-toast');
+    initNotificationToasts();
+    console.log('[YC Hedge Fund] Notification toasts initialised');
+  } catch (err) {
+    console.warn('[YC Hedge Fund] Notification toasts unavailable:', err);
+  }
+
+  // Navigation stats (live stats in nav tabs + ATLAS logo pulse)
+  try {
+    const { initNavStats } = await import('./components/nav-stats');
+    initNavStats();
+    console.log('[YC Hedge Fund] Navigation stats initialised');
+  } catch (err) {
+    console.warn('[YC Hedge Fund] Navigation stats unavailable:', err);
+  }
+
+  // Keyboard shortcuts overlay (? key)
+  try {
+    const { initKeyboardShortcutsOverlay } = await import('./components/keyboard-shortcuts-overlay');
+    initKeyboardShortcutsOverlay();
+    console.log('[YC Hedge Fund] Keyboard shortcuts overlay initialised');
+  } catch (err) {
+    console.warn('[YC Hedge Fund] Keyboard shortcuts overlay unavailable:', err);
+  }
+
+  // Trade flow animation (signal → portfolio)
+  try {
+    const { initTradeFlowAnimation } = await import('./components/trade-flow-animation');
+    initTradeFlowAnimation();
+    console.log('[YC Hedge Fund] Trade flow animation initialised');
+  } catch (err) {
+    console.warn('[YC Hedge Fund] Trade flow animation unavailable:', err);
+  }
+
+  // Circuit breaker transitions
+  try {
+    const { initCircuitBreakerTransitions } = await import('./components/circuit-breaker-transitions');
+    initCircuitBreakerTransitions();
+    console.log('[YC Hedge Fund] Circuit breaker transitions initialised');
+  } catch (err) {
+    console.warn('[YC Hedge Fund] Circuit breaker transitions unavailable:', err);
   }
 
   // Onboarding tour button — use capture so we run before other handlers

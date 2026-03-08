@@ -1,0 +1,143 @@
+/**
+ * Navigation Stats Styles
+ * Live stats in nav tabs + ATLAS logo pulse
+ */
+
+/* ── ATLAS Logo ─────────────────────────────────────────────────────────── */
+
+.atlas-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-medium);
+  transition: all 0.3s ease;
+}
+
+.atlas-logo:hover {
+  background: var(--surface-raised);
+  border-color: var(--text-accent);
+  box-shadow: var(--border-glow);
+}
+
+.atlas-symbol {
+  font-size: 24px;
+  color: var(--text-accent);
+  font-weight: var(--font-bold);
+  transition: all 0.3s ease;
+}
+
+/* Pulse animations synchronized with data health */
+.atlas-symbol.pulse-healthy {
+  animation: atlas-pulse-healthy 3s ease-in-out infinite;
+}
+
+.atlas-symbol.pulse-warning {
+  animation: atlas-pulse-warning 1.5s ease-in-out infinite;
+  color: #FFB300; /* Amber */
+}
+
+@keyframes atlas-pulse-healthy {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px var(--text-accent));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 12px var(--text-accent));
+  }
+}
+
+@keyframes atlas-pulse-warning {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 6px #FFB300);
+  }
+  50% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 16px #FFB300);
+  }
+}
+
+/* ── Nav Tab with Stats ─────────────────────────────────────────────────── */
+
+.header-nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 14px;
+}
+
+.nav-tab-label {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: var(--font-medium);
+}
+
+.nav-tab-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.nav-stat-dot {
+  font-size: 6px;
+  color: var(--signal-positive);
+}
+
+.nav-stat-value {
+  font-weight: var(--font-medium);
+}
+
+.nav-stat-sep {
+  opacity: 0.4;
+}
+
+/* Active tab styling */
+.header-nav-tab.active .nav-tab-stats {
+  color: var(--text-accent);
+}
+
+.header-nav-tab.active .nav-stat-dot {
+  color: var(--text-accent);
+}
+
+/* Hover effects */
+.header-nav-tab:hover .nav-tab-stats {
+  color: var(--text-secondary);
+}
+
+/* ── Mobile Responsive ──────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .nav-tab-stats {
+    display: none; /* Hide stats on smaller screens to save space */
+  }
+}
+
+@media (max-width: 768px) {
+  .atlas-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .atlas-symbol {
+    font-size: 20px;
+  }
+
+  .header-nav-tab {
+    padding: 6px 10px;
+  }
+
+  .nav-tab-label {
+    font-size: 12px;
+  }
+}

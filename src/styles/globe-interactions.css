@@ -1,0 +1,115 @@
+/**
+ * Globe Country Interactions Styles
+ * Tooltips, context menus, hover effects
+ */
+
+/* ── Country Tooltip ────────────────────────────────────────────────────── */
+
+.globe-country-tooltip {
+  min-width: 200px;
+  padding: 12px 14px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(12px);
+  font-family: var(--font-ui);
+}
+
+.country-tooltip-header {
+  font-size: 14px;
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.country-tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 12px;
+}
+
+.tooltip-label {
+  color: var(--text-tertiary);
+}
+
+.tooltip-value {
+  color: var(--text-primary);
+  font-weight: var(--font-medium);
+  font-family: var(--font-mono);
+}
+
+.tooltip-value.exposure-active {
+  color: var(--text-accent);
+}
+
+/* ── Context Menu ───────────────────────────────────────────────────────── */
+
+.globe-context-menu {
+  min-width: 240px;
+  padding: 8px 0;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: 8px;
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(12px);
+  animation: context-menu-appear 0.15s ease-out;
+}
+
+@keyframes context-menu-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.context-menu-header {
+  padding: 8px 14px;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 6px;
+}
+
+.context-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.context-menu-item:hover {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+
+.context-menu-icon {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.context-menu-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 6px 8px;
+}

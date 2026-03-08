@@ -1,0 +1,268 @@
+/**
+ * ATLAS DESIGN SYSTEM — Design Tokens
+ *
+ * Aesthetic: "Tactical Luxury"
+ * The lovechild of Bloomberg Terminal, NORAD missile command, and Arrival (the film)
+ * Dark but warm — classified intelligence meets editorial luxury
+ *
+ * Color Philosophy:
+ * - NOT generic dark mode. Deep forest-black, not cold gray.
+ * - Gold accent (#D4A843) = "classified", "valuable", "intelligence grade"
+ * - Signal green (#00E676) = live, positive, bullish
+ * - Threat red (#FF3D3D) = alerts, bearish, critical
+ *
+ * Typography:
+ * - DM Mono: data values, code, monospace (tactical)
+ * - Instrument Sans: UI labels, body (modern intelligence)
+ * - Playfair Display: hero numbers, big metrics (editorial luxury)
+ *
+ * This looks like it costs $50,000/year but runs for free.
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════
+     SURFACES — Layered depth system
+     ═══════════════════════════════════════════════════════════════ */
+
+  --surface-base: #0a0f0a;           /* The void — deepest background, forest-black */
+  --surface-raised: #0d120d;         /* Panels, cards — barely lifted */
+  --surface-overlay: #111811;        /* Modals, dropdowns — floating above */
+  --surface-elevated: #151d15;       /* Hover states, active items — interactive */
+  --surface-glass: rgba(10, 15, 10, 0.85); /* Glassmorphism panels with blur */
+  --surface-glass-hover: rgba(13, 18, 13, 0.92); /* Glass on hover */
+
+  /* ═══════════════════════════════════════════════════════════════
+     BORDERS — Subtle structure with gold warmth
+     ═══════════════════════════════════════════════════════════════ */
+
+  --border-subtle: rgba(212, 168, 67, 0.08);   /* Barely visible, structural */
+  --border-default: rgba(212, 168, 67, 0.15);  /* Standard borders */
+  --border-emphasis: rgba(212, 168, 67, 0.3);  /* Active/focus borders */
+  --border-active: rgba(212, 168, 67, 0.5);    /* Selected/clicked */
+  --border-glow: 0 0 15px rgba(212, 168, 67, 0.1); /* Ambient glow effect */
+  --border-glow-strong: 0 0 20px rgba(212, 168, 67, 0.25); /* Strong glow for emphasis */
+
+  /* ═══════════════════════════════════════════════════════════════
+     TEXT — Warm off-white, never pure white
+     ═══════════════════════════════════════════════════════════════ */
+
+  --text-primary: #e8e4dd;           /* Warm off-white — main content */
+  --text-secondary: #8a9a7c;         /* Muted sage green — labels, metadata */
+  --text-tertiary: #4a5a3c;          /* Very muted — timestamps, hints */
+  --text-accent: #D4A843;            /* Gold — highlights, labels, classified info */
+  --text-link: #D4A843;              /* Links use gold */
+  --text-link-hover: #E5C35A;        /* Lighter gold on hover */
+  --text-dim: #2a3a2c;               /* Almost invisible, for disabled states */
+
+  /* ═══════════════════════════════════════════════════════════════
+     SIGNALS — State indicators (green/red/amber)
+     ═══════════════════════════════════════════════════════════════ */
+
+  --signal-positive: #00E676;        /* Live, profit, bullish, UP */
+  --signal-negative: #FF3D3D;        /* Alert, loss, bearish, DOWN */
+  --signal-warning: #FFB300;         /* Caution, stale, degraded */
+  --signal-info: #4FC3F7;            /* Informational, neutral */
+  --signal-critical: #FF1744;        /* Emergency, circuit breaker, HALT */
+
+  /* Signal backgrounds (muted versions for fills) */
+  --signal-positive-bg: rgba(0, 230, 118, 0.08);
+  --signal-negative-bg: rgba(255, 61, 61, 0.08);
+  --signal-warning-bg: rgba(255, 179, 0, 0.08);
+  --signal-critical-bg: rgba(255, 23, 68, 0.12);
+
+  /* ═══════════════════════════════════════════════════════════════
+     STRATEGY COLORS — Each trading strategy gets unique identity
+     ═══════════════════════════════════════════════════════════════ */
+
+  --strategy-momentum: #B388FF;      /* Purple — technical momentum */
+  --strategy-sentiment: #4FC3F7;     /* Cyan — news sentiment */
+  --strategy-geopolitical: #FF8A65;  /* Coral — CII-based geopolitical */
+  --strategy-macro: #00E676;         /* Green — regime classification */
+  --strategy-crossasset: #FFD54F;    /* Amber — divergence detection */
+  --strategy-predictionmarkets: #06b6d4; /* Cyan — Polymarket momentum */
+
+  /* Future strategies */
+  --strategy-supplychain: #F06292;   /* Pink */
+  --strategy-earnings: #4DB6AC;      /* Teal */
+  --strategy-disaster: #E57373;      /* Soft red */
+  --strategy-geocommodity: #FF8A65;  /* Deep orange */
+  --strategy-countryrotation: #9FA8DA; /* Indigo-light */
+
+  /* ═══════════════════════════════════════════════════════════════
+     DATA LAYER COLORS — Globe layer categorization
+     ═══════════════════════════════════════════════════════════════ */
+
+  --layer-intelligence: #FF8A65;     /* Orange — conflict, instability */
+  --layer-environmental: #4DB6AC;    /* Teal — earthquakes, fires */
+  --layer-infrastructure: #9FA8DA;   /* Indigo — cables, pipelines */
+  --layer-economic: #FFD54F;         /* Amber — financial centers */
+  --layer-military: #E57373;         /* Red — bases, nuclear */
+  --layer-realtime: #4FC3F7;         /* Cyan — aircraft, vessels */
+
+  /* ═══════════════════════════════════════════════════════════════
+     TYPOGRAPHY — Three-tier type system
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Fonts loaded from Google Fonts CDN in index.html */
+  --font-mono: 'DM Mono', 'Fira Code', 'Courier New', monospace;
+  --font-sans: 'Instrument Sans', 'DM Sans', -apple-system, system-ui, sans-serif;
+  --font-display: 'Playfair Display', 'Georgia', serif;
+
+  /* Font sizes — modular scale based on 14px base */
+  --text-xs: 0.65rem;    /* 10.4px — tiny labels */
+  --text-sm: 0.75rem;    /* 12px — metadata, timestamps */
+  --text-base: 0.875rem; /* 14px — body text */
+  --text-md: 1rem;       /* 16px — emphasized body */
+  --text-lg: 1.125rem;   /* 18px — panel headers */
+  --text-xl: 1.5rem;     /* 24px — section titles */
+  --text-2xl: 2rem;      /* 32px — hero numbers */
+  --text-3xl: 3rem;      /* 48px — NAV, big metrics */
+
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Line heights */
+  --leading-tight: 1.2;
+  --leading-snug: 1.4;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.8;
+
+  /* Letter spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
+
+  /* ═══════════════════════════════════════════════════════════════
+     SPACING — 4px base unit
+     ═══════════════════════════════════════════════════════════════ */
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+  --space-3xl: 48px;
+  --space-4xl: 64px;
+
+  /* ═══════════════════════════════════════════════════════════════
+     RADIUS — Subtle, not rounded
+     ═══════════════════════════════════════════════════════════════ */
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 9999px;
+
+  /* ═══════════════════════════════════════════════════════════════
+     SHADOWS — Depth without heaviness
+     ═══════════════════════════════════════════════════════════════ */
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.6);
+
+  /* Inner shadows for depth */
+  --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-inset-lg: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+
+  /* ═══════════════════════════════════════════════════════════════
+     EFFECTS — Cinematic touches
+     ═══════════════════════════════════════════════════════════════ */
+
+  /* Subtle CRT scanline effect — overlay on entire viewport */
+  --scanline: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(212, 168, 67, 0.015) 2px,
+    rgba(212, 168, 67, 0.015) 4px
+  );
+
+  /* Film grain noise texture — inline SVG for performance */
+  --noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+
+  /* Vignette — darkens edges for cinematic feel */
+  --vignette: radial-gradient(
+    ellipse at center,
+    transparent 0%,
+    transparent 60%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+
+  /* Blur for glassmorphism */
+  --blur-sm: blur(8px);
+  --blur-md: blur(12px);
+  --blur-lg: blur(16px);
+
+  /* ═══════════════════════════════════════════════════════════════
+     TRANSITIONS — Consistent easing
+     ═══════════════════════════════════════════════════════════════ */
+
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ═══════════════════════════════════════════════════════════════
+     Z-INDEX LAYERS — Stacking order
+     ═══════════════════════════════════════════════════════════════ */
+
+  --z-base: 0;
+  --z-panel: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal: 1000;
+  --z-toast: 2000;
+  --z-tooltip: 3000;
+  --z-overlay: 9000;
+  --z-max: 9999;
+
+  /* ═══════════════════════════════════════════════════════════════
+     LAYOUT — Panel/grid dimensions
+     ═══════════════════════════════════════════════════════════════ */
+
+  --panel-width: 380px;          /* Right-side panel width */
+  --panel-width-collapsed: 48px; /* Collapsed panel (icon only) */
+  --navbar-height: 56px;         /* Top navigation bar */
+  --status-bar-height: 32px;     /* Bottom status bar */
+  --sidebar-width: 64px;         /* Left sidebar (layer controls) */
+
+  /* ═══════════════════════════════════════════════════════════════
+     BREAKPOINTS — Responsive design
+     ═══════════════════════════════════════════════════════════════ */
+
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE OVERRIDES (future-proofing)
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (prefers-color-scheme: dark) {
+  /* Already dark by default — no overrides needed */
+  /* This block ensures we respect system preferences */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PRINT STYLES (for reports)
+   ═══════════════════════════════════════════════════════════════ */
+
+@media print {
+  :root {
+    --surface-base: #ffffff;
+    --surface-raised: #f5f5f5;
+    --text-primary: #000000;
+    --text-secondary: #666666;
+    --border-default: #cccccc;
+  }
+}

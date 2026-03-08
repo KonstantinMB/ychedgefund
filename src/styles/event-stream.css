@@ -1,0 +1,365 @@
+/**
+ * Event Stream Panel Styles
+ * Real-time feed of all 32 data sources with layer-colored events
+ */
+
+/* ── Panel Container ────────────────────────────────────────────────────── */
+
+.event-stream-panel-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--surface-base);
+  overflow: hidden;
+}
+
+/* ── Header with Rate Counter ───────────────────────────────────────────── */
+
+.event-stream-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
+}
+
+.stream-title {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+}
+
+.stream-rate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.rate-value {
+  font-weight: var(--font-semibold);
+  min-width: 60px;
+  text-align: right;
+}
+
+.rate-status {
+  font-size: 8px;
+  color: var(--signal-positive);
+  transition: color 0.3s ease;
+}
+
+.rate-status.spike {
+  color: var(--text-accent);
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 8px var(--text-accent);
+  }
+  50% {
+    opacity: 0.6;
+    text-shadow: 0 0 16px var(--text-accent);
+  }
+}
+
+/* ── Filter Buttons ─────────────────────────────────────────────────────── */
+
+.stream-filters {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-base);
+}
+
+.stream-filter-btn {
+  flex: 1;
+  padding: 6px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stream-filter-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+  background: var(--surface-elevated);
+}
+
+.stream-filter-btn.active {
+  color: var(--text-accent);
+  background: rgba(212, 168, 67, 0.08);
+  border-color: var(--text-accent);
+  box-shadow: var(--border-glow);
+}
+
+/* ── Event List Container ───────────────────────────────────────────────── */
+
+.stream-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stream-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.stream-list::-webkit-scrollbar-track {
+  background: var(--surface-base);
+}
+
+.stream-list::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 3px;
+}
+
+.stream-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
+}
+
+/* ── Empty State ────────────────────────────────────────────────────────── */
+
+.stream-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-title {
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.empty-subtitle {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text-tertiary);
+}
+
+/* ── Event Card ─────────────────────────────────────────────────────────── */
+
+.stream-event-card {
+  position: relative;
+  padding: 12px 14px;
+  background: var(--surface-raised);
+  border-left: 4px solid var(--border-medium);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  will-change: transform, opacity;
+}
+
+.stream-event-card:hover {
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-md);
+  transform: translateX(2px);
+}
+
+/* Severity-based sizing and effects */
+.stream-event-card.high,
+.stream-event-card.critical {
+  padding: 14px 16px;
+  background: linear-gradient(
+    135deg,
+    var(--surface-raised) 0%,
+    rgba(212, 168, 67, 0.03) 100%
+  );
+  box-shadow: var(--shadow-sm);
+}
+
+.stream-event-card.critical {
+  border-left-width: 6px;
+  box-shadow: var(--shadow-md), var(--border-glow);
+}
+
+/* ── Event Card Header ──────────────────────────────────────────────────── */
+
+.event-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.event-star {
+  color: var(--text-accent);
+  font-size: 14px;
+  text-shadow: 0 0 8px var(--text-accent);
+  animation: subtle-pulse 3s ease-in-out infinite;
+}
+
+@keyframes subtle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.event-dot {
+  color: var(--text-tertiary);
+  font-size: 8px;
+  opacity: 0.5;
+}
+
+.event-time {
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+}
+
+.event-layer {
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.05em;
+  /* Color set inline based on layer */
+}
+
+.event-source {
+  margin-left: auto;
+  padding: 2px 8px;
+  background: var(--surface-base);
+  border-radius: 3px;
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* ── Event Card Title ───────────────────────────────────────────────────── */
+
+.event-card-title {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.stream-event-card.high .event-card-title,
+.stream-event-card.critical .event-card-title {
+  font-size: 15px;
+  font-weight: var(--font-semibold);
+}
+
+/* ── Event Card Details ─────────────────────────────────────────────────── */
+
+.event-card-details {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Signals Generated Badge ────────────────────────────────────────────── */
+
+.event-card-signals {
+  margin-top: 10px;
+  padding: 6px 10px;
+  background: rgba(212, 168, 67, 0.08);
+  border-left: 2px solid var(--text-accent);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-accent);
+  font-weight: var(--font-medium);
+}
+
+/* ── Slide-In Animation ─────────────────────────────────────────────────── */
+
+.stream-event-card {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.stream-event-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.4s ease-out, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── Mobile Responsive ──────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .event-stream-header {
+    padding: 12px;
+  }
+
+  .stream-title {
+    font-size: 12px;
+  }
+
+  .stream-rate {
+    font-size: 12px;
+  }
+
+  .stream-filters {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+
+  .stream-filter-btn {
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+
+  .stream-list {
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .stream-event-card {
+    padding: 10px 12px;
+  }
+
+  .event-card-header {
+    font-size: 10px;
+    gap: 8px;
+  }
+
+  .event-card-title {
+    font-size: 13px;
+  }
+
+  .stream-event-card.high .event-card-title,
+  .stream-event-card.critical .event-card-title {
+    font-size: 14px;
+  }
+}

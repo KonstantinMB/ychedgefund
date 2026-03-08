@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlas Design System — Component Test</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Atlas Design System -->
+  <link rel="stylesheet" href="src/styles/design-tokens.css">
+  <link rel="stylesheet" href="src/styles/base-design.css">
+  <link rel="stylesheet" href="src/styles/components-design.css">
+  <link rel="stylesheet" href="src/styles/animations-design.css">
+
+  <style>
+    body {
+      padding: var(--space-2xl);
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .test-section {
+      margin-bottom: var(--space-4xl);
+      padding: var(--space-xl);
+      background: var(--surface-raised);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-lg);
+    }
+
+    .test-section-title {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-bold);
+      color: var(--text-accent);
+      margin-bottom: var(--space-xl);
+      padding-bottom: var(--space-md);
+      border-bottom: 2px solid var(--border-emphasis);
+      letter-spacing: var(--tracking-wide);
+      text-transform: uppercase;
+    }
+
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--space-xl);
+      margin-bottom: var(--space-xl);
+    }
+
+    .test-row {
+      display: flex;
+      gap: var(--space-md);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-xl);
+    }
+
+    .color-swatch {
+      width: 100px;
+      height: 100px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      display: flex;
+      align-items: flex-end;
+      padding: var(--space-sm);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-primary);
+      text-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- Hero -->
+    <header style="text-align: center; margin-bottom: var(--space-4xl);">
+      <h1 style="font-family: var(--font-display); font-size: 4rem; margin-bottom: var(--space-md);">
+        ATLAS DESIGN SYSTEM
+      </h1>
+      <p style="font-size: var(--text-lg); color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+        Tactical Luxury • Bloomberg × NORAD × Arrival
+      </p>
+      <div class="status-dot live"></div>
+      <span style="font-family: var(--font-mono); font-size: var(--text-sm); color: var(--signal-positive);">
+        SYSTEM ONLINE
+      </span>
+    </header>
+
+    <!-- 1. COLOR SYSTEM -->
+    <section class="test-section">
+      <h2 class="test-section-title">01 — Color System</h2>
+
+      <h3 style="color: var(--text-accent); margin-bottom: var(--space-md);">Surfaces</h3>
+      <div class="test-row">
+        <div class="color-swatch" style="background: var(--surface-base);">base</div>
+        <div class="color-swatch" style="background: var(--surface-raised);">raised</div>
+        <div class="color-swatch" style="background: var(--surface-overlay);">overlay</div>
+        <div class="color-swatch" style="background: var(--surface-elevated);">elevated</div>
+        <div class="color-swatch" style="background: var(--surface-glass); backdrop-filter: var(--blur-md);">glass</div>
+      </div>
+
+      <h3 style="color: var(--text-accent); margin-bottom: var(--space-md);">Signals</h3>
+      <div class="test-row">
+        <div class="color-swatch" style="background: var(--signal-positive);">positive</div>
+        <div class="color-swatch" style="background: var(--signal-negative);">negative</div>
+        <div class="color-swatch" style="background: var(--signal-warning);">warning</div>
+        <div class="color-swatch" style="background: var(--signal-info);">info</div>
+        <div class="color-swatch" style="background: var(--signal-critical);">critical</div>
+      </div>
+
+      <h3 style="color: var(--text-accent); margin-bottom: var(--space-md);">Strategies</h3>
+      <div class="test-row">
+        <div class="color-swatch" style="background: var(--strategy-momentum);">momentum</div>
+        <div class="color-swatch" style="background: var(--strategy-sentiment);">sentiment</div>
+        <div class="color-swatch" style="background: var(--strategy-geopolitical);">geopolitical</div>
+        <div class="color-swatch" style="background: var(--strategy-macro);">macro</div>
+        <div class="color-swatch" style="background: var(--strategy-crossasset);">crossasset</div>
+        <div class="color-swatch" style="background: var(--strategy-predictionmarkets);">predmkt</div>
+      </div>
+    </section>
+
+    <!-- 2. TYPOGRAPHY -->
+    <section class="test-section">
+      <h2 class="test-section-title">02 — Typography</h2>
+
+      <div class="test-grid">
+        <div>
+          <h3 style="color: var(--text-accent); margin-bottom: var(--space-md);">Playfair Display (Hero)</h3>
+          <div style="font-family: var(--font-display); font-size: var(--text-3xl); font-weight: var(--font-bold); margin-bottom: var(--space-md);">
+            $1,247,893
+          </div>
+          <div style="font-family: var(--font-display); font-size: var(--text-2xl); color: var(--signal-positive);">
+            +15.7%
+          </div>
+        </div>
+
+        <div>
+          <h3 style="color: var(--text-accent); margin-bottom: var(--space-md);">Instrument Sans (UI)</h3>
+          <p style="font-size: var(--text-lg); margin-bottom: var(--space-sm);">
+            Panel Header Text
+          </p>
+          <p style="font-size: var(--text-base); margin-bottom: var(--space-sm);">
+            Body text for labels and descriptions
+          </p>
+          <p style="font-size: var(--text-sm); color: var(--text-secondary);">
+            Secondary metadata and timestamps
+          </p>
+        </div>
+
+        <div>
+          <h3 style="color: var(--text-accent); margin-bottom: var(--space-md);">DM Mono (Data)</h3>
+          <code>SPY: $425.83 ▲ +0.42%</code>
+          <pre style="margin-top: var(--space-md);">
+{
+  "signal": "LONG",
+  "confidence": 0.87
+}</pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. PANELS -->
+    <section class="test-section">
+      <h2 class="test-section-title">03 — Panels</h2>
+
+      <div class="test-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <div class="panel-title">Intelligence Brief</div>
+              <div class="panel-subtitle">Last updated: 2min ago</div>
+            </div>
+            <div class="panel-actions">
+              <button class="button button-ghost">⟲</button>
+            </div>
+          </div>
+          <p style="color: var(--text-secondary);">
+            This is a standard glass panel with subtle gold border and blur effect.
+            Hovers show emphasis glow.
+          </p>
+        </div>
+
+        <div class="panel panel-accent-green">
+          <div class="panel-header">
+            <div class="panel-title">Active Positions</div>
+          </div>
+          <p style="color: var(--text-secondary);">
+            Panel with green accent border indicating positive state.
+          </p>
+        </div>
+
+        <div class="panel panel-accent-red">
+          <div class="panel-header">
+            <div class="panel-title">Risk Alert</div>
+          </div>
+          <p style="color: var(--text-secondary);">
+            Panel with red accent border for warnings/alerts.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. BADGES -->
+    <section class="test-section">
+      <h2 class="test-section-title">04 — Badges</h2>
+
+      <div class="test-row">
+        <span class="badge badge-momentum">MOMENTUM</span>
+        <span class="badge badge-sentiment">SENTIMENT</span>
+        <span class="badge badge-geopolitical">GEO</span>
+        <span class="badge badge-macro">MACRO</span>
+        <span class="badge badge-crossasset">CROSS</span>
+        <span class="badge badge-predictionmarkets">PRED-MKT</span>
+      </div>
+
+      <div class="test-row" style="margin-top: var(--space-lg);">
+        <span class="badge badge-live">LIVE</span>
+        <span class="badge badge-stale">STALE</span>
+        <span class="badge badge-critical">CRITICAL</span>
+      </div>
+    </section>
+
+    <!-- 5. METRICS -->
+    <section class="test-section">
+      <h2 class="test-section-title">05 — Metrics</h2>
+
+      <div class="test-grid">
+        <div class="metric">
+          <div class="metric-value">$1,247,893</div>
+          <div class="metric-label">Net Asset Value</div>
+          <div class="metric-change up">+15.7% (24h)</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-value positive">+$43,291</div>
+          <div class="metric-label">Daily P&L</div>
+          <div class="metric-change up">+3.6%</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-value negative">-$8,450</div>
+          <div class="metric-label">Open Drawdown</div>
+          <div class="metric-change down">-0.7%</div>
+        </div>
+
+        <div class="metric">
+          <div class="metric-value">342</div>
+          <div class="metric-label">Active Signals</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. SIGNAL CARDS -->
+    <section class="test-section">
+      <h2 class="test-section-title">06 — Signal Cards</h2>
+
+      <div class="signal-card momentum">
+        <div class="signal-header">
+          <span class="signal-symbol">SPY</span>
+          <span class="signal-direction long">LONG</span>
+        </div>
+        <div class="signal-confidence">
+          <div class="signal-confidence-bar">
+            <div class="signal-confidence-fill" style="width: 87%;"></div>
+          </div>
+          <span class="signal-confidence-value">87%</span>
+        </div>
+        <div style="margin-bottom: var(--space-sm);">
+          <span class="badge badge-momentum">MOMENTUM</span>
+        </div>
+        <div class="signal-reasoning">
+          Technical breakout above 200-day MA with expanding volume. RSI(14) = 68.3, MACD bullish crossover. Strong momentum continuation signal.
+        </div>
+      </div>
+
+      <div class="signal-card geopolitical">
+        <div class="signal-header">
+          <span class="signal-symbol">XLE</span>
+          <span class="signal-direction long">LONG</span>
+        </div>
+        <div class="signal-confidence">
+          <div class="signal-confidence-bar">
+            <div class="signal-confidence-fill" style="width: 72%;"></div>
+          </div>
+          <span class="signal-confidence-value">72%</span>
+        </div>
+        <div style="margin-bottom: var(--space-sm);">
+          <span class="badge badge-geopolitical">GEO</span>
+        </div>
+        <div class="signal-reasoning">
+          CII spike in Middle East (Saudi Arabia Z-score +2.8). Historical correlation: oil/energy sectors rally on geopolitical risk. Confirmed by GDELT tone shift.
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. BUTTONS -->
+    <section class="test-section">
+      <h2 class="test-section-title">07 — Buttons</h2>
+
+      <div class="test-row">
+        <button class="button button-primary">Execute Trade</button>
+        <button class="button button-success">Confirm</button>
+        <button class="button button-danger">Flatten All</button>
+        <button class="button button-ghost">Cancel</button>
+        <button class="button button-primary" disabled>Disabled</button>
+      </div>
+    </section>
+
+    <!-- 8. DATA TABLE -->
+    <section class="test-section">
+      <h2 class="test-section-title">08 — Data Table</h2>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Side</th>
+            <th>Qty</th>
+            <th>Entry</th>
+            <th>Current</th>
+            <th>P&L</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SPY</strong></td>
+            <td style="color: var(--signal-positive);">LONG</td>
+            <td>100</td>
+            <td>$425.00</td>
+            <td>$428.50</td>
+            <td style="color: var(--signal-positive); font-weight: bold;">+$350</td>
+          </tr>
+          <tr>
+            <td><strong>QQQ</strong></td>
+            <td style="color: var(--signal-negative);">SHORT</td>
+            <td>50</td>
+            <td>$372.00</td>
+            <td>$371.25</td>
+            <td style="color: var(--signal-positive); font-weight: bold;">+$38</td>
+          </tr>
+          <tr>
+            <td><strong>GLD</strong></td>
+            <td style="color: var(--signal-positive);">LONG</td>
+            <td>25</td>
+            <td>$193.50</td>
+            <td>$192.80</td>
+            <td style="color: var(--signal-negative); font-weight: bold;">-$18</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 9. GAUGES -->
+    <section class="test-section">
+      <h2 class="test-section-title">09 — Gauges</h2>
+
+      <div class="test-grid">
+        <div>
+          <div class="gauge">
+            <svg viewBox="0 0 120 120">
+              <circle class="gauge-track" cx="60" cy="60" r="52" />
+              <circle class="gauge-fill positive" cx="60" cy="60" r="52"
+                stroke-dasharray="327" stroke-dashoffset="98"
+                transform="rotate(-90 60 60)" />
+            </svg>
+            <div class="gauge-value" style="color: var(--signal-positive);">70%</div>
+          </div>
+          <p style="text-align: center; margin-top: var(--space-md); color: var(--text-secondary);">
+            Risk Utilization
+          </p>
+        </div>
+
+        <div>
+          <div class="gauge">
+            <svg viewBox="0 0 120 120">
+              <circle class="gauge-track" cx="60" cy="60" r="52" />
+              <circle class="gauge-fill negative" cx="60" cy="60" r="52"
+                stroke-dasharray="327" stroke-dashoffset="229"
+                transform="rotate(-90 60 60)" />
+            </svg>
+            <div class="gauge-value" style="color: var(--signal-negative);">30%</div>
+          </div>
+          <p style="text-align: center; margin-top: var(--space-md); color: var(--text-secondary);">
+            Drawdown
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. ANIMATIONS -->
+    <section class="test-section">
+      <h2 class="test-section-title">10 — Animations</h2>
+
+      <div class="test-grid">
+        <div class="panel animate-slide-up">
+          <div class="panel-header">
+            <div class="panel-title">Slide Up</div>
+          </div>
+          <p style="color: var(--text-secondary);">Panel slides in from bottom</p>
+        </div>
+
+        <div class="panel animate-scale-in">
+          <div class="panel-header">
+            <div class="panel-title">Scale In</div>
+          </div>
+          <p style="color: var(--text-secondary);">Panel scales from 95% to 100%</p>
+        </div>
+
+        <div class="panel animate-fade-in">
+          <div class="panel-header">
+            <div class="panel-title">Fade In</div>
+          </div>
+          <p style="color: var(--text-secondary);">Simple opacity fade</p>
+        </div>
+      </div>
+
+      <div style="margin-top: var(--space-xl);">
+        <div class="status-dot live"></div>
+        <span style="font-family: var(--font-mono); font-size: var(--text-sm); margin-right: var(--space-xl);">
+          Pulsing Live Indicator
+        </span>
+
+        <div class="status-dot critical"></div>
+        <span style="font-family: var(--font-mono); font-size: var(--text-sm); margin-right: var(--space-xl);">
+          Blinking Critical
+        </span>
+
+        <span class="badge badge-live">LIVE BADGE</span>
+      </div>
+    </section>
+
+    <!-- 11. LOADING STATES -->
+    <section class="test-section">
+      <h2 class="test-section-title">11 — Loading States</h2>
+
+      <div class="progress-bar-indeterminate"></div>
+
+      <div style="margin-top: var(--space-xl);">
+        <div class="skeleton" style="width: 100%; height: 60px; margin-bottom: var(--space-md);"></div>
+        <div class="skeleton" style="width: 80%; height: 40px; margin-bottom: var(--space-md);"></div>
+        <div class="skeleton" style="width: 60%; height: 40px;"></div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="text-align: center; margin-top: var(--space-4xl); padding-top: var(--space-xl); border-top: 1px solid var(--border-default);">
+      <p style="font-family: var(--font-mono); font-size: var(--text-sm); color: var(--text-tertiary);">
+        Atlas Design System v1.0.0 • Tactical Luxury Aesthetic
+      </p>
+      <p style="font-size: var(--text-xs); color: var(--text-tertiary); margin-top: var(--space-sm);">
+        Every pixel reinforces: "This costs $50,000/year but runs for free."
+      </p>
+    </footer>
+  </div>
+
+  <!-- Scan line effect -->
+  <div class="scan-line"></div>
+</body>
+</html>

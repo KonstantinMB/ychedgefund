@@ -1,0 +1,204 @@
+/**
+ * Data Ticker Styles
+ * CNN/Bloomberg-style scrolling bar at bottom of screen
+ */
+
+/* ── Ticker Container ───────────────────────────────────────────────────── */
+
+.data-ticker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  background: var(--surface-raised);
+  border-top: 1px solid var(--border-medium);
+  overflow: hidden;
+  z-index: 900;
+  transition: border-color 0.3s ease;
+}
+
+.data-ticker.has-failures {
+  border-top: 2px solid var(--signal-negative);
+  animation: pulse-red-border 2s ease-in-out infinite;
+}
+
+@keyframes pulse-red-border {
+  0%,
+  100% {
+    border-top-color: var(--signal-negative);
+  }
+  50% {
+    border-top-color: rgba(255, 23, 68, 0.5);
+  }
+}
+
+/* ── Ticker Inner (Scrolling Container) ─────────────────────────────────── */
+
+.data-ticker-inner {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  animation: ticker-scroll 120s linear infinite;
+  will-change: transform;
+}
+
+.data-ticker-inner:hover {
+  animation-play-state: paused;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* ── Ticker Item ────────────────────────────────────────────────────────── */
+
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  height: 100%;
+}
+
+.ticker-item:hover {
+  background: var(--surface-elevated);
+}
+
+.ticker-dot {
+  font-size: 8px;
+  /* Color set inline based on status */
+}
+
+.ticker-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  letter-spacing: 0.03em;
+}
+
+.ticker-time {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+/* ── Tooltip ────────────────────────────────────────────────────────────── */
+
+.ticker-tooltip {
+  position: fixed;
+  padding: 12px 14px;
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: 6px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+  z-index: 1000;
+  pointer-events: none;
+  animation: tooltip-fade-in 0.15s ease-out;
+  min-width: 240px;
+}
+
+@keyframes tooltip-fade-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.tooltip-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tooltip-dot {
+  font-size: 10px;
+}
+
+.tooltip-title {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.tooltip-label {
+  color: var(--text-tertiary);
+}
+
+.tooltip-value {
+  color: var(--text-primary);
+  font-weight: var(--font-medium);
+}
+
+.tooltip-error {
+  margin-top: 8px;
+  padding: 6px 8px;
+  background: rgba(255, 23, 68, 0.1);
+  border-left: 2px solid var(--signal-negative);
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--signal-negative);
+  line-height: 1.4;
+}
+
+/* ── Mobile Responsive ──────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .data-ticker {
+    height: 28px;
+  }
+
+  .ticker-item {
+    gap: 6px;
+    padding: 0 14px;
+  }
+
+  .ticker-name {
+    font-size: 10px;
+  }
+
+  .ticker-time {
+    font-size: 9px;
+  }
+
+  .ticker-tooltip {
+    min-width: 200px;
+    padding: 10px 12px;
+  }
+
+  .tooltip-title {
+    font-size: 12px;
+  }
+
+  .tooltip-row {
+    font-size: 10px;
+  }
+}
