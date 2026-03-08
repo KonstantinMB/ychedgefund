@@ -1,0 +1,286 @@
+/**
+ * Mobile & Tablet Responsive Styles
+ * Mobile: < 768px (bottom sheet layout)
+ * Tablet: 768-1024px (60/40 split)
+ * Desktop: > 1024px (default layout)
+ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE LAYOUT (< 768px)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) {
+  /* ── Hide Desktop Panels ──────────────────────────────────────────────── */
+
+  #left-panel,
+  #right-panel {
+    display: none !important;
+  }
+
+  .status-bar {
+    bottom: 64px; /* Above data ticker */
+  }
+
+  /* ── Full-Screen Globe ────────────────────────────────────────────────── */
+
+  #globe-container {
+    position: fixed;
+    top: 60px; /* Below compact nav */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+  }
+
+  /* ── Compact Navigation ───────────────────────────────────────────────── */
+
+  .header-bar {
+    height: 60px;
+    padding: 0 12px;
+    gap: 12px;
+  }
+
+  .header-logo img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header-nav-tabs {
+    display: none; /* Hide desktop tabs */
+  }
+
+  .header-nav-back {
+    font-size: 14px;
+  }
+
+  /* Show only essential controls */
+  #theme-toggle,
+  #cmd-palette-hint {
+    display: none;
+  }
+
+  #paper-trading-toggle {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .pt-toggle-label {
+    display: none; /* Hide label on mobile */
+  }
+
+  /* ── Floating Action Button (Layer Controls) ──────────────────────────── */
+
+  .mobile-layer-fab {
+    position: fixed;
+    bottom: 160px; /* Above bottom sheet */
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    background: var(--text-accent);
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 940;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .mobile-layer-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  }
+
+  .mobile-layer-fab-icon {
+    font-size: 24px;
+    color: var(--bg-primary);
+  }
+
+  /* ── Touch Optimizations ──────────────────────────────────────────────── */
+
+  * {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    -webkit-touch-callout: none;
+  }
+
+  button,
+  .clickable {
+    min-height: 44px; /* iOS recommended touch target */
+    min-width: 44px;
+  }
+
+  /* ── Performance ──────────────────────────────────────────────────────── */
+
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Reduce animations for better performance */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TABLET LAYOUT (768px - 1024px)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* ── Globe 60% / Right Panel 40% ──────────────────────────────────────── */
+
+  #left-panel {
+    display: none !important; /* No left sidebar on tablet */
+  }
+
+  #globe-container {
+    width: 60%;
+    left: 0;
+  }
+
+  #right-panel {
+    width: 40%;
+    right: 0;
+    left: auto;
+  }
+
+  /* ── Floating Layer Controls ──────────────────────────────────────────── */
+
+  .tablet-layer-panel {
+    position: fixed;
+    top: 100px;
+    left: 20px;
+    width: 280px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-medium);
+    border-radius: 8px;
+    box-shadow: var(--shadow-xl);
+    padding: 16px;
+    z-index: 900;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  /* ── Compact Nav ──────────────────────────────────────────────────────── */
+
+  .header-bar {
+    padding: 0 16px;
+  }
+
+  .header-nav-tabs button {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+
+  /* ── Panel Widths ─────────────────────────────────────────────────────── */
+
+  .panel {
+    min-width: auto;
+  }
+
+  /* ── Touch-Friendly Sizing ────────────────────────────────────────────── */
+
+  button,
+  .clickable {
+    min-height: 40px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE LANDSCAPE (< 768px, landscape)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) and (orientation: landscape) {
+  .header-bar {
+    height: 50px; /* Shorter nav in landscape */
+  }
+
+  .mobile-bottom-sheet {
+    transform: translateY(calc(100vh - 100px)) !important; /* More collapsed */
+  }
+
+  .bottom-sheet-content {
+    max-height: 50vh; /* Limit content height */
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VERY SMALL SCREENS (< 375px)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 374px) {
+  .header-bar {
+    padding: 0 8px;
+    gap: 8px;
+  }
+
+  .header-logo img {
+    width: 24px;
+    height: 24px;
+  }
+
+  #paper-trading-toggle {
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+
+  .sheet-tab-label {
+    font-size: 10px;
+  }
+
+  .sheet-tab-summary {
+    font-size: 8px;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SAFE AREA INSETS (iOS Notch Support)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@supports (padding: env(safe-area-inset-top)) {
+  .header-bar {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .mobile-bottom-sheet {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .status-bar {
+    bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DARK MODE ADJUSTMENTS FOR MOBILE
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 767px) and (prefers-color-scheme: dark) {
+  .mobile-bottom-sheet {
+    background: var(--bg-primary);
+  }
+
+  .bottom-sheet-tabs {
+    border-bottom-color: var(--border-subtle);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HIGH DPI DISPLAYS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Sharper borders on retina */
+  .mobile-bottom-sheet,
+  .sheet-tab,
+  .mobile-layer-fab {
+    border-width: 0.5px;
+  }
+}

@@ -979,6 +979,28 @@ async function init(): Promise<void> {
   // WebSocket relay (defer to let prices load first)
   setTimeout(initWebSockets, 1_000);
 
+  // Mobile bottom sheet (mobile only)
+  if (window.innerWidth < 768) {
+    try {
+      const { initBottomSheet } = await import('./mobile/bottom-sheet');
+      initBottomSheet();
+      console.log('[YC Hedge Fund] Mobile bottom sheet initialized');
+    } catch (err) {
+      console.warn('[YC Hedge Fund] Mobile bottom sheet unavailable:', err);
+    }
+  }
+
+  // PWA Service Worker registration
+  if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    try {
+      const { registerServiceWorker } = await import('./lib/sw-register');
+      await registerServiceWorker();
+      console.log('[YC Hedge Fund] Service worker registered');
+    } catch (err) {
+      console.warn('[YC Hedge Fund] Service worker registration failed:', err);
+    }
+  }
+
   console.log('[YC Hedge Fund] Initialisation complete — globe + intelligence + trading active');
 }
 

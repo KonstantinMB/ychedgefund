@@ -1,12 +1,13 @@
 {
-  "name": "YC Hedge Fund - Global Intelligence",
-  "short_name": "YC Hedge Fund",
-  "description": "AI-powered global intelligence dashboard with real-time geopolitical monitoring and paper trading",
+  "name": "Atlas Intelligence Platform",
+  "short_name": "Atlas",
+  "description": "AI-powered global intelligence dashboard with paper trading capabilities",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "landscape",
+  "orientation": "any",
   "background_color": "#0a0f0a",
-  "theme_color": "#0a0f0a",
+  "theme_color": "#D4A843",
+  "scope": "/",
   "icons": [
     {
       "src": "/favicon-32.png",
@@ -26,12 +27,28 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["finance", "news", "productivity"],
+  "categories": ["finance", "productivity", "business"],
   "shortcuts": [
     {
-      "name": "Open YC Hedge Fund",
-      "url": "/",
-      "description": "Open the intelligence dashboard"
+      "name": "Globe View",
+      "short_name": "Globe",
+      "description": "Open global intelligence map",
+      "url": "/?view=globe",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Trading Signals",
+      "short_name": "Signals",
+      "description": "View active trading signals",
+      "url": "/?view=signals",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Portfolio",
+      "short_name": "Portfolio",
+      "description": "View paper trading portfolio",
+      "url": "/?view=portfolio",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

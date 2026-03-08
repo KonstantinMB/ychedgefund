@@ -1,0 +1,179 @@
+/**
+ * Mobile Bottom Sheet Styles
+ * Swipeable panel with spring physics
+ */
+
+/* ── Bottom Sheet Container ───────────────────────────────────────────── */
+
+.mobile-bottom-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 100vh;
+  background: var(--surface-elevated);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
+  z-index: 950;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(100vh - 120px));
+  will-change: transform;
+}
+
+/* ── Drag Handle ──────────────────────────────────────────────────────── */
+
+.bottom-sheet-drag-handle {
+  width: 100%;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  touch-action: none;
+}
+
+.bottom-sheet-drag-handle::before {
+  content: '';
+  width: 40px;
+  height: 4px;
+  background: var(--border-medium);
+  border-radius: 2px;
+}
+
+.bottom-sheet-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* ── Tabs ─────────────────────────────────────────────────────────────── */
+
+.bottom-sheet-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sheet-tab {
+  flex: 1;
+  min-width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.sheet-tab.active {
+  color: var(--text-accent);
+}
+
+.sheet-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--text-accent);
+}
+
+.sheet-tab-icon {
+  font-size: 20px;
+}
+
+.sheet-tab-label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  letter-spacing: 0.03em;
+}
+
+.sheet-tab-summary {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-tertiary);
+  text-align: center;
+  line-height: 1.2;
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-bottom-sheet.collapsed .sheet-tab-summary {
+  display: block;
+}
+
+.mobile-bottom-sheet:not(.collapsed) .sheet-tab-summary {
+  display: none;
+}
+
+/* ── Content ──────────────────────────────────────────────────────────── */
+
+.bottom-sheet-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bottom-sheet-content h3 {
+  font-family: var(--font-ui);
+  font-size: 18px;
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+/* ── Mobile NAV Display ───────────────────────────────────────────────── */
+
+.mobile-nav-big {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 12px 0 6px 0;
+}
+
+.mobile-pnl {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  color: var(--signal-positive);
+  margin-bottom: 20px;
+}
+
+.mobile-pnl.negative {
+  color: var(--signal-negative);
+}
+
+/* ── State-Specific Styles ────────────────────────────────────────────── */
+
+.mobile-bottom-sheet.collapsed {
+  /* Shows tab bar + summaries only */
+}
+
+.mobile-bottom-sheet.half {
+  /* 40% of screen */
+}
+
+.mobile-bottom-sheet.full {
+  /* 85% of screen */
+}
+
+/* ── Mobile-Only ──────────────────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+  .mobile-bottom-sheet {
+    display: none;
+  }
+}
