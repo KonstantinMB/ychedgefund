@@ -21,7 +21,7 @@ export interface FinancialBeacon {
   importance: number; // 0-1, affects base height
 }
 
-const BEACON_COLORS = {
+const BEACON_COLORS: Record<string, [number, number, number]> = {
   open: [0, 230, 118], // Green (market open)
   closed: [138, 154, 124], // Muted sage (market closed)
   highActivity: [212, 168, 67], // Gold (high volume)

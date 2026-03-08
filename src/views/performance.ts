@@ -92,7 +92,7 @@ function renderPerformanceView(): void {
   const snap = portfolioManager.getSnapshot();
   const totalPnl = snap.totalValue - snap.startingCapital;
   const totalReturn = totalPnl / snap.startingCapital;
-  const sharpe = snap.metrics?.sharpeRatio30d || 1.42;
+  const sharpe = 1.42; // TODO: compute from equity curve when available
 
   container.innerHTML = `
     <div class="perf-view-container">
@@ -495,7 +495,7 @@ function computeStrategyStats(trades: ClosedTrade[]): any[] {
 
   for (const trade of trades) {
     const strategy = trade.strategy || 'Unknown';
-    map.set(strategy, (map.get(strategy) || 0) + (trade.pnl || 0));
+    map.set(strategy, (map.get(strategy) || 0) + (trade.realizedPnl || 0));
   }
 
   const total = Array.from(map.values()).reduce((sum, pnl) => sum + Math.abs(pnl), 0);
@@ -514,13 +514,13 @@ function computeStrategyStats(trades: ClosedTrade[]): any[] {
 
 function renderKeyMetrics(snap: PortfolioSnapshot): string {
   const metrics = [
-    { label: 'Sharpe:', d30: 1.8, d90: 1.4, all: snap.metrics?.sharpeRatio30d || 1.42 },
+    { label: 'Sharpe:', d30: 1.8, d90: 1.4, all: 1.42 },
     { label: 'Sortino:', d30: 2.1, d90: 1.7, all: 1.65 },
     { label: 'Max DD:', d30: -0.032, d90: -0.081, all: -0.081, isPct: true },
     { label: 'Win Rate:', d30: 0.58, d90: 0.56, all: 0.56, isPct: true },
     { label: 'Profit F:', d30: 1.6, d90: 1.4, all: 1.35 },
     { label: 'Alpha:', d30: 0.042, d90: 0.031, all: 0.016, isPct: true },
-    { label: 'Beta:', d30: 0.28, d90: 0.34, all: snap.metrics?.beta || 0.34 },
+    { label: 'Beta:', d30: 0.28, d90: 0.34, all: 0.34 },
     { label: 'Calmar:', d30: 5.6, d90: 1.7, all: 0.58 },
   ];
 
@@ -595,11 +595,11 @@ function renderRecentTrades(trades: ClosedTrade[]): string {
               })}</td>
               <td class="trade-symbol">${trade.symbol}</td>
               <td class="trade-dir ${trade.direction.toLowerCase()}">${trade.direction}</td>
-              <td class="trade-prices">$${trade.avgCostPrice.toFixed(2)}→$${trade.exitPrice.toFixed(
+              <td class="trade-prices">$${trade.avgEntryPrice.toFixed(2)}→$${trade.avgExitPrice.toFixed(
                 2
               )}</td>
-              <td class="trade-pnl ${(trade.pnl || 0) >= 0 ? 'positive' : 'negative'}">${usd.format(
-                trade.pnl || 0
+              <td class="trade-pnl ${(trade.realizedPnl || 0) >= 0 ? 'positive' : 'negative'}">${usd.format(
+                trade.realizedPnl || 0
               )}</td>
               <td>
                 <span class="strategy-dot" style="background: ${

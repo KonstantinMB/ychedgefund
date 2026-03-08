@@ -130,7 +130,7 @@ let circuitBreakerActive = false;
 // ── Tab: OVERVIEW ─────────────────────────────────────────────────────────────
 
 function renderOverviewTab(container: HTMLElement, snap: PortfolioSnapshot): void {
-  const username = auth.getUsername() || 'guest';
+  const username = auth.getUser()?.username ?? 'guest';
   const dailyPnl = snap.dailyPnl;
   const dailyPnlPct = dailyPnl / snap.startingCapital;
   const totalPnl = snap.totalValue - snap.startingCapital;
@@ -149,11 +149,11 @@ function renderOverviewTab(container: HTMLElement, snap: PortfolioSnapshot): voi
   const shortPct = snap.totalValue > 0 ? shortExposure / snap.totalValue : 0;
   const cashPct = snap.totalValue > 0 ? cash / snap.totalValue : 0;
 
-  const drawdownPct = snap.metrics?.drawdownPct || 0;
+  const drawdownPct = snap.currentDrawdown || 0;
   const maxDrawdown = 0.15; // 15% max
   const heatLevel = Math.min(1, drawdownPct / maxDrawdown);
 
-  const sharpe = snap.metrics?.sharpeRatio30d || 0;
+  const sharpe = 0; // TODO: compute from equity curve when available
 
   container.innerHTML = `
     <div class="port-v2-overview">
@@ -437,19 +437,19 @@ function renderAnalyticsTab(container: HTMLElement, snap: PortfolioSnapshot): vo
         <div class="risk-metrics-grid">
           <div class="risk-metric">
             <span class="risk-metric-label">VaR (95%):</span>
-            <span class="risk-metric-value">-${$$(snap.metrics?.var95 || 14200)}</span>
+            <span class="risk-metric-value">-${$$(14200)}</span>
           </div>
           <div class="risk-metric">
             <span class="risk-metric-label">CVaR:</span>
-            <span class="risk-metric-value">-${$$(snap.metrics?.cvar || 21800)}</span>
+            <span class="risk-metric-value">-${$$(21800)}</span>
           </div>
           <div class="risk-metric">
             <span class="risk-metric-label">Beta:</span>
-            <span class="risk-metric-value">${(snap.metrics?.beta || 0.34).toFixed(2)}</span>
+            <span class="risk-metric-value">${(0.34).toFixed(2)}</span>
           </div>
           <div class="risk-metric">
             <span class="risk-metric-label">Correlation to SPY:</span>
-            <span class="risk-metric-value">${(snap.metrics?.correlationSpy || 0.28).toFixed(2)}</span>
+            <span class="risk-metric-value">${(0.28).toFixed(2)}</span>
           </div>
           <div class="risk-metric">
             <span class="risk-metric-label">Max single position:</span>
@@ -487,8 +487,8 @@ function computeStrategyAttribution(
     const strategy = trade.strategy || 'Unknown';
     const stats = map.get(strategy) || { count: 0, pnl: 0, wins: 0 };
     stats.count++;
-    stats.pnl += trade.pnl || 0;
-    if ((trade.pnl || 0) > 0) stats.wins++;
+    stats.pnl += trade.realizedPnl || 0;
+    if ((trade.realizedPnl || 0) > 0) stats.wins++;
     map.set(strategy, stats);
   }
 
@@ -646,7 +646,7 @@ function flattenAll(): void {
 function buildPanelBody(container: HTMLElement): void {
   container.className += ' port-v2-panel-body';
 
-  const username = auth.getUsername() || 'guest';
+  const username = auth.getUser()?.username ?? 'guest';
 
   container.innerHTML = `
     <div class="port-v2-header">

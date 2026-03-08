@@ -32,7 +32,7 @@ export function initCountryInteractions(globe: Deck): void {
   createContextMenu();
 
   // Wire up deck.gl hover events
-  globe.deck.setProps({
+  globe.setProps({
     onHover: (info: any) => {
       if (info.layer?.id?.includes('risk-heatmap')) {
         handleCountryHover(info);
@@ -48,9 +48,9 @@ export function initCountryInteractions(globe: Deck): void {
   });
 
   // Right-click context menu
-  const container = globe.deck.getCanvas()?.parentElement;
+  const container = globe.getCanvas()?.parentElement;
   if (container) {
-    container.addEventListener('contextmenu', (e) => {
+    container.addEventListener('contextmenu', (e: MouseEvent) => {
       if (hoveredCountry) {
         e.preventDefault();
         showContextMenu(e.clientX, e.clientY, hoveredCountry);

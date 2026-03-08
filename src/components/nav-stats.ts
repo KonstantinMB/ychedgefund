@@ -7,9 +7,8 @@
  * - ATLAS logo (◈) with pulse animation synchronized with data ticker
  */
 
-import { portfolioManager } from '../trading/portfolio';
-import { signalBus } from '../trading/signals';
-import type { Signal } from '../trading/signals';
+import { portfolioManager } from '../trading/engine/portfolio-manager';
+import { signalBus } from '../trading/signals/signal-bus';
 
 // ── State ─────────────────────────────────────────────────────────────────
 
@@ -109,7 +108,7 @@ function subscribeToEvents(): void {
 
   // Listen for signal updates
   window.addEventListener('signals:update', () => {
-    const signals = signalBus.getActiveSignals();
+    const signals = signalBus.getRecent(200).filter((s) => s.expiresAt > Date.now());
     activeSignals = signals.length;
     updateNavStats();
   });
@@ -148,8 +147,8 @@ function updateTradingTab(): void {
   const snapshot = portfolioManager.getSnapshot();
   positionCount = snapshot.positions.length;
 
-  // Get active signals
-  const signals = signalBus.getActiveSignals();
+  // Get active signals (non-expired)
+  const signals = signalBus.getRecent(200).filter((s) => s.expiresAt > Date.now());
   activeSignals = signals.length;
 
   // Trading tab shows: "Trading • 3 signals • 2 pos"
