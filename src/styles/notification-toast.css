@@ -9,7 +9,7 @@
   position: fixed;
   top: 80px; /* Below nav bar */
   right: 20px;
-  z-index: 1000;
+  z-index: 10001; /* Above right panel / market data modal */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -22,11 +22,10 @@
   position: relative;
   width: 360px;
   padding: 16px;
-  background: var(--surface-elevated);
-  border: 1px solid var(--border-medium);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-primary);
   border-radius: 8px;
-  box-shadow: var(--shadow-xl);
-  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
   pointer-events: all;
   transform: translateX(400px);
   opacity: 0;
