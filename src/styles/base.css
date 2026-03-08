@@ -6478,7 +6478,7 @@ kbd {
   left: 0;
   right: 0;
   height: 32px;
-  z-index: 301; /* Above data ticker so shortcuts remain visible */
+  z-index: 302; /* Top layer - always visible */
   display: flex;
   align-items: center;
   gap: 0;

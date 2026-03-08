@@ -7,7 +7,7 @@
 
 .data-ticker {
   position: fixed;
-  bottom: 32px; /* Right above status bar (status bar is 32px tall) */
+  bottom: 32px; /* Above status bar (status bar is 32px tall at bottom:0) */
   left: 0;
   right: 0;
   height: 32px;
@@ -15,7 +15,7 @@
   border-top: 1px solid var(--border-medium);
   border-bottom: none;
   overflow: hidden;
-  z-index: 300; /* Below status bar (301) so shortcuts remain clickable */
+  z-index: 301; /* Below status bar (302) */
   transition: border-color 0.3s ease;
   margin: 0;
   padding: 0;

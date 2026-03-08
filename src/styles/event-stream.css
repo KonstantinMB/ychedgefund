@@ -113,10 +113,13 @@
 .stream-list {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  max-height: calc(100vh - 400px); /* Limit height to prevent infinite scroll */
+  min-height: 200px;
 }
 
 .stream-list::-webkit-scrollbar {
