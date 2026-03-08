@@ -83,8 +83,15 @@
   color: var(--text-tertiary);
 }
 
-.toast-close {
+.toast-time {
   margin-left: auto;
+  font-size: 9px;
+  color: var(--text-tertiary);
+  opacity: 0.6;
+  font-family: var(--font-mono);
+}
+
+.toast-close {
   width: 20px;
   height: 20px;
   display: flex;
@@ -97,6 +104,7 @@
   cursor: pointer;
   border-radius: 4px;
   transition: all 0.2s ease;
+  margin-left: 8px;
 }
 
 .toast-close:hover {
@@ -120,7 +128,32 @@
   font-size: 11px;
   color: var(--text-tertiary);
   line-height: 1.4;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+}
+
+.toast-magnitude {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-accent);
+  font-weight: var(--font-semibold);
+  margin-bottom: 6px;
+}
+
+.toast-affected {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  padding: 6px 8px;
+  background: rgba(212, 168, 67, 0.05);
+  border-left: 2px solid var(--text-accent);
+  border-radius: 3px;
+  margin-bottom: 8px;
+}
+
+.toast-affected strong {
+  color: var(--text-accent);
+  font-weight: var(--font-semibold);
 }
 
 /* ── Signals Badge ──────────────────────────────────────────────────────── */
@@ -172,6 +205,17 @@
 
 .toast-action-btn:active {
   transform: scale(0.98);
+}
+
+.toast-action-source {
+  background: rgba(212, 168, 67, 0.08);
+  border-color: var(--text-accent);
+  color: var(--text-accent);
+}
+
+.toast-action-source:hover {
+  background: rgba(212, 168, 67, 0.15);
+  box-shadow: 0 0 12px rgba(212, 168, 67, 0.3);
 }
 
 /* ── Progress Bar ───────────────────────────────────────────────────────── */

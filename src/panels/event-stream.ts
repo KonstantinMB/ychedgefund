@@ -27,6 +27,9 @@ interface StreamEvent {
   location?: [number, number]; // [lon, lat]
   signalsGenerated?: number;
   metadata?: Record<string, any>;
+  referenceUrl?: string; // Link to source article/data
+  affectedAssets?: string[]; // Assets impacted
+  magnitude?: number; // For earthquakes, severity scores
 }
 
 // ── Layer Colors ──────────────────────────────────────────────────────────────
@@ -228,6 +231,10 @@ function addEvent(eventData: Partial<StreamEvent>): void {
           signalsGenerated: event.signalsGenerated,
           location: event.location,
           timestamp: event.timestamp,
+          referenceUrl: event.referenceUrl,
+          affectedAssets: event.affectedAssets,
+          magnitude: event.magnitude,
+          metadata: event.metadata,
         },
       })
     );
@@ -473,6 +480,7 @@ function generateMockEvents(): void {
       details: 'Revenue: $62.0B (+15% YoY)',
       source: 'sec_edgar',
       signalsGenerated: 1,
+      referenceUrl: 'https://www.sec.gov/edgar/browse/?CIK=789019',
     },
     {
       layer: 'PHYSICAL',
@@ -481,6 +489,8 @@ function generateMockEvents(): void {
       details: 'Infrastructure: 0 facilities within 600km',
       source: 'usgs',
       location: [-175.2, -21.2],
+      magnitude: 5.2,
+      referenceUrl: 'https://earthquake.usgs.gov/earthquakes/map/',
     },
     {
       layer: 'REF',
@@ -488,6 +498,7 @@ function generateMockEvents(): void {
       title: 'Reference update: New sanctions list',
       details: 'OFAC added 12 entities, OpenSanctions database updated',
       source: 'mock',
+      referenceUrl: 'https://www.opensanctions.org/',
     },
     {
       layer: 'EVENT',
@@ -497,15 +508,20 @@ function generateMockEvents(): void {
       source: 'acled',
       location: [51.4, 35.7],
       signalsGenerated: 2,
+      affectedAssets: ['Iranian Rial (IRR)', 'Regional oil supply', 'Geopolitical risk premium'],
+      referenceUrl: 'https://acleddata.com/',
     },
     {
       layer: 'PHYSICAL',
-      severity: 'high',
-      title: 'FIRE DETECTED: 23.4°N, 57.2°E',
-      details:
-        'Near: Strait of Hormuz (12km)\nInfrastructure: oil tanker route\nSeverity: HIGH',
+      severity: 'critical',
+      title: 'FIRE DETECTED: 23.4°N, 57.2°E — Strait of Hormuz',
+      details: 'Near: Strait of Hormuz (12km)\nInfrastructure: oil tanker route\nSeverity: HIGH',
       source: 'nasa_firms',
       location: [57.2, 23.4],
+      affectedAssets: ['Oil tanker routes', 'Crude oil (WTI)', 'Brent futures', 'Shipping insurance'],
+      magnitude: 8.5,
+      referenceUrl: 'https://firms.modaps.eosdis.nasa.gov/',
+      signalsGenerated: 3,
     },
     {
       layer: 'PRICE',

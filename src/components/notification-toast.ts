@@ -19,6 +19,10 @@ interface ToastData {
   signalsGenerated?: number;
   location?: [number, number];
   timestamp: number;
+  referenceUrl?: string; // Link to source article/data
+  affectedAssets?: string[]; // Assets impacted (e.g., ["Oil tanker routes", "Strait of Hormuz"])
+  magnitude?: number; // For earthquakes, severity scores
+  metadata?: Record<string, any>; // Additional context
 }
 
 // ── State ─────────────────────────────────────────────────────────────────
@@ -91,6 +95,17 @@ export function showToast(data: ToastData): void {
   console.log(`[NotificationToast] Showing toast for ${AUTO_DISMISS_MS / 1000}s:`, data.title);
 }
 
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+function formatTimeAgo(timestamp: number): string {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+
+  if (seconds < 60) return 'just now';
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+  return `${Math.floor(seconds / 86400)}d ago`;
+}
+
 // ── Build Toast Element ───────────────────────────────────────────────────
 
 function buildToast(data: ToastData): HTMLElement {
@@ -102,11 +117,14 @@ function buildToast(data: ToastData): HTMLElement {
   const layerColor = getLayerColor(data.layer);
 
   const sourceLabel = getSourceLabel(data.source);
+  const timeAgo = formatTimeAgo(data.timestamp);
+
   toast.innerHTML = `
     <div class="toast-header">
       <span class="toast-icon">${icon}</span>
       <span class="toast-layer" style="color: ${layerColor};">${data.layer}</span>
       <span class="toast-source">${sourceLabel}</span>
+      <span class="toast-time">${timeAgo}</span>
       <button class="toast-close" data-toast-id="${data.id}">✕</button>
     </div>
 
@@ -115,6 +133,20 @@ function buildToast(data: ToastData): HTMLElement {
     ${
       data.details
         ? `<div class="toast-details">${escapeHtml(data.details).replace(/\n/g, '<br>')}</div>`
+        : ''
+    }
+
+    ${
+      data.magnitude
+        ? `<div class="toast-magnitude">Magnitude: ${data.magnitude}</div>`
+        : ''
+    }
+
+    ${
+      data.affectedAssets && data.affectedAssets.length > 0
+        ? `<div class="toast-affected">
+          <strong>Affected:</strong> ${data.affectedAssets.map(a => escapeHtml(a)).join(', ')}
+        </div>`
         : ''
     }
 
@@ -143,6 +175,13 @@ function buildToast(data: ToastData): HTMLElement {
         </button>`
           : ''
       }
+      ${
+        data.referenceUrl
+          ? `<button class="toast-action-btn toast-action-source" data-action="source" data-toast-id="${data.id}" data-url="${escapeHtml(data.referenceUrl)}">
+          VIEW SOURCE
+        </button>`
+          : ''
+      }
     </div>
 
     <div class="toast-progress">
@@ -158,8 +197,11 @@ function buildToast(data: ToastData): HTMLElement {
   actionBtns.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       const action = (e.target as HTMLElement).dataset.action;
-      handleAction(data, action!);
-      dismissToast(data.id, false);
+      const url = (e.target as HTMLElement).dataset.url;
+      handleAction(data, action!, url);
+      if (action !== 'source') {
+        dismissToast(data.id, false);
+      }
     });
   });
 
@@ -190,7 +232,7 @@ function dismissToast(id: string, auto: boolean): void {
 
 // ── Action Handlers ───────────────────────────────────────────────────────
 
-function handleAction(data: ToastData, action: string): void {
+function handleAction(data: ToastData, action: string, url?: string): void {
   console.log('[NotificationToast] Action:', action, data);
 
   switch (action) {
@@ -216,6 +258,13 @@ function handleAction(data: ToastData, action: string): void {
           detail: { panelId: 'signals' },
         })
       );
+      break;
+
+    case 'source':
+      // Open reference URL in new tab
+      if (url || data.referenceUrl) {
+        window.open(url || data.referenceUrl, '_blank', 'noopener,noreferrer');
+      }
       break;
   }
 }
