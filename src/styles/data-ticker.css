@@ -5,11 +5,12 @@
 
 /* ── Ticker Container ───────────────────────────────────────────────────── */
 
-/* Inside .bottom-bars: data ticker is first child (top), status bar second (bottom) */
+/* Inside .bottom-bars: data ticker first (top), status bar second (bottom) */
 .data-ticker {
   flex: 0 0 32px;
+  flex-shrink: 0;
   width: 100%;
-  height: 32px;
+  min-height: 32px;
   background: var(--surface-raised);
   border-top: 1px solid var(--border-medium);
   border-bottom: none;
