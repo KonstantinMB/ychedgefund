@@ -5,21 +5,20 @@
 
 /* ── Ticker Container ───────────────────────────────────────────────────── */
 
+/* Inside .bottom-bars: data ticker is first child (top), status bar second (bottom) */
 .data-ticker {
-  position: fixed;
-  bottom: 32px; /* Above status bar (status bar is 32px tall at bottom:0) */
-  left: 0;
-  right: 0;
+  flex: 0 0 32px;
+  width: 100%;
   height: 32px;
   background: var(--surface-raised);
   border-top: 1px solid var(--border-medium);
   border-bottom: none;
   overflow: hidden;
-  z-index: 301; /* Below status bar (302) */
+  z-index: 301;
   transition: border-color 0.3s ease;
   margin: 0;
   padding: 0;
-  box-shadow: 0 2px 0 0 var(--surface-raised); /* Extend bg to cover subpixel gap */
+  box-sizing: border-box;
 }
 
 .data-ticker.has-failures {

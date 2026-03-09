@@ -17,8 +17,8 @@
     display: none !important;
   }
 
-  .status-bar {
-    bottom: 64px; /* Above data ticker */
+  .bottom-bars {
+    bottom: 64px; /* Above mobile bottom sheet */
   }
 
   /* ── Full-Screen Globe ────────────────────────────────────────────────── */
@@ -253,7 +253,7 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  .status-bar {
+  .bottom-bars {
     bottom: calc(64px + env(safe-area-inset-bottom));
   }
 }

@@ -6486,14 +6486,30 @@ kbd {
 .pt-toggle.pt-killed  .pt-toggle-status { background: rgba(239, 68, 68, 0.2);  color: #ef4444; }
 
 /* ============================================================
-   BOTTOM STATUS BAR
+   BOTTOM BARS (data ticker + status bar) — single viewport anchor
    ============================================================ */
 
-.status-bar {
+.bottom-bars {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
+  z-index: 301;
+  display: flex;
+  flex-direction: column;
+  /* Data ticker (32px) + status bar (32px + safe area) */
+  min-height: calc(64px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  /* Extend bg to cover subpixel gap at viewport bottom */
+  box-shadow: 0 4px 0 0 var(--bg-panel);
+}
+
+/* ============================================================
+   BOTTOM STATUS BAR (inside .bottom-bars)
+   ============================================================ */
+
+.status-bar {
+  flex: 0 0 auto;
   min-height: 32px;
   height: calc(32px + env(safe-area-inset-bottom, 0px));
   z-index: 302; /* Top layer - always visible */
@@ -6511,8 +6527,6 @@ kbd {
   font-size: 0.65rem;
   overflow: hidden;
   box-sizing: border-box;
-  /* Extend bg to cover subpixel gap at viewport bottom */
-  box-shadow: 0 2px 0 0 var(--bg-panel);
 }
 
 .status-bar-section {

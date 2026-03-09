@@ -96,9 +96,10 @@
     <!-- Command Palette injected by command-palette.ts -->
   </div>
 
-  <!-- Bottom Status Bar: NAV | Daily P&L | Signals | Risk (outside #app for correct viewport positioning) -->
-  <div id="status-bar" class="status-bar">
-    <div class="status-bar-section" id="sb-nav">
+  <!-- Bottom bars: data ticker + status bar, wrapped for viewport-bottom anchoring -->
+  <div id="bottom-bars" class="bottom-bars">
+    <div id="status-bar" class="status-bar">
+      <div class="status-bar-section" id="sb-nav">
       <span class="sb-label">NAV</span>
       <span class="sb-value" id="sb-nav-value">$1,000,000</span>
     </div>
@@ -120,6 +121,7 @@
     <div class="status-bar-divider"></div>
     <div class="status-bar-section sb-shortcuts">
       <span class="sb-hint">T·S·P·Space·Esc</span>
+      </div>
     </div>
   </div>
 

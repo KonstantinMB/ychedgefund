@@ -79,7 +79,12 @@ export function initDataTicker(): void {
   tickerInner.className = 'data-ticker-inner';
   tickerContainer.appendChild(tickerInner);
 
-  document.body.appendChild(tickerContainer);
+  const bottomBars = document.getElementById('bottom-bars');
+  if (bottomBars) {
+    bottomBars.insertBefore(tickerContainer, bottomBars.firstChild);
+  } else {
+    document.body.appendChild(tickerContainer);
+  }
 
   // Initialize sources with mock data
   sources = DATA_SOURCES.map((s) => ({
