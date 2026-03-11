@@ -203,7 +203,7 @@ export class MarketDataStream {
   }
 
   /**
-   * Start unified stream polling (15-second intervals).
+   * Start unified stream polling (30-second intervals).
    * /api/market/stream returns stocks, ETFs, crypto, forex from full universe.
    */
   private startStreamPoll(_symbols: string[]): void {
@@ -239,7 +239,8 @@ export class MarketDataStream {
     };
 
     poll();
-    this.streamPollInterval = window.setInterval(poll, 15_000);
+    // Poll every 30 seconds (reduced from 15s to lower server load)
+    this.streamPollInterval = window.setInterval(poll, 30_000);
   }
 
   /**

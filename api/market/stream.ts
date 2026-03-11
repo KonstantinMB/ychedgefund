@@ -25,10 +25,10 @@ interface MarketTick {
 }
 
 /** Max symbols to fetch per request (avoid timeout/rate limits) */
-const MAX_SYMBOLS = 500;
+const MAX_SYMBOLS = 100; // Reduced from 500 to prevent CPU spikes
 
 /** Concurrency limit for Yahoo fetches */
-const YAHOO_CONCURRENCY = 10;
+const YAHOO_CONCURRENCY = 15; // Increased from 10 for faster execution
 
 /**
  * Fetch quote from Finnhub REST API
@@ -189,8 +189,8 @@ async function fetchAllQuotes(): Promise<Record<string, MarketTick>> {
 export default withCors(async (_req: Request) => {
   try {
     const quotes = await withCache<Record<string, MarketTick>>(
-      'market:stream:v1',
-      15, // 15-second cache
+      'market:stream:v2', // v2: reduced symbols, longer cache
+      60, // 60-second cache (increased from 15s to reduce CPU load)
       async () => {
         const data = await fetchAllQuotes();
 
@@ -212,7 +212,7 @@ export default withCors(async (_req: Request) => {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
-          'Cache-Control': 'public, s-maxage=15, stale-while-revalidate=30',
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
         },
       }
     );
