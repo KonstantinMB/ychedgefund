@@ -41,3 +41,6 @@ coverage/
 *.tsbuildinfo
 .cache/
 .vercel
+
+# Internal docs (not for public repo)
+docs/

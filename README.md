@@ -1,5 +1,8 @@
 # YC Hedge Fund — Global Intelligence Platform
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
 > AI-powered geopolitical intelligence dashboard with real-time data streams, client-side analytics, and paper trading capabilities.
 
 **Live demo:** https://atlas-rouge-one.vercel.app
@@ -178,6 +181,20 @@ npx tsc --noEmit # Type-check without building
 
 ---
 
+## Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+**Quick ways to contribute:**
+- 🐛 Report bugs via [Issues](https://github.com/KonstantinMB/atlas/issues)
+- 💡 Suggest features or data sources
+- 📖 Improve documentation
+- 🔧 Submit PRs for bug fixes or enhancements
+
+---
+
 ## License
 
 MIT — built from scratch, inspired by the architecture of [WorldMonitor](https://github.com/koala73/worldmonitor) (AGPL-3.0, Elie Habib). No code was copied — architecture patterns only.
+
+See [LICENSE](LICENSE) for full text.

@@ -4,6 +4,14 @@
   "description": "AI-powered global intelligence dashboard with paper trading capabilities",
   "type": "module",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KonstantinMB/atlas.git"
+  },
+  "bugs": {
+    "url": "https://github.com/KonstantinMB/atlas/issues"
+  },
+  "homepage": "https://github.com/KonstantinMB/atlas#readme",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
